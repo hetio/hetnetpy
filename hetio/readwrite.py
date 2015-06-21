@@ -1,5 +1,5 @@
 import collections
-import cPickle as pickle
+import pickle as pickle
 import gzip
 import json
 import os
@@ -10,8 +10,8 @@ import random
 
 import yaml
 
-from graph import Graph
-from graph import MetaGraph
+from .graph import Graph
+from .graph import MetaGraph
 
 def open_ext(path, *args, **kwargs):
     open_fxn = gzip.open if path.endswith('.gz') else open
@@ -63,7 +63,7 @@ def write_yaml(graph, path):
 def graph_from_writable(writable):
     """ """
     metaedge_tuples = writable['metaedge_tuples']
-    metaedge_tuples = map(tuple, metaedge_tuples)
+    metaedge_tuples = list(map(tuple, metaedge_tuples))
     metagraph = MetaGraph.from_edge_tuples(metaedge_tuples)
     graph = Graph(metagraph)
 
@@ -112,7 +112,7 @@ def write_sif(graph, path, max_edges=None, seed=0):
     sif_file = gzip.open(path, 'wb') if path.endswith('.gz') else open(path, 'w')
     metaedge_to_edges = graph.get_metaedge_to_edges(exclude_inverts=True)
     random.seed(seed)
-    for metaedge, edges in metaedge_to_edges.iteritems():
+    for metaedge, edges in metaedge_to_edges.items():
         if max_edges is not None and len(edges) > max_edges:
             edges = random.sample(edges, k=max_edges)
         for i, edge in enumerate(edges):
@@ -125,7 +125,7 @@ def write_sif(graph, path, max_edges=None, seed=0):
 
 def write_nodetable(graph, path):
     rows = list()
-    for node in graph.node_dict.itervalues():
+    for node in graph.node_dict.values():
         row = collections.OrderedDict()
         row['id'] = node.id_
         row['name'] = node.data.get('name', '')
@@ -142,13 +142,13 @@ def write_nodetable(graph, path):
 
 def writable_from_graph(graph, ordered=True, int_id=False, masked=True):
     """ """
-    metanode_kinds = graph.metagraph.node_dict.keys()
+    metanode_kinds = list(graph.metagraph.node_dict.keys())
     
     metaedge_tuples = [edge.get_id() for edge in
                        graph.metagraph.get_edges(exclude_inverts=True)]
     
     nodes = list()
-    for i, node in enumerate(graph.node_dict.itervalues()):
+    for i, node in enumerate(graph.node_dict.values()):
         if not masked and node.is_masked():
             continue
         node_as_dict = collections.OrderedDict() if ordered else dict()
@@ -166,7 +166,7 @@ def writable_from_graph(graph, ordered=True, int_id=False, masked=True):
             continue
         edge_id_keys = ('source_id', 'target_id', 'kind', 'direction')
         edge_id = edge.get_id()
-        edge_items = zip(edge_id_keys, edge_id)
+        edge_items = list(zip(edge_id_keys, edge_id))
         edge_as_dict = collections.OrderedDict(edge_items) if ordered else dict(edge_items)
         edge_as_dict['data'] = edge.data
         if int_id:
@@ -214,22 +214,22 @@ class GMLWriter(object):
         self.gml_file.write(indent + s)
 
     def write_properties(self, dictionary):
-        for key, value in dictionary.items():
+        for key, value in list(dictionary.items()):
             self.write_property(key, value)
 
     def write_property(self, key, value, printing=False):
         """ """
         if not re.match(r'[A-Za-z]\w*\Z', key):
-            if printing: print 'Invalid Key:', key
+            if printing: print('Invalid Key:', key)
             return
-        if isinstance(value, (int, long, float)):
+        if isinstance(value, (int, float)):
             value = str(value)
         
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             #value = value.replace('"', "'")
             #value = value.replace('&', "AMPERSAND")
             if re.search(r'[&"\\]', value):
-                if printing: print 'Invalid Value:', value
+                if printing: print('Invalid Value:', value)
                 return
             value = '"{}"'.format(value)
         
@@ -245,11 +245,11 @@ class GMLWriter(object):
             return
         
         else:
-            print 'GML formating not specified for', type(value)
+            print('GML formating not specified for', type(value))
             return
         line = '{} {}\n'.format(key, value)
         if len(line) > 254:
-            if printing: print 'Line too long:', line
+            if printing: print('Line too long:', line)
             return
         self.write(line)
 

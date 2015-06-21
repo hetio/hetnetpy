@@ -41,10 +41,10 @@ class BaseGraph(object):
         return self.edge_dict[edge_tuple]
 
     def get_nodes(self):
-        return self.node_dict.itervalues()
+        return iter(self.node_dict.values())
 
     def get_edges(self, exclude_inverts=True):
-        for edge in self.edge_dict.itervalues():
+        for edge in self.edge_dict.values():
             if exclude_inverts and edge.inverted:
                 continue
             yield edge
@@ -171,30 +171,30 @@ class MetaGraph(BaseGraph):
     def find_abbrevs(kinds):
         """For a list of strings (kinds), find the shortest unique abbreviation."""
         kind_to_abbrev = {kind: kind[0] for kind in kinds}
-        duplicates = MetaGraph.get_duplicates(kind_to_abbrev.values())
+        duplicates = MetaGraph.get_duplicates(list(kind_to_abbrev.values()))
         while duplicates:
-            for kind, abbrev in kind_to_abbrev.items():
+            for kind, abbrev in list(kind_to_abbrev.items()):
                 if abbrev in duplicates:
                     abbrev += kind[len(abbrev)]
                     kind_to_abbrev[kind] = abbrev
-            duplicates = MetaGraph.get_duplicates(kind_to_abbrev.values())
+            duplicates = MetaGraph.get_duplicates(list(kind_to_abbrev.values()))
         return kind_to_abbrev
 
     def create_abbreviations(self):
         """Creates abbreviations for node and edge kinds."""
-        kind_to_abbrev = MetaGraph.find_abbrevs(self.node_dict.keys())
+        kind_to_abbrev = MetaGraph.find_abbrevs(list(self.node_dict.keys()))
         kind_to_abbrev = {kind: abbrev.upper()
-                          for kind, abbrev in kind_to_abbrev.items()}
+                          for kind, abbrev in list(kind_to_abbrev.items())}
         
         edge_set_to_keys = dict()
-        for edge in self.edge_dict.keys():
-            key = frozenset(map(str.lower, edge[:2]))
+        for edge in list(self.edge_dict.keys()):
+            key = frozenset(list(map(str.lower, edge[:2])))
             value = edge[2]
             edge_set_to_keys.setdefault(key, list()).append(value)
         
-        for edge_set, keys in edge_set_to_keys.items():
+        for edge_set, keys in list(edge_set_to_keys.items()):
             key_to_abbrev = MetaGraph.find_abbrevs(keys)
-            for key, abbrev in key_to_abbrev.items():
+            for key, abbrev in list(key_to_abbrev.items()):
                 previous_abbrev = kind_to_abbrev.get(key)
                 if previous_abbrev and len(abbrev) <= len(previous_abbrev):
                     continue
@@ -205,9 +205,9 @@ class MetaGraph(BaseGraph):
         return kind_to_abbrev
 
     def set_abbreviations(self, kind_to_abbrev):
-        for kind, node in self.node_dict.iteritems():
+        for kind, node in self.node_dict.items():
             node.abbrev = kind_to_abbrev[kind]
-        for metaedge in self.edge_dict.itervalues():
+        for metaedge in self.edge_dict.values():
             metaedge.kind_abbrev = kind_to_abbrev[metaedge.kind]
         
 
@@ -458,7 +458,7 @@ class Graph(BaseGraph):
         split_threshold = 2
         if len(metapath) <= split_threshold:
             leaves = self.paths_tree(source, metapath, duplicates, masked, exclude_nodes, exclude_edges)
-            leaves = filter(lambda leaf: leaf.edge.target == target, leaves)
+            leaves = [leaf for leaf in leaves if leaf.edge.target == target]
             paths = [leaf.path_to_root() for leaf in leaves]
             return paths
 
@@ -475,8 +475,8 @@ class Graph(BaseGraph):
         tail_leaf_targets = {tail_leaf.edge.target for tail_leaf in tail_leaves}
         intersecting_leaf_targets = head_leaf_targets & tail_leaf_targets
 
-        head_leaves = filter(lambda leaf: leaf.edge.target in intersecting_leaf_targets, head_leaves)
-        tail_leaves = filter(lambda leaf: leaf.edge.target in intersecting_leaf_targets, tail_leaves)
+        head_leaves = [leaf for leaf in head_leaves if leaf.edge.target in intersecting_leaf_targets]
+        tail_leaves = [leaf for leaf in tail_leaves if leaf.edge.target in intersecting_leaf_targets]
 
 
         head_dict = dict()
@@ -620,7 +620,7 @@ class Graph(BaseGraph):
     def unmask(self):
         """Unmask all nodes and edges contained within the graph"""
         for dictionary in self.node_dict, self.edge_dict:
-            for value in dictionary.itervalues():
+            for value in dictionary.values():
                 value.masked = False
         
     def get_metanode_to_nodes(self):
