@@ -1,3 +1,5 @@
+import pytest
+
 import graph
 
 def test_creation():
@@ -22,4 +24,11 @@ def test_creation():
         assert hash(metanode) == hash(metanode_id)
 
     g = graph.Graph(metagraph)
-    g.add_node('multiple sclerosis', 'disease')
+    ms = g.add_node('disease', 'DOID:2377', 'multiple sclerosis')
+    assert ms.metanode.identifier == 'disease'
+    assert ms.identifier == 'DOID:2377'
+    assert ms.name == 'multiple sclerosis'
+
+    with pytest.raises(KeyError):
+        # misordered args
+        g.add_node('DOID:2377', 'multiple sclerosis', 'disease')

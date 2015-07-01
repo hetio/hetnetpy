@@ -377,10 +377,12 @@ class Graph(BaseGraph):
         self.metagraph = metagraph
         self.data = data
 
-    def add_node(self, identifier, kind, data=dict()):
+    def add_node(self, kind, identifier, name=None, data={}):
         """ """
+        if name is None:
+            name = identifier
         metanode = self.metagraph.node_dict[kind]
-        node = Node(identifier, metanode, data)
+        node = Node(metanode, identifier, name, data)
         self.node_dict[node.get_id()] = node
         return node
 
@@ -653,10 +655,11 @@ class Graph(BaseGraph):
 
 class Node(BaseNode):
 
-    def __init__(self, identifier, metanode, data):
+    def __init__(self, metanode, identifier, name, data):
         """ """
         BaseNode.__init__(self, identifier)
         self.metanode = metanode
+        self.name = name
         self.data = data
         self.edges = {metaedge: set() for metaedge in metanode.edges}
 
