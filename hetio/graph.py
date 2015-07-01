@@ -50,6 +50,12 @@ class BaseGraph(object):
                 continue
             yield edge
 
+    def __iter__(self):
+        return iter(self.node_dict.values())
+
+    def __contains__(self, item):
+        return item in self.node_dict
+
 class BaseNode(ElemMask):
 
     def __init__(self, identifier):
@@ -383,11 +389,13 @@ class Graph(BaseGraph):
             name = identifier
         metanode = self.metagraph.node_dict[kind]
         node = Node(metanode, identifier, name, data)
-        self.node_dict[node.get_id()] = node
+        node_id = node.get_id()
+        assert node_id not in self
+        self.node_dict[node_id] = node
         return node
 
-    def add_edge(self, source_identifier, target_identifier, kind, direction, data=dict()):
-        """ """
+    def add_edge(self, source_id, target_id, kind, direction, data=dict()):
+        """source_id and target_id are (metanode, node) tuples"""
         source = self.node_dict[source_id]
         target = self.node_dict[target_id]
         metaedge_id = source.metanode.identifier, target.metanode.identifier, kind, direction
@@ -516,8 +524,6 @@ class Graph(BaseGraph):
                 paths.append(path)
 
         return paths
-
-
 
     def paths_from(self, source, metapath,
                    duplicates=False, masked=True,
@@ -692,7 +698,7 @@ class Edge(BaseEdge):
         self.source.edges[metaedge].add(self)
 
     def get_id(self):
-        return self.source.identifier, self.target.identifier, self.metaedge.kind, self.metaedge.direction
+        return self.source.get_id(), self.source.get_id(), self.metaedge.kind, self.metaedge.direction
 
 class Path(BasePath):
 
