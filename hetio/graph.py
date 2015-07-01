@@ -1,4 +1,5 @@
 # daniel.himmelstein@gmail.com
+import abc
 import itertools
 import collections
 
@@ -9,7 +10,7 @@ direction_to_inverse = {'forward': 'backward',
 direction_to_abbrev = {'forward': '>', 'backward': '<', 'both': '-'}
 
 class ElemMask(object):
-    
+
     def __init__(self):
         self.masked = False
 
@@ -18,17 +19,17 @@ class ElemMask(object):
 
     def mask(self):
         self.masked = True
-        
+
     def unmask(self):
         self.masked = False
 
 class IterMask(object):
-    
+
     def is_masked(self):
         return any(elem.is_masked() for elem in self.mask_elem_iter())
 
 class BaseGraph(object):
-    
+
     def __init__(self):
         self.node_dict = dict()
         self.edge_dict = dict()
@@ -50,30 +51,37 @@ class BaseGraph(object):
             yield edge
 
 class BaseNode(ElemMask):
-    
-    def __init__(self, id_):
+
+    def __init__(self, identifier):
         ElemMask.__init__(self)
-        self.id_ = id_
-    
+        self.identifier = identifier
+
+    @abc.abstractmethod
+    def get_id(self):
+        pass
+
     def __hash__(self):
-        return hash(self.id_)
+        try:
+            return self.hash_
+        except AttributeError:
+            return hash(self.get_id())
 
     def __lt__(self, other):
-        return self.id_ < other.id_
+        return self.get_id() < other.get_id()
 
     def __eq__(self, other):
-        return self.id_ == other.id_
+        return self.get_id() == other.get_id()
 
     def __repr__(self):
-        return self.id_    
+        return self.get_id()
 
 class BaseEdge(ElemMask):
-    
+
     def __init__(self, source, target):
         ElemMask.__init__(self)
         self.source = source
         self.target = target
-    
+
     def __hash__(self):
         try:
             return self.hash_
@@ -86,25 +94,25 @@ class BaseEdge(ElemMask):
         return '{0} {3} {2} {3} {1}'.format(source, target, kind, dir_abbrev)
 
 class BasePath(IterMask):
-    
+
     def __init__(self, edges):
         assert isinstance(edges, tuple)
         self.edges = edges
-    
+
     def source(self):
         return self[0].source
 
     def target(self):
         return self[-1].target
-    
+
     def get_nodes(self):
         nodes = tuple(edge.source for edge in self)
         nodes = nodes + (self.target(), )
         return nodes
-    
+
     def inverse_edges(self):
         return tuple(reversed(list(edge.inverse for edge in self)))
-    
+
     def mask_elem_iter(self):
         for edge in self:
             yield edge
@@ -119,7 +127,7 @@ class BasePath(IterMask):
             if self[:len_other] == other:
                 return other
         return None
-    
+
     def __iter__(self):
         return iter(self.edges)
 
@@ -131,16 +139,16 @@ class BasePath(IterMask):
 
     def __hash__(self):
         return hash(self.edges)
-    
+
     def __eq__(self, other):
         return self.edges == other.edges
 
 class MetaGraph(BaseGraph):
-    
+
     def __init__(self):
         """ """
         BaseGraph.__init__(self)
-    
+
     @staticmethod
     def from_edge_tuples(metaedge_tuples):
         metagraph = MetaGraph()
@@ -152,7 +160,7 @@ class MetaGraph(BaseGraph):
             metagraph.add_node(kind)
         for edge_tuple in metaedge_tuples:
             metagraph.add_edge(edge_tuple)
-        
+
         metagraph.create_abbreviations()
         return metagraph
 
@@ -166,7 +174,7 @@ class MetaGraph(BaseGraph):
             else:
                 seen.add(elem)
         return duplicates
-    
+
     @staticmethod
     def find_abbrevs(kinds):
         """For a list of strings (kinds), find the shortest unique abbreviation."""
@@ -185,13 +193,13 @@ class MetaGraph(BaseGraph):
         kind_to_abbrev = MetaGraph.find_abbrevs(list(self.node_dict.keys()))
         kind_to_abbrev = {kind: abbrev.upper()
                           for kind, abbrev in list(kind_to_abbrev.items())}
-        
+
         edge_set_to_keys = dict()
         for edge in list(self.edge_dict.keys()):
             key = frozenset(list(map(str.lower, edge[:2])))
             value = edge[2]
             edge_set_to_keys.setdefault(key, list()).append(value)
-        
+
         for edge_set, keys in list(edge_set_to_keys.items()):
             key_to_abbrev = MetaGraph.find_abbrevs(keys)
             for key, abbrev in list(key_to_abbrev.items()):
@@ -199,7 +207,7 @@ class MetaGraph(BaseGraph):
                 if previous_abbrev and len(abbrev) <= len(previous_abbrev):
                     continue
                 kind_to_abbrev[key] = abbrev
-        
+
         self.set_abbreviations(kind_to_abbrev)
         self.kind_to_abbrev = kind_to_abbrev
         return kind_to_abbrev
@@ -209,7 +217,7 @@ class MetaGraph(BaseGraph):
             node.abbrev = kind_to_abbrev[kind]
         for metaedge in self.edge_dict.values():
             metaedge.kind_abbrev = kind_to_abbrev[metaedge.kind]
-        
+
 
     def add_node(self, kind):
         metanode = MetaNode(kind)
@@ -221,7 +229,7 @@ class MetaGraph(BaseGraph):
         source_kind, target_kind, kind, direction = edge_id
         source = self.get_node(source_kind)
         target = self.get_node(target_kind)
-        
+
         metaedge = MetaEdge(source, target, kind, direction)
         self.edge_dict[edge_id] = metaedge
         source.edges.add(metaedge)
@@ -240,11 +248,11 @@ class MetaGraph(BaseGraph):
             metaedge.inverse = inverse
             inverse.inverse = metaedge
             inverse.inverted = True
-       
+
     def extract_metapaths(self, source_kind, target_kind, max_length):
         source = self.node_dict[source_kind]
         target = self.node_dict[target_kind]
-        
+
         metapaths = [self.get_metapath((edge, )) for edge in source.edges]
         previous_metapaths = list(metapaths)
         for depth in range(1, max_length):
@@ -257,7 +265,7 @@ class MetaGraph(BaseGraph):
             previous_metapaths = current_metapaths
         metapaths = [metapath for metapath in metapaths if metapath.target() == target]
         return metapaths
-            
+
     def get_metapath(self, edges):
         """ """
         try:
@@ -286,14 +294,18 @@ class MetaGraph(BaseGraph):
                 inverse.sub = self.get_metapath(inverse_edges[1:])
 
             return metapath
-    
-    
+
+
 class MetaNode(BaseNode):
-    
-    def __init__(self, id_):
+
+    def __init__(self, identifier):
         """ """
-        BaseNode.__init__(self, id_)
+        BaseNode.__init__(self, identifier)
         self.edges = set()
+        self.hash_ = hash(self)
+
+    def get_id(self):
+        return self.identifier
 
 class MetaEdge(BaseEdge):
 
@@ -302,23 +314,23 @@ class MetaEdge(BaseEdge):
         BaseEdge.__init__(self, source, target)
         self.kind = kind
         self.direction = direction
-        self.hash_ = hash(self.get_id())
+        self.hash_ = hash(self)
 
     def get_id(self):
         """ """
-        return self.source.id_, self.target.id_, self.kind, self.direction
-    
+        return self.source.identifier, self.target.identifier, self.kind, self.direction
+
     def filesystem_str(self):
         return '{0}{2}{1}-{3}'.format(self.source.abbrev, self.target.abbrev,
                                       self.kind_abbrev, self.direction)
 
 class MetaPath(BasePath):
-    
+
     def __init__(self, edges):
         """metaedges is a tuple of edges"""
         assert all(isinstance(edge, MetaEdge) for edge in edges)
         BasePath.__init__(self, edges)
-    
+
     def __repr__(self):
         s = str()
         for edge in self:
@@ -358,30 +370,30 @@ class Tree(object):
 
 
 class Graph(BaseGraph):
-    
+
     def __init__(self, metagraph, data=dict()):
         """ """
         BaseGraph.__init__(self)
         self.metagraph = metagraph
-        self.data = data        
+        self.data = data
 
-    def add_node(self, id_, kind, data=dict()):
+    def add_node(self, identifier, kind, data=dict()):
         """ """
         metanode = self.metagraph.node_dict[kind]
-        node = Node(id_, metanode, data)
-        self.node_dict[id_] = node
+        node = Node(identifier, metanode, data)
+        self.node_dict[node.get_id()] = node
         return node
-    
-    def add_edge(self, source_id, target_id, kind, direction, data=dict()):
+
+    def add_edge(self, source_identifier, target_identifier, kind, direction, data=dict()):
         """ """
         source = self.node_dict[source_id]
         target = self.node_dict[target_id]
-        metaedge_id = source.metanode.id_, target.metanode.id_, kind, direction
+        metaedge_id = source.metanode.identifier, target.metanode.identifier, kind, direction
         metaedge = self.metagraph.edge_dict[metaedge_id]
         edge = Edge(source, target, metaedge, data)
         self.edge_dict[edge.get_id()] = edge
         edge.inverted = metaedge.inverted
-        
+
         inverse = Edge(target, source, metaedge.inverse, data)
         inverse_id = inverse.get_id()
         self.edge_dict[inverse_id] = inverse
@@ -389,7 +401,7 @@ class Graph(BaseGraph):
 
         edge.inverse = inverse
         inverse.inverse = edge
-        
+
         return edge, inverse
 
     def paths_tree(self, source, metapath,
@@ -518,13 +530,13 @@ class Graph(BaseGraph):
 
         if not isinstance(source, Node):
             source = self.node_dict[source]
-        
+
         if masked and source.masked:
             return None
-        
+
         if source in exclude_nodes:
             return None
-        
+
         paths = list()
 
         for edge in source.edges[metapath[0]]:
@@ -539,7 +551,7 @@ class Graph(BaseGraph):
                 continue
             path = Path((edge, ))
             paths.append(path)
-        
+
         for i in range(1, len(metapath)):
             current_paths = list()
             metaedge = metapath[i]
@@ -559,9 +571,9 @@ class Graph(BaseGraph):
                     newpath = Path(path.edges + (edge, ))
                     current_paths.append(newpath)
             paths = current_paths
-        
+
         return paths
-    
+
     def paths_between(self, source, target, metapath,
                       duplicates=False, masked=True,
                       exclude_nodes=set(), exclude_edges=set()):
@@ -576,8 +588,8 @@ class Graph(BaseGraph):
                                     exclude_nodes, exclude_edges)
             paths = [path for path in paths if path.target() == target]
             return paths
-        
-        
+
+
         split_index = len(metapath) / 2
 
         get_metapath = self.metagraph.get_metapath
@@ -585,10 +597,10 @@ class Graph(BaseGraph):
         metapath_tail = get_metapath(tuple(mp.inverse for mp in reversed(metapath[split_index:])))
         paths_head = self.paths_from(source, metapath_head, duplicates, masked, exclude_nodes, exclude_edges)
         paths_tail = self.paths_from(target, metapath_tail, duplicates, masked, exclude_nodes, exclude_edges)
-        
-        node_intersect = (set(path.target() for path in paths_head) & 
+
+        node_intersect = (set(path.target() for path in paths_head) &
                           set(path.target() for path in paths_tail))
-                
+
         head_dict = dict()
         for path in paths_head:
             path_target = path.target()
@@ -613,16 +625,16 @@ class Graph(BaseGraph):
                     if len(set(nodes)) < len(nodes):
                         continue
                 paths.append(path)
-        
-        return paths        
-    
-    
+
+        return paths
+
+
     def unmask(self):
         """Unmask all nodes and edges contained within the graph"""
         for dictionary in self.node_dict, self.edge_dict:
             for value in dictionary.values():
                 value.masked = False
-        
+
     def get_metanode_to_nodes(self):
         metanode_to_nodes = dict()
         for node in self.get_nodes():
@@ -638,15 +650,18 @@ class Graph(BaseGraph):
         return metaedge_to_edges
 
 
-    
+
 class Node(BaseNode):
-    
-    def __init__(self, id_, metanode, data):
+
+    def __init__(self, identifier, metanode, data):
         """ """
-        BaseNode.__init__(self, id_)
+        BaseNode.__init__(self, identifier)
         self.metanode = metanode
         self.data = data
         self.edges = {metaedge: set() for metaedge in metanode.edges}
+
+    def get_id(self):
+        return self.metanode.identifier, self.identifier
 
     def get_edges(self, metaedge, exclude_masked=True):
         """
@@ -663,7 +678,7 @@ class Node(BaseNode):
         return edges
 
 class Edge(BaseEdge):
-    
+
     def __init__(self, source, target, metaedge, data):
         """source and target are Node objects. metaedge is the MetaEdge object
         representing the edge
@@ -672,12 +687,12 @@ class Edge(BaseEdge):
         self.metaedge = metaedge
         self.data = data
         self.source.edges[metaedge].add(self)
-    
+
     def get_id(self):
-        return self.source.id_, self.target.id_, self.metaedge.kind, self.metaedge.direction
-        
+        return self.source.identifier, self.target.identifier, self.metaedge.kind, self.metaedge.direction
+
 class Path(BasePath):
-    
+
     def __init__(self, edges):
         """potentially metapath should be an input although it can be calculated"""
         BasePath.__init__(self, edges)
@@ -689,4 +704,3 @@ class Path(BasePath):
             s += '{0} {1} {2} {1} '.format(edge.source, dir_abbrev, edge.metaedge.kind)
         s = '{}{}'.format(s, self.target())
         return s
-
