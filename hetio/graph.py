@@ -398,7 +398,7 @@ class Graph(BaseGraph):
         """source_id and target_id are (metanode, node) tuples"""
         source = self.node_dict[source_id]
         target = self.node_dict[target_id]
-        metaedge_id = source.metanode.identifier, target.metanode.identifier, kind, direction
+        metaedge_id = source.metanode.get_id(), target.metanode.get_id(), kind, direction
         metaedge = self.metagraph.edge_dict[metaedge_id]
         edge = Edge(source, target, metaedge, data)
         self.edge_dict[edge.get_id()] = edge
@@ -686,6 +686,9 @@ class Node(BaseNode):
             edges = self.edges[metaedge]
         return edges
 
+    def __str__(self):
+        return self.name
+
 class Edge(BaseEdge):
 
     def __init__(self, source, target, metaedge, data):
@@ -698,7 +701,7 @@ class Edge(BaseEdge):
         self.source.edges[metaedge].add(self)
 
     def get_id(self):
-        return self.source.get_id(), self.source.get_id(), self.metaedge.kind, self.metaedge.direction
+        return self.source.get_id(), self.target.get_id(), self.metaedge.kind, self.metaedge.direction
 
 class Path(BasePath):
 
