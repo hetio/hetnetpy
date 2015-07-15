@@ -13,6 +13,13 @@ import yaml
 from .graph import Graph
 from .graph import MetaGraph
 
+class Encoder(json.JSONEncoder):
+
+    def default(self, o):
+        if type(o).__module__ == 'numpy':
+            return o.item()
+        return json.JSONEncoder.default(self, o)
+
 def open_ext(path, *args, **kwargs):
     open_fxn = gzip.open if path.endswith('.gz') else open
     return open_fxn(path, *args, **kwargs)
@@ -45,8 +52,8 @@ def read_yaml(path):
 def write_json(graph, path):
     """ """
     writable = writable_from_graph(graph, False)
-    write_file = open_ext(path, 'w')
-    json.dump(writable, write_file, indent=2)
+    write_file = open_ext(path, 'wt')
+    json.dump(writable, write_file, indent=2, cls=Encoder)
     write_file.close()
 
 def write_yaml(graph, path):
@@ -119,8 +126,8 @@ def write_sif(graph, path, max_edges=None, seed=0):
             if i:
                 sif_file.write('\n')
             line = '{source}\t{kind}\t{target}'.format(
-                source = str(edge.source),
-                target = str(edge.target),
+                source = edge.source,
+                target = edge.target,
                 kind = edge.metaedge.filesystem_str()
             )
             sif_file.write(line)
@@ -155,8 +162,9 @@ def writable_from_graph(graph, ordered=True, int_id=False, masked=True):
         if not masked and node.is_masked():
             continue
         node_as_dict = collections.OrderedDict() if ordered else dict()
-        node_as_dict['id_'] = node.id_
-        node_as_dict['kind'] = node.metanode.id_
+        node_as_dict['kind'] = node.metanode.identifier
+        node_as_dict['identifier'] = node.identifier
+        node_as_dict['name'] = node.name
         node_as_dict['data'] = node.data
         if int_id:
             node_as_dict['int_id'] = i
