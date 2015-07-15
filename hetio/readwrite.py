@@ -117,20 +117,16 @@ def write_sif(graph, path, max_edges=None, seed=0):
     if max_edges is not None:
         assert isinstance(max_edges, int)
     sif_file = gzip.open(path, 'wt') if path.endswith('.gz') else open(path, 'w')
+    writer = csv.writer(sif_file, delimiter='\t')
+    writer.writerow(['source', 'metaedge', 'target'])
     metaedge_to_edges = graph.get_metaedge_to_edges(exclude_inverts=True)
     random.seed(seed)
     for metaedge, edges in metaedge_to_edges.items():
         if max_edges is not None and len(edges) > max_edges:
             edges = random.sample(edges, k=max_edges)
-        for i, edge in enumerate(edges):
-            if i:
-                sif_file.write('\n')
-            line = '{source}\t{kind}\t{target}'.format(
-                source = edge.source,
-                target = edge.target,
-                kind = edge.metaedge.filesystem_str()
-            )
-            sif_file.write(line)
+        for edge in edges:
+            row = edge.source, edge.metaedge.filesystem_str(), edge.target
+            writer.writerow(row)
     sif_file.close()
 
 def write_nodetable(graph, path):
