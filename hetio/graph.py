@@ -78,9 +78,6 @@ class BaseNode(ElemMask):
     def __eq__(self, other):
         return self.get_id() == other.get_id()
 
-    def __repr__(self):
-        return self.get_id()
-
 class BaseEdge(ElemMask):
 
     def __init__(self, source, target):
@@ -94,7 +91,7 @@ class BaseEdge(ElemMask):
         except AttributeError:
             return hash(self.get_id())
 
-    def __repr__(self):
+    def __str__(self):
         source, target, kind, direction = self.get_id()
         dir_abbrev = direction_to_abbrev[direction]
         return '{0} {3} {2} {3} {1}'.format(source, target, kind, dir_abbrev)
@@ -312,6 +309,9 @@ class MetaNode(BaseNode):
 
     def get_id(self):
         return self.identifier
+
+    def __str__(self):
+        return str(self.identifier)
 
 class MetaEdge(BaseEdge):
 
@@ -686,8 +686,11 @@ class Node(BaseNode):
             edges = self.edges[metaedge]
         return edges
 
+    def __repr__(self):
+        return '%s(%r)'.format(self.__class__, self.__dict__)
+
     def __str__(self):
-        return self.name
+        return '{}::{}'.format(*self.get_id())
 
 class Edge(BaseEdge):
 

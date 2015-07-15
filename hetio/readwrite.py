@@ -22,7 +22,7 @@ def write_pickle(graph, path, masked=True):
     write_file = open_ext(path, 'wb')
     pickle.dump(writable, write_file)
     write_file.close()
-    
+
 def read_pickle(path):
     read_file = open_ext(path)
     writable = pickle.load(read_file)
@@ -39,7 +39,7 @@ def read_yaml(path):
         loader = yaml.SafeLoader
     writable = yaml.load(read_file, Loader=loader)
     read_file.close()
-    
+
     return graph_from_writable(writable)
 
 def write_json(graph, path):
@@ -74,7 +74,7 @@ def graph_from_writable(writable):
     edges = writable['edges']
     for edge in edges:
         graph.add_edge(**edge)
-    
+
     return graph
 
 def write_gml(graph, path):
@@ -109,7 +109,7 @@ def write_gml(graph, path):
 def write_sif(graph, path, max_edges=None, seed=0):
     if max_edges is not None:
         assert isinstance(max_edges, int)
-    sif_file = gzip.open(path, 'wb') if path.endswith('.gz') else open(path, 'w')
+    sif_file = gzip.open(path, 'wt') if path.endswith('.gz') else open(path, 'w')
     metaedge_to_edges = graph.get_metaedge_to_edges(exclude_inverts=True)
     random.seed(seed)
     for metaedge, edges in metaedge_to_edges.items():
@@ -118,8 +118,11 @@ def write_sif(graph, path, max_edges=None, seed=0):
         for i, edge in enumerate(edges):
             if i:
                 sif_file.write('\n')
-            sif_tuple = edge.source, edge.metaedge.kind, edge.target
-            line = '{} {} {}'.format(*sif_tuple)
+            line = '{source}\t{kind}\t{target}'.format(
+                source = str(edge.source),
+                target = str(edge.target),
+                kind = edge.metaedge.filesystem_str()
+            )
             sif_file.write(line)
     sif_file.close()
 
@@ -127,9 +130,9 @@ def write_nodetable(graph, path):
     rows = list()
     for node in graph.node_dict.values():
         row = collections.OrderedDict()
-        row['id'] = node.id_
-        row['name'] = node.data.get('name', '')
-        row['kind'] = node.metanode.id_
+        row['kind'] = node.metanode.identifier
+        row['id'] = str(node)
+        row['name'] = node.name
         rows.append(row)
     rows.sort(key=operator.itemgetter('kind', 'id'))
     fieldnames = ['id', 'name', 'kind']
@@ -143,10 +146,10 @@ def write_nodetable(graph, path):
 def writable_from_graph(graph, ordered=True, int_id=False, masked=True):
     """ """
     metanode_kinds = list(graph.metagraph.node_dict.keys())
-    
+
     metaedge_tuples = [edge.get_id() for edge in
                        graph.metagraph.get_edges(exclude_inverts=True)]
-    
+
     nodes = list()
     for i, node in enumerate(graph.node_dict.values()):
         if not masked and node.is_masked():
@@ -187,26 +190,26 @@ class GMLWriter(object):
     """
     http://www.fim.uni-passau.de/fileadmin/files/lehrstuhl/brandenburg/projekte/gml/gml-technical-report.pdf
     """
-    
+
     def __init__(self, write_file):
         """GML writing and reading class"""
         self.gml_file = write_file  # file to write GML to
         self.write_indent = '\t'
         self.write_level = 0  # indentation level while writing
-        
+
     def write_graph(self, nodes, edges):
         """nodes and edges are lists of dictionaries."""
-        
+
         with GMLBlock(self, 'graph'):
-            
+
             for node in nodes:
                 with GMLBlock(self, 'node'):
                     self.write_properties(node)
-                    
+
             for edge in edges:
                 with GMLBlock(self, 'edge'):
                     self.write_properties(edge)
-    
+
 
     def write(self, s):
         """Write string s to self.gml_file prepending the proper indentation."""
@@ -224,7 +227,7 @@ class GMLWriter(object):
             return
         if isinstance(value, (int, float)):
             value = str(value)
-        
+
         elif isinstance(value, str):
             #value = value.replace('"', "'")
             #value = value.replace('&', "AMPERSAND")
@@ -232,18 +235,18 @@ class GMLWriter(object):
                 if printing: print('Invalid Value:', value)
                 return
             value = '"{}"'.format(value)
-        
+
         elif isinstance(value, (list, tuple, set)):
             with GMLBlock(self, key):
                 for elem in value:
                     self.write_property('list', elem)
             return
-        
+
         elif isinstance(value, dict):
             with GMLBlock(self, key):
                 self.write_properties(value)
             return
-        
+
         else:
             print('GML formating not specified for', type(value))
             return
@@ -254,16 +257,15 @@ class GMLWriter(object):
         self.write(line)
 
 class GMLBlock(object):
-    
+
     def __init__(self, gml, key):
         self.gml = gml
         self.key = key
-    
+
     def __enter__(self):
         self.gml.write('%s [\n' % self.key)
         self.gml.write_level += 1
-    
+
     def __exit__(self, *args, **kwargs):
         self.gml.write_level -= 1
         self.gml.write(']\n')
-
