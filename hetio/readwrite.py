@@ -1,5 +1,5 @@
 import collections
-import pickle as pickle
+import pickle
 import gzip
 import json
 import os
@@ -36,7 +36,6 @@ def read_pickle(path):
     read_file.close()
     return graph_from_writable(writable)
 
-
 def read_yaml(path):
     """ """
     read_file = open_ext(path)
@@ -55,6 +54,13 @@ def write_json(graph, path):
     write_file = open_ext(path, 'wt')
     json.dump(writable, write_file, indent=2, cls=Encoder)
     write_file.close()
+
+def read_json(path):
+    """ """
+    read_file = open_ext(path, 'rt')
+    writable = json.load(read_file)
+    read_file.close()
+    return graph_from_writable(writable)
 
 def write_yaml(graph, path):
     """ """
@@ -80,6 +86,8 @@ def graph_from_writable(writable):
 
     edges = writable['edges']
     for edge in edges:
+        for key in 'source_id', 'target_id':
+            edge[key] = tuple(edge[key])
         graph.add_edge(**edge)
 
     return graph
