@@ -48,9 +48,9 @@ def read_yaml(path):
 
     return graph_from_writable(writable)
 
-def write_json(graph, path):
+def write_json(graph, path, masked=True):
     """ """
-    writable = writable_from_graph(graph, False)
+    writable = writable_from_graph(graph, ordered=False, masked=masked)
     write_file = open_ext(path, 'wt')
     json.dump(writable, write_file, indent=2, cls=Encoder)
     write_file.close()
