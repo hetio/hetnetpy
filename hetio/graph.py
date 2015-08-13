@@ -3,6 +3,8 @@ import abc
 import itertools
 import collections
 
+from hetio.abbreviation import validate_abbreviations, create_abbreviations
+
 direction_to_inverse = {'forward': 'backward',
                          'backward': 'forward',
                          'both': 'both'}
@@ -166,8 +168,10 @@ class MetaGraph(BaseGraph):
             metagraph.add_edge(edge_tuple)
 
         if kind_to_abbrev is None:
-            raise NotImplementedError
+            kind_to_abbrev = create_abbreviations(metagraph)
         metagraph.set_abbreviations(kind_to_abbrev)
+
+        assert validate_abbreviations(metagraph)
 
         return metagraph
 

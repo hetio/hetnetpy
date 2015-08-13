@@ -10,8 +10,7 @@ import random
 
 import yaml
 
-from .graph import Graph
-from .graph import MetaGraph
+from hetio.graph import Graph, MetaGraph
 
 class Encoder(json.JSONEncoder):
 
@@ -62,9 +61,9 @@ def read_json(path):
     read_file.close()
     return graph_from_writable(writable)
 
-def write_yaml(graph, path):
+def write_yaml(graph, path, masked=True):
     """ """
-    writable = writable_from_graph(graph, False)
+    writable = writable_from_graph(graph, ordered=False, masked=masked)
     write_file = open_ext(path, 'w')
     try:
         dumper = yaml.CSafeDumper
