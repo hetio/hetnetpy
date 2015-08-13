@@ -50,7 +50,7 @@ def read_yaml(path):
 
 def write_json(graph, path, masked=True):
     """ """
-    writable = writable_from_graph(graph, ordered=False, masked=masked)
+    writable = writable_from_graph(graph, ordered=True, masked=masked)
     write_file = open_ext(path, 'wt')
     json.dump(writable, write_file, indent=2, cls=Encoder)
     write_file.close()
@@ -75,9 +75,9 @@ def write_yaml(graph, path):
 
 def graph_from_writable(writable):
     """ """
-    metaedge_tuples = writable['metaedge_tuples']
-    metaedge_tuples = list(map(tuple, metaedge_tuples))
-    metagraph = MetaGraph.from_edge_tuples(metaedge_tuples)
+    metaedge_tuples = [tuple(x) for x in writable['metaedge_tuples']]
+    kind_to_abbrev = writable.get('kind_to_abbrev')
+    metagraph = MetaGraph.from_edge_tuples(metaedge_tuples, kind_to_abbrev)
     graph = Graph(metagraph)
 
     nodes = writable['nodes']
@@ -192,6 +192,7 @@ def writable_from_graph(graph, ordered=True, int_id=False, masked=True):
     writable = collections.OrderedDict() if ordered else dict()
     writable['metanode_kinds'] = metanode_kinds
     writable['metaedge_tuples'] = metaedge_tuples
+    writable['kind_to_abbrev'] = graph.metagraph.kind_to_abbrev
     writable['nodes'] = nodes
     writable['edges'] = edges
 

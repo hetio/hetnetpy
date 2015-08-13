@@ -153,7 +153,8 @@ class MetaGraph(BaseGraph):
         BaseGraph.__init__(self)
 
     @staticmethod
-    def from_edge_tuples(metaedge_tuples):
+    def from_edge_tuples(metaedge_tuples, kind_to_abbrev=None):
+        """Create a new metagraph defined by its edges."""
         metagraph = MetaGraph()
         node_kinds = set()
         for source_kind, target_kind, kind, direction in metaedge_tuples:
@@ -164,63 +165,19 @@ class MetaGraph(BaseGraph):
         for edge_tuple in metaedge_tuples:
             metagraph.add_edge(edge_tuple)
 
-        metagraph.create_abbreviations()
+        if kind_to_abbrev is None:
+            raise NotImplementedError
+        metagraph.set_abbreviations(kind_to_abbrev)
+
         return metagraph
 
-    @staticmethod
-    def get_duplicates(iterable):
-        """Return a set of the elements which appear multiple times in iterable."""
-        seen, duplicates = set(), set()
-        for elem in iterable:
-            if elem in seen:
-                duplicates.add(elem)
-            else:
-                seen.add(elem)
-        return duplicates
-
-    @staticmethod
-    def find_abbrevs(kinds):
-        """For a list of strings (kinds), find the shortest unique abbreviation."""
-        kind_to_abbrev = {kind: kind[0] for kind in kinds}
-        duplicates = MetaGraph.get_duplicates(list(kind_to_abbrev.values()))
-        while duplicates:
-            for kind, abbrev in list(kind_to_abbrev.items()):
-                if abbrev in duplicates:
-                    abbrev += kind[len(abbrev)]
-                    kind_to_abbrev[kind] = abbrev
-            duplicates = MetaGraph.get_duplicates(list(kind_to_abbrev.values()))
-        return kind_to_abbrev
-
-    def create_abbreviations(self):
-        """Creates abbreviations for node and edge kinds."""
-        kind_to_abbrev = MetaGraph.find_abbrevs(list(self.node_dict.keys()))
-        kind_to_abbrev = {kind: abbrev.upper()
-                          for kind, abbrev in list(kind_to_abbrev.items())}
-
-        edge_set_to_keys = dict()
-        for edge in list(self.edge_dict.keys()):
-            key = frozenset(list(map(str.lower, edge[:2])))
-            value = edge[2]
-            edge_set_to_keys.setdefault(key, list()).append(value)
-
-        for edge_set, keys in list(edge_set_to_keys.items()):
-            key_to_abbrev = MetaGraph.find_abbrevs(keys)
-            for key, abbrev in list(key_to_abbrev.items()):
-                previous_abbrev = kind_to_abbrev.get(key)
-                if previous_abbrev and len(abbrev) <= len(previous_abbrev):
-                    continue
-                kind_to_abbrev[key] = abbrev
-
-        self.set_abbreviations(kind_to_abbrev)
-        self.kind_to_abbrev = kind_to_abbrev
-        return kind_to_abbrev
-
     def set_abbreviations(self, kind_to_abbrev):
-        for kind, node in self.node_dict.items():
-            node.abbrev = kind_to_abbrev[kind]
+        """Add abbreviations as an attribute for metanodes and metaedges"""
+        self.kind_to_abbrev = kind_to_abbrev
+        for kind, metanode in self.node_dict.items():
+            metanode.abbrev = kind_to_abbrev[kind]
         for metaedge in self.edge_dict.values():
             metaedge.kind_abbrev = kind_to_abbrev[metaedge.kind]
-
 
     def add_node(self, kind):
         metanode = MetaNode(kind)
