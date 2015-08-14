@@ -4,7 +4,7 @@ def validate_abbreviations(metagraph):
     """Check that abbreviations are unambigious"""
     valid = True
     metanodes = set(metagraph.get_nodes())
-    metaedges = set(metagraph.get_edges(exclude_inverts=True))
+    metaedges = set(metagraph.get_edges(exclude_inverts=False))
 
     # Duplicated metanode and metaedge kinds
     metanode_kinds = {metanode.identifier for metanode in metanodes}
@@ -37,25 +37,11 @@ def validate_abbreviations(metagraph):
             valid = False
 
     # Check that metaedges are not ambigious
-    for metanode in metanodes:
-
-        abbrevs = set()
-        metaedges_temp = set()
-
-        for metaedge in metanode.edges:
-            # Check that the inverse of the edge hasn't already been examined
-            if metaedge.inverse in metaedges_temp:
-                metaedges_temp.add(metaedge)
-                continue
-            metaedges_temp.add(metaedge)
-
-            # Check that abbrev does not exist for other metaedges of the same metanode
-            abbrev = metaedge.source.abbrev + metaedge.kind_abbrev + metaedge.target.abbrev,
-
-            if abbrev in abbrevs:
-                print('{} has multiple metaedges abbreviated as {}'.format(metanode, abbrev))
-                valid = False
-            abbrevs.add(abbrev)
+    metaedge_abbrevs = [metaedge.get_abbrev() for metaedge in metaedges]
+    duplicated_meataedge_abbrevs = get_duplicates(metaedge_abbrevs)
+    if duplicated_meataedge_abbrevs:
+        print('Duplicated metaedge abbreviations:', duplicated_meataedge_abbrevs)
+        valid = False
 
     return valid
 

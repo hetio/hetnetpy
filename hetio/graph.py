@@ -181,7 +181,12 @@ class MetaGraph(BaseGraph):
         for kind, metanode in self.node_dict.items():
             metanode.abbrev = kind_to_abbrev[kind]
         for metaedge in self.edge_dict.values():
-            metaedge.kind_abbrev = kind_to_abbrev[metaedge.kind]
+            abbrev = kind_to_abbrev[metaedge.kind]
+            if metaedge.direction == 'forward':
+                abbrev = '{}>'.format(abbrev)
+            if metaedge.direction == 'backward':
+                abbrev = '<{}'.format(abbrev)
+            metaedge.kind_abbrev = abbrev
 
     def add_node(self, kind):
         metanode = MetaNode(kind)
@@ -287,9 +292,13 @@ class MetaEdge(BaseEdge):
         """ """
         return self.source.identifier, self.target.identifier, self.kind, self.direction
 
+    def get_abbrev(self):
+        return self.source.abbrev + self.kind_abbrev + self.target.abbrev
+
     def filesystem_str(self):
-        return '{0}{2}{1}-{3}'.format(self.source.abbrev, self.target.abbrev,
+        s = '{0}{2}{1}-{3}'.format(self.source.abbrev, self.target.abbrev,
                                       self.kind_abbrev, self.direction)
+        return s.translate(None, '><')
 
 class MetaPath(BasePath):
 
