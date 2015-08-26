@@ -308,12 +308,7 @@ class MetaPath(BasePath):
         BasePath.__init__(self, edges)
 
     def __repr__(self):
-        s = str()
-        for edge in self:
-            source_abbrev = edge.source.abbrev
-            dir_abbrev = direction_to_abbrev[edge.direction]
-            kind_abbrev = edge.kind_abbrev
-            s += '{0}{1}{2}{1}'.format(source_abbrev, dir_abbrev, kind_abbrev)
+        s = ''.join(edge.source.abbrev + edge.kind_abbrev for edge in self)
         s += self.target().abbrev
         return s
 
