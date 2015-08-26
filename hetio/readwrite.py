@@ -10,7 +10,7 @@ import random
 
 import yaml
 
-from hetio.graph import Graph, MetaGraph
+from hetio.hetnet import Graph, MetaGraph
 
 class Encoder(json.JSONEncoder):
 

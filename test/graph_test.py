@@ -1,6 +1,6 @@
 import pytest
 
-import graph
+import hetio.hetnet
 
 def test_creation():
     metaedge_tuples = [
