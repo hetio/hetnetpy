@@ -222,6 +222,10 @@ class MetaGraph(BaseGraph):
         source = self.node_dict[source_kind]
         target = self.node_dict[target_kind]
 
+        assert max_length >= 0
+        if max_length == 0:
+            return []
+        
         metapaths = [self.get_metapath((edge, )) for edge in source.edges]
         previous_metapaths = list(metapaths)
         for depth in range(1, max_length):
