@@ -13,9 +13,9 @@ def get_degrees_for_metanode(graph, metanode):
     rows = list()
     for node in nodes:
         for metaedge, edges in node.edges.items():
-            rows.append((node, metaedge, len(edges)))
-    df = pandas.DataFrame(rows, columns=['node', 'metaedge', 'degree'])
-    return df.sort(['node', 'metaedge'])
+            rows.append((str(node), node.name, str(metaedge), len(edges)))
+    df = pandas.DataFrame(rows, columns=['node_id', 'node_name', 'metaedge', 'degree'])
+    return df.sort(['node_name', 'metaedge'])
 
 def plot_degrees_for_metanode(graph, metanode, col_wrap=2, facet_height=4):
     """
@@ -63,7 +63,7 @@ def get_metaedge_df(graph):
     rows = list()
     for metaedge, edges in graph.get_metaedge_to_edges().items():
         series = pandas.Series()
-        series['metaedge'] = metaedge
+        series['metaedge'] = str(metaedge)
         series['abbreviation'] = metaedge.get_abbrev()
         series['inverted'] = int(metaedge.inverted)
         series['edges'] = len(edges)
