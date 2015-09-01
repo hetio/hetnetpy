@@ -51,22 +51,25 @@ def get_duplicates(iterable):
     return {key for key, count in counter.items() if count > 1}
 
 def find_abbrevs(kinds):
-    """For a list of strings (kinds), find the shortest unique abbreviation."""
-    kind_to_abbrev = {kind: kind[0] for kind in kinds}
-    duplicates = get_duplicates(list(kind_to_abbrev.values()))
+    """
+    For a list of strings (kinds), find the shortest unique abbreviation.
+    All returned abbrevs are lowercase.
+    """
+    kind_to_abbrev = {kind: kind[0].lower() for kind in kinds}
+    duplicates = get_duplicates(kind_to_abbrev.values())
     while duplicates:
         for kind, abbrev in list(kind_to_abbrev.items()):
-            if abbrev in duplicates:
-                abbrev += kind[len(abbrev)]
+            if abbrev in duplicates and len(abbrev) < len(kind):
+                abbrev += kind[len(abbrev)].lower()
                 kind_to_abbrev[kind] = abbrev
-        duplicates = get_duplicates(list(kind_to_abbrev.values()))
+        duplicates = get_duplicates(kind_to_abbrev.values())
     return kind_to_abbrev
 
 def create_abbreviations(metagraph):
     """Creates abbreviations for node and edge kinds."""
-    kind_to_abbrev = find_abbrevs(list(metagraph.node_dict.keys()))
+    kind_to_abbrev = find_abbrevs(metagraph.node_dict.keys())
     kind_to_abbrev = {kind: abbrev.upper()
-                      for kind, abbrev in list(kind_to_abbrev.items())}
+                      for kind, abbrev in kind_to_abbrev.items()}
 
     edge_set_to_keys = dict()
     for edge in list(metagraph.edge_dict.keys()):
