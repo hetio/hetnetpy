@@ -225,7 +225,7 @@ class MetaGraph(BaseGraph):
         assert max_length >= 0
         if max_length == 0:
             return []
-        
+
         metapaths = [self.get_metapath((edge, )) for edge in source.edges]
         previous_metapaths = list(metapaths)
         for depth in range(1, max_length):
@@ -283,6 +283,7 @@ class MetaNode(BaseNode):
     def __str__(self):
         return str(self.identifier)
 
+
 class MetaEdge(BaseEdge):
 
     def __init__(self, source, target, kind, direction):
@@ -304,6 +305,7 @@ class MetaEdge(BaseEdge):
                                       self.kind_abbrev, self.direction)
         return s.translate(None, '><')
 
+
 class MetaPath(BasePath):
 
     def __init__(self, edges):
@@ -315,33 +317,6 @@ class MetaPath(BasePath):
         s = ''.join(edge.source.abbrev + edge.kind_abbrev for edge in self)
         s += self.target().abbrev
         return s
-
-
-class Tree(object):
-
-    __slots__ = ('parent', 'edge') #, 'is_root', 'path_to_root')
-
-    def __init__(self, parent, edge):
-        self.parent = parent
-        self.edge = edge
-
-    def path_to_root(self):
-        path_edges = [self.edge]
-        parent = self.parent
-        while parent is not None:
-            path_edges.append(parent.edge)
-            parent = parent.parent
-        path_edges = tuple(reversed(path_edges))
-        path = Path(path_edges)
-        return path
-
-    def nodes_to_root(self):
-        nodes = [self.edge.target, self.edge.source]
-        parent = self.parent
-        while parent is not None:
-            nodes.append(parent.edge.source)
-            parent = parent.parent
-        return nodes
 
 
 class Graph(BaseGraph):
@@ -383,229 +358,6 @@ class Graph(BaseGraph):
 
         return edge, inverse
 
-    def paths_tree(self, source, metapath,
-                   duplicates=False, masked=True,
-                   exclude_nodes=set(), exclude_edges=set()):
-        """
-        Return a list of Paths starting with source and following metapath.
-        Setting duplicates False disallows paths with repeated nodes.
-        Setting masked False disallows paths which traverse a masked node or edge.
-        exclude_nodes and exclude_edges allow specification of additional nodes
-        and edges beyond (or independent of) masked nodes and edges.
-        """
-
-        if not isinstance(source, Node):
-            source = self.node_dict[source]
-
-        if masked and source.masked:
-            return None
-
-        if source in exclude_nodes:
-            return None
-
-        leaves = list()
-        for edge in source.edges[metapath[0]]:
-            edge_target = edge.target
-            if not duplicates and source == edge_target:
-                continue
-            if edge_target in exclude_nodes or edge in exclude_edges:
-                continue
-            if not masked and (edge_target.masked or edge.masked):
-                continue
-            tree = Tree(parent=None, edge=edge)
-            leaves.append(tree)
-
-        for metaedge in metapath[1:]:
-            new_leaves = list()
-            for parent in leaves:
-                edges = parent.edge.target.edges[metaedge]
-                path_members = set(parent.nodes_to_root())
-                for edge in edges:
-                    edge_target = edge.target
-                    if not duplicates and edge_target in path_members:
-                        continue
-                    if edge_target in exclude_nodes or edge in exclude_edges:
-                        continue
-                    if not masked and (edge_target.masked or edge.masked):
-                        continue
-
-                    tree = Tree(parent=parent, edge=edge)
-                    new_leaves.append(tree)
-            leaves = new_leaves
-            if not leaves:
-                break
-
-        return leaves
-
-    def paths_between_tree(self, source, target, metapath,
-                      duplicates=False, masked=True,
-                      exclude_nodes=set(), exclude_edges=set()):
-        """
-        Retreive the paths starting with the node source and ending on the
-        node target. Future implementations should split the metapath, computing
-        paths_from the source and target and look for the intersection at the
-        intermediary Node position.
-        """
-        split_threshold = 2
-        if len(metapath) <= split_threshold:
-            leaves = self.paths_tree(source, metapath, duplicates, masked, exclude_nodes, exclude_edges)
-            leaves = [leaf for leaf in leaves if leaf.edge.target == target]
-            paths = [leaf.path_to_root() for leaf in leaves]
-            return paths
-
-
-        split_index = len(metapath) / 2
-
-        get_metapath = self.metagraph.get_metapath
-        metapath_head = get_metapath(metapath[:split_index])
-        metapath_tail = get_metapath(tuple(mp.inverse for mp in reversed(metapath[split_index:])))
-        head_leaves = self.paths_tree(source, metapath_head, duplicates, masked, exclude_nodes, exclude_edges)
-        tail_leaves = self.paths_tree(target, metapath_tail, duplicates, masked, exclude_nodes, exclude_edges)
-
-        head_leaf_targets = {head_leaf.edge.target for head_leaf in head_leaves}
-        tail_leaf_targets = {tail_leaf.edge.target for tail_leaf in tail_leaves}
-        intersecting_leaf_targets = head_leaf_targets & tail_leaf_targets
-
-        head_leaves = [leaf for leaf in head_leaves if leaf.edge.target in intersecting_leaf_targets]
-        tail_leaves = [leaf for leaf in tail_leaves if leaf.edge.target in intersecting_leaf_targets]
-
-
-        head_dict = dict()
-        for leaf in head_leaves:
-            path = leaf.path_to_root()
-            head_dict.setdefault(leaf.edge.target, list()).append(path)
-
-        tail_dict = dict()
-        for leaf in tail_leaves:
-            path = leaf.path_to_root()
-            tail_dict.setdefault(leaf.edge.target, list()).append(path)
-
-        paths = list()
-        for node in intersecting_leaf_targets:
-            heads = head_dict[node]
-            tails = tail_dict[node]
-            for head, tail in itertools.product(heads, tails):
-                path = Path(head.edges + tail.edges)
-                if not duplicates:
-                    nodes = path.get_nodes()
-                    if len(set(nodes)) < len(nodes):
-                        continue
-                paths.append(path)
-
-        return paths
-
-    def paths_from(self, source, metapath,
-                   duplicates=False, masked=True,
-                   exclude_nodes=set(), exclude_edges=set()):
-        """
-        Return a list of Paths starting with source and following metapath.
-        Setting duplicates False disallows paths with repeated nodes.
-        Setting masked False disallows paths which traverse a masked node or edge.
-        exclude_nodes and exclude_edges allow specification of additional nodes
-        and edges beyond (or independent of) masked nodes and edges.
-        """
-
-        if not isinstance(source, Node):
-            source = self.node_dict[source]
-
-        if masked and source.masked:
-            return None
-
-        if source in exclude_nodes:
-            return None
-
-        paths = list()
-
-        for edge in source.edges[metapath[0]]:
-            edge_target = edge.target
-            if edge_target in exclude_nodes:
-                continue
-            if edge in exclude_edges:
-                continue
-            if not masked and (edge_target.masked or edge.masked):
-                continue
-            if not duplicates and edge_target == source:
-                continue
-            path = Path((edge, ))
-            paths.append(path)
-
-        for i in range(1, len(metapath)):
-            current_paths = list()
-            metaedge = metapath[i]
-            for path in paths:
-                nodes = path.get_nodes()
-                edges = path.target().edges[metaedge]
-                for edge in edges:
-                    edge_target = edge.target
-                    if edge_target in exclude_nodes:
-                        continue
-                    if edge in exclude_edges:
-                        continue
-                    if not masked and (edge_target.masked or edge.masked):
-                        continue
-                    if not duplicates and edge_target in nodes:
-                        continue
-                    newpath = Path(path.edges + (edge, ))
-                    current_paths.append(newpath)
-            paths = current_paths
-
-        return paths
-
-    def paths_between(self, source, target, metapath,
-                      duplicates=False, masked=True,
-                      exclude_nodes=set(), exclude_edges=set()):
-        """
-        Retreive the paths starting with the node source and ending on the
-        node target. Future implementations should split the metapath, computing
-        paths_from the source and target and look for the intersection at the
-        intermediary Node position.
-        """
-        if len(metapath) <= 1:
-            paths = self.paths_from(source, metapath, duplicates, masked,
-                                    exclude_nodes, exclude_edges)
-            paths = [path for path in paths if path.target() == target]
-            return paths
-
-
-        split_index = len(metapath) / 2
-
-        get_metapath = self.metagraph.get_metapath
-        metapath_head = get_metapath(metapath[:split_index])
-        metapath_tail = get_metapath(tuple(mp.inverse for mp in reversed(metapath[split_index:])))
-        paths_head = self.paths_from(source, metapath_head, duplicates, masked, exclude_nodes, exclude_edges)
-        paths_tail = self.paths_from(target, metapath_tail, duplicates, masked, exclude_nodes, exclude_edges)
-
-        node_intersect = (set(path.target() for path in paths_head) &
-                          set(path.target() for path in paths_tail))
-
-        head_dict = dict()
-        for path in paths_head:
-            path_target = path.target()
-            if path_target in node_intersect:
-                head_dict.setdefault(path_target, list()).append(path)
-
-        tail_dict = dict()
-        for path in paths_tail:
-            path_target = path.target()
-            if path_target in node_intersect:
-                path = Path(path.inverse_edges())
-                tail_dict.setdefault(path_target, list()).append(path)
-
-        paths = list()
-        for node in node_intersect:
-            heads = head_dict[node]
-            tails = tail_dict[node]
-            for head, tail in itertools.product(heads, tails):
-                path = Path(head.edges + tail.edges)
-                if not duplicates:
-                    nodes = path.get_nodes()
-                    if len(set(nodes)) < len(nodes):
-                        continue
-                paths.append(path)
-
-        return paths
-
-
     def unmask(self):
         """Unmask all nodes and edges contained within the graph"""
         for dictionary in self.node_dict, self.edge_dict:
@@ -625,7 +377,6 @@ class Graph(BaseGraph):
         for edge in self.get_edges(exclude_inverts):
             metaedge_to_edges[edge.metaedge].append(edge)
         return metaedge_to_edges
-
 
 
 class Node(BaseNode):
