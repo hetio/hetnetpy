@@ -1,8 +1,12 @@
-# Heterogeneous Networks in python
+# Hetnets in Python
 
-Heterogeneous (or multipartite) networks are graphs with multiple node and edge types. They provide a scalable, intuitive, and frictionless structure for data integration. This package provides python data structures for heterogeneous networks as well as algorithms for [edge prediction](http://het.io/hnep/). 
+## Background
 
-A [study to predict disease-associated genes](https://dx.doi.org/10.1371/journal.pcbi.1004259) formed the impetus for this project. The package is being actively developed for a successive [study to repurpose drugs](https://dx.doi.org/10.15363/thinklab.4).
+**Hetnets**: Hetnets, also [called](https://doi.org/10.15363/thinklab.d104) *heterogeneous information networks*, are graphs with multiple node and edge types. Hetnets are both multipartite and multirelational. They provide a scalable, intuitive, and frictionless structure for data integration.
+
+**Purpose**: This package provides data structures for hetnets and algorithms for [edge prediction](http://het.io/hnep/). It only supports hetnets, which is its primary advantage compared to other network software. Node/edge attributes and edge directionality are supported.
+
+**Impetus**: Development originated with a [study](https://doi.org/10.1371/journal.pcbi.1004259) to predict disease-associated genes and continues with a successive [study](https://doi.org/10.15363/thinklab.4) to repurpose drugs.
 
 Documentation is currently lacking and the API is unstable. Contributions welcome.
 
