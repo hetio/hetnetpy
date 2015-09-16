@@ -8,9 +8,21 @@
 
 **Impetus**: Development originated with a [study](https://doi.org/10.1371/journal.pcbi.1004259) to predict disease-associated genes and continues with a successive [study](https://doi.org/10.15363/thinklab.4) to repurpose drugs.
 
-Documentation is currently lacking and the API is unstable. Contributions welcome.
+**Caution**: Documentation is currently lacking, testing coverage is poor, and the API is unstable. Contributions are welcome. Use the [issues](/../../issues) page for feedback or troubleshooting.
 
-## Classes
+## Installation
+
+Python 2 compatibility is unkown, please use Python 3.4 or higher. To install the current version, run
+
+```sh
+pip install https://github.com/dhimmel/hetio/archive/master.zip
+```
+
+For development, clone or download-and-extract the repository. Then run `pip install -e .` from the repository's root directory. The `-e` flag specifies [editable](https://pythonhosted.org/setuptools/setuptools.html#development-mode) mode, so updating the source updates your installation.
+
+Once installed, tests can be executed by running `py.test test/` from the repository's root directory. 
+
+## Design
 
 A Graph object stores a heterogeneous network and relies on the following classes:
 
