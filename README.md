@@ -1,5 +1,7 @@
 # Hetnets in Python
 
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.31763.svg)](http://dx.doi.org/10.5281/zenodo.31763)
+
 ## Background
 
 **Hetnets**: Hetnets, also [called](https://doi.org/10.15363/thinklab.d104) *heterogeneous information networks*, are graphs with multiple node and edge types. Hetnets are both multipartite and multirelational. They provide a scalable, intuitive, and frictionless structure for data integration.
