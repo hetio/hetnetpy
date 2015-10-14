@@ -86,3 +86,46 @@ def create_abbreviations(metagraph):
             kind_to_abbrev[key] = abbrev
 
     return kind_to_abbrev
+
+def metaedges_from_metapath(abbreviation, arrange=False):
+    """Get the abbreviated metaedges for an abbreviated metapath."""
+    import regex
+    metaedges = regex.findall('(?<=^|[a-z<])[A-Z]+[a-z<>]+[A-Z]+', abbreviation, overlapped=True)
+    if arrange:
+        metaedges = [arrange_metaege(metaedge) for metaedge in metaedges]
+    return metaedges
+
+def metaedge_id_from_abbreviation(metagraph, abbreviation):
+    import regex
+    source_abbrev, target_abbrev = regex.split('[a-z<>]+', abbreviation)
+    edge_abbrev = regex.search('[a-z<>]+', abbreviation).group()
+    abbrev_to_kind = {v: k for k, v in metagraph.kind_to_abbrev.items()}
+    source_kind = abbrev_to_kind[source_abbrev]
+    target_kind = abbrev_to_kind[target_abbrev]
+    metanode = metagraph.get_node(source_kind)
+    for edge in metanode.edges:
+        if edge.kind_abbrev == edge_abbrev:
+            kind = edge.kind
+            break
+    else:
+        raise KeyError('edge abbreviation not found: {}'.format(edge_abbrev))
+    if '>' in abbreviation:
+        direction = 'forward'
+    elif '<' in abbreviation:
+        direction = 'backward'
+    else:
+        direction = 'both'
+    return source_kind, target_kind, kind, direction
+
+def arrange_metaege(abbreviation):
+    """Return the same metaedge abbreviation for a metaedge and its inverse."""
+    import regex
+    if '>' in abbreviation:
+        return abbreviation
+    source, target = regex.split('[a-z<>]+', abbreviation)
+    edge = regex.search('[a-z]+', abbreviation).group()
+    if '<' in abbreviation:
+        return '{}{}>{}'.format(target, edge, source)
+    if source > target:
+        return '{}{}{}'.format(target, edge, source)
+    return abbreviation

@@ -3,7 +3,7 @@ import abc
 import itertools
 import collections
 
-from hetio.abbreviation import validate_abbreviations, create_abbreviations
+import hetio.abbreviation
 
 direction_to_inverse = {'forward': 'backward',
                          'backward': 'forward',
@@ -168,10 +168,10 @@ class MetaGraph(BaseGraph):
             metagraph.add_edge(edge_tuple)
 
         if kind_to_abbrev is None:
-            kind_to_abbrev = create_abbreviations(metagraph)
+            kind_to_abbrev = hetio.abbreviation.create_abbreviations(metagraph)
         metagraph.set_abbreviations(kind_to_abbrev)
 
-        assert validate_abbreviations(metagraph)
+        assert hetio.abbreviation.validate_abbreviations(metagraph)
 
         return metagraph
 
@@ -240,7 +240,7 @@ class MetaGraph(BaseGraph):
         return metapaths
 
     def get_metapath(self, edges):
-        """ """
+        """Store exactly one of each metapath."""
         try:
             return self.path_dict[edges]
         except KeyError:
@@ -268,6 +268,14 @@ class MetaGraph(BaseGraph):
 
             return metapath
 
+    def metapath_from_abbrev(self, abbrev):
+        """Retrieve a metapath from its abbreviation"""
+        metaedges = list()
+        metaedge_abbrevs = hetio.abbreviation.metaedges_from_metapath(abbrev)
+        for metaedge_abbrev in metaedge_abbrevs:
+            metaedge_id = hetio.abbreviation.metaedge_id_from_abbreviation(self, metaedge_abbrev)
+            metaedges.append(self.get_edge(metaedge_id))
+        return self.get_metapath(tuple(metaedges))
 
 class MetaNode(BaseNode):
 
