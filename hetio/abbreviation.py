@@ -104,6 +104,8 @@ def metaedge_id_from_abbreviation(metagraph, abbreviation):
     target_kind = abbrev_to_kind[target_abbrev]
     metanode = metagraph.get_node(source_kind)
     for edge in metanode.edges:
+        if edge.target.identifier != target_kind:
+            continue
         if edge.kind_abbrev == edge_abbrev:
             kind = edge.kind
             break
