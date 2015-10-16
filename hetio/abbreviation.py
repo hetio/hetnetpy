@@ -90,7 +90,7 @@ def create_abbreviations(metagraph):
 def metaedges_from_metapath(abbreviation, arrange=False):
     """Get the abbreviated metaedges for an abbreviated metapath."""
     import regex
-    metaedges = regex.findall('(?<=^|[a-z<])[A-Z]+[a-z<>]+[A-Z]+', abbreviation, overlapped=True)
+    metaedges = regex.findall('(?<=^|[a-z<>])[A-Z]+[a-z<>]+[A-Z]+', abbreviation, overlapped=True)
     if arrange:
         metaedges = [arrange_metaege(metaedge) for metaedge in metaedges]
     return metaedges
