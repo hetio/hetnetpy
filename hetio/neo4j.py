@@ -132,7 +132,7 @@ def cypher_path(metarels):
         q += '{dir0}[:{rel_type}]{dir1}(n{i}:{target_label})'.format(**kwargs)
     return q
 
-def construct_dwpc_query(metarels):
+def construct_dwpc_query(metarels, property='name'):
     """
     Create a cypher query for computing the DWPC for a type of path.
     """
@@ -157,21 +157,22 @@ def construct_dwpc_query(metarels):
         }
         degree_strs.append(textwrap.dedent(
             '''\
-            length((n{i0}){dir0}[:{rel_type}]{dir1}(:{target_label})),
-            length((:{source_label}){dir0}[:{rel_type}]{dir1}(n{i1}))'''
+            size((n{i0}){dir0}[:{rel_type}]{dir1}(:{target_label})),
+            size((:{source_label}){dir0}[:{rel_type}]{dir1}(n{i1}))'''
             ).format(**kwargs))
     degree_query = ',\n'.join(degree_strs)
 
     # combine cypher fragments into a single query and add DWPC logic
     query = textwrap.dedent('''\
         MATCH p = {metapath_query}
-        WHERE n0.name = {{ source }}
-        AND n{length}.name = {{ target }}
+        WHERE n0.{property} = {{ source }}
+        AND n{length}.{property} = {{ target }}
         WITH [{degree_query}] AS degrees
         RETURN sum(reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }})) AS dwpc\
         ''').format(
         degree_query = degree_query,
         metapath_query = metapath_query,
-        length=len(metarels))
+        length=len(metarels),
+		property=property)
 
     return query
