@@ -167,12 +167,20 @@ def construct_dwpc_query(metarels, property='name'):
         MATCH p = {metapath_query}
         WHERE n0.{property} = {{ source }}
         AND n{length}.{property} = {{ target }}
-        WITH [{degree_query}] AS degrees
-        RETURN sum(reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }})) AS dwpc\
+        WITH
+        [
+        {degree_query}
+        ] AS degrees
+        RETURN
+        {{ source }} AS source,
+        {{ target }} AS target,
+        size(degrees) AS PC,
+        {{ w }} AS w,
+        sum(reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }})) AS DWPC\
         ''').format(
         degree_query = degree_query,
         metapath_query = metapath_query,
         length=len(metarels),
-		property=property)
+        property=property)
 
     return query
