@@ -164,19 +164,20 @@ def construct_dwpc_query(metarels, property='name'):
 
     # combine cypher fragments into a single query and add DWPC logic
     query = textwrap.dedent('''\
-        MATCH p = {metapath_query}
+        MATCH paths = {metapath_query}
         WHERE n0.{property} = {{ source }}
         AND n{length}.{property} = {{ target }}
         WITH
         [
         {degree_query}
-        ] AS degrees
+        ] AS degrees, paths
+        WITH
+        COUNT(paths) AS PC,
+        sum(reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }})) AS DWPC
         RETURN
         {{ source }} AS source,
         {{ target }} AS target,
-        size(degrees) AS PC,
-        {{ w }} AS w,
-        sum(reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }})) AS DWPC\
+        PC, {{ w }} AS w, DWPC\
         ''').format(
         degree_query = degree_query,
         metapath_query = metapath_query,
