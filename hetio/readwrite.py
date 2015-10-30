@@ -8,8 +8,6 @@ import operator
 import csv
 import random
 
-import yaml
-
 from hetio.hetnet import Graph, MetaGraph
 
 class Encoder(json.JSONEncoder):
@@ -37,6 +35,7 @@ def read_pickle(path):
 
 def read_yaml(path):
     """ """
+    import yaml
     read_file = open_ext(path)
     try:
         loader = yaml.CSafeLoader
@@ -63,6 +62,7 @@ def read_json(path):
 
 def write_yaml(graph, path, masked=True):
     """ """
+    import yaml
     writable = writable_from_graph(graph, ordered=False, masked=masked)
     write_file = open_ext(path, 'w')
     try:
