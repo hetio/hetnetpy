@@ -160,7 +160,7 @@ def write_nodetable(graph, path):
 
 def writable_from_metagraph(metagraph, ordered=True):
     """Create a writable from a metagraph"""
-    metanode_kinds = list(metagraph.get_nodes())
+    metanode_kinds = [metanode.get_id() for metanode in metagraph.get_nodes()]
     metaedge_tuples = [edge.get_id() for edge in
                        metagraph.get_edges(exclude_inverts=True)]
     writable = collections.OrderedDict() if ordered else dict()
