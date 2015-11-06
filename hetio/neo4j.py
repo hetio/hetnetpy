@@ -1,4 +1,5 @@
 import textwrap
+import re
 
 import py2neo
 import py2neo.packages.httpstream
@@ -109,7 +110,8 @@ def metapath_to_metarels(metapath):
 
 def metaedge_to_metarel(metaedge):
     source, target, kind, direction = metaedge.get_id()
-    return as_label(source), as_label(target), as_type(kind), direction
+    rel_type = '{}_{}'.format(as_type(kind), re.sub('[<>]', '', metaedge.get_abbrev()))
+    return as_label(source), as_label(target), rel_type, direction
 
 def cypher_path(metarels):
     """
@@ -125,11 +127,11 @@ def cypher_path(metarels):
         kwargs = {
             'i': i + 1,
             'rel_type': rel_type,
-            'target_label': target_label,
+            'target_label': ':{}'.format(target_label) if i + 1 == len(metarels) else '',
             'dir0': '<-' if direction == 'backward' else '-',
             'dir1': '->' if direction == 'forward' else '-',
         }
-        q += '{dir0}[:{rel_type}]{dir1}(n{i}:{target_label})'.format(**kwargs)
+        q += '{dir0}[:{rel_type}]{dir1}(n{i}{target_label})'.format(**kwargs)
     return q
 
 def construct_dwpc_query(metarels, property='name'):
@@ -157,8 +159,8 @@ def construct_dwpc_query(metarels, property='name'):
         }
         degree_strs.append(textwrap.dedent(
             '''\
-            size((n{i0}){dir0}[:{rel_type}]{dir1}(:{target_label})),
-            size((:{source_label}){dir0}[:{rel_type}]{dir1}(n{i1}))'''
+            size((n{i0}){dir0}[:{rel_type}]{dir1}()),
+            size((){dir0}[:{rel_type}]{dir1}(n{i1}))'''
             ).format(**kwargs))
     degree_query = ',\n'.join(degree_strs)
 
@@ -171,13 +173,9 @@ def construct_dwpc_query(metarels, property='name'):
         [
         {degree_query}
         ] AS degrees, paths
-        WITH
-        COUNT(paths) AS PC,
-        sum(reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }})) AS DWPC
         RETURN
-        {{ source }} AS source,
-        {{ target }} AS target,
-        PC, {{ w }} AS w, DWPC\
+        COUNT(paths) AS PC,
+        sum(reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }})) AS DWPC\
         ''').format(
         degree_query = degree_query,
         metapath_query = metapath_query,
