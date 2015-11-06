@@ -17,6 +17,7 @@ class Encoder(json.JSONEncoder):
             return o.item()
         return json.JSONEncoder.default(self, o)
 
+
 def open_ext(path, *args, **kwargs):
     open_fxn = gzip.open if path.endswith('.gz') else open
     return open_fxn(path, *args, **kwargs)
@@ -72,11 +73,16 @@ def write_yaml(graph, path, masked=True):
     yaml.dump(writable, write_file, Dumper=dumper)
     write_file.close()
 
-def graph_from_writable(writable):
-    """ """
+def metagraph_from_writable(writable):
+    """Create a metagraph from a writable"""
     metaedge_tuples = [tuple(x) for x in writable['metaedge_tuples']]
     kind_to_abbrev = writable.get('kind_to_abbrev')
     metagraph = MetaGraph.from_edge_tuples(metaedge_tuples, kind_to_abbrev)
+    return metagraph
+
+def graph_from_writable(writable):
+    """Create a graph from a writable"""
+    metagraph = metagraph_from_writable(writable)
     graph = Graph(metagraph)
 
     nodes = writable['nodes']
@@ -152,13 +158,21 @@ def write_nodetable(graph, path):
     writer.writerows(rows)
     write_file.close()
 
+def writable_from_metagraph(metagraph, ordered=True):
+    """Create a writable from a metagraph"""
+    metanode_kinds = list(metagraph.get_nodes())
+    metaedge_tuples = [edge.get_id() for edge in
+                       metagraph.get_edges(exclude_inverts=True)]
+    writable = collections.OrderedDict() if ordered else dict()
+    writable['metanode_kinds'] = metanode_kinds
+    writable['metaedge_tuples'] = metaedge_tuples
+    writable['kind_to_abbrev'] = metagraph.kind_to_abbrev
+    return writable
 
 def writable_from_graph(graph, ordered=True, int_id=False, masked=True):
-    """ """
-    metanode_kinds = list(graph.metagraph.node_dict.keys())
+    """Create a writable from a graph"""
 
-    metaedge_tuples = [edge.get_id() for edge in
-                       graph.metagraph.get_edges(exclude_inverts=True)]
+    writable = writable_from_metagraph(graph.metagraph, ordered)
 
     nodes = list()
     for i, node in enumerate(graph.node_dict.values()):
@@ -173,6 +187,7 @@ def writable_from_graph(graph, ordered=True, int_id=False, masked=True):
             node_as_dict['int_id'] = i
             node.int_id = i
         nodes.append(node_as_dict)
+    writable['nodes'] = nodes
 
     edges = list()
     for edge in graph.get_edges(exclude_inverts=True):
@@ -187,12 +202,6 @@ def writable_from_graph(graph, ordered=True, int_id=False, masked=True):
             edge_as_dict['source_int'] = edge.source.int_id
             edge_as_dict['target_int'] = edge.target.int_id
         edges.append(edge_as_dict)
-
-    writable = collections.OrderedDict() if ordered else dict()
-    writable['metanode_kinds'] = metanode_kinds
-    writable['metaedge_tuples'] = metaedge_tuples
-    writable['kind_to_abbrev'] = graph.metagraph.kind_to_abbrev
-    writable['nodes'] = nodes
     writable['edges'] = edges
 
     return writable
