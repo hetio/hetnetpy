@@ -46,56 +46,100 @@ def open_ext(path, *args, **kwargs):
     open_fxn = gzip.open if path.endswith('.gz') else open
     return open_fxn(path, *args, **kwargs)
 
-def write_pickle(graph, path, masked=True):
-    writable = writable_from_graph(graph, masked=masked)
-    write_file = open_ext(path, 'wb')
-    pickle.dump(writable, write_file)
-    write_file.close()
+def load(read_file, formatting):
+    """Return a writable from a read_file"""
 
-def read_pickle(path):
-    read_file = open_ext(path)
-    writable = pickle.load(read_file)
-    read_file.close()
-    return graph_from_writable(writable)
+    # JSON formatted
+    if formatting == 'json':
+        return json.load(read_file)
 
-def read_yaml(path):
-    """ """
-    import yaml
+    # YAML formatted
+    if formatting == 'yaml':
+        import yaml
+        try:
+            loader = yaml.CSafeLoader
+        except AttributeError:
+            loader = yaml.SafeLoader
+        return yaml.load(read_file, Loader=loader)
+
+    # pickle formatted
+    if formatting == 'pkl':
+        return pickle.load(read_file)
+
+    # Unsupported format
+    raise ValueError('Unsupported format: {}'.format(formatting))
+
+def detect_formatting(path):
+    """Detect the formatting using filename extension"""
+    if '.json' in path:
+        return 'json'
+    if '.yaml' in path:
+        return 'yaml'
+    if '.pkl' in path:
+        return 'pkl'
+    raise ValueError('Cannot detect the format of {}'.format(path))
+
+def extract_writable(path, formatting=None):
+    """Extract a writable from the file specified by path"""
+    if formatting is None:
+        formatting = detect_formatting(path)
     read_file = open_path(path)
-    try:
-        loader = yaml.CSafeLoader
-    except AttributeError:
-        loader = yaml.SafeLoader
-    writable = yaml.load(read_file, Loader=loader)
+    writable = load(read_file, formatting)
     read_file.close()
+    return writable
 
-    return graph_from_writable(writable)
+def read_graph(path, formatting=None):
+    """Read a graph from a path"""
+    writable = extract_writable(path, formatting)
+    graph = graph_from_writable(writable)
+    return graph
 
-def write_json(graph, path, masked=True):
-    """ """
+def read_metagraph(path, formatting=None):
+    """Read a metagraph from a path"""
+    writable = extract_writable(path, formatting)
+    metagraph = metagraph_from_writable(writable)
+    return metagraph
+
+def write_graph(graph, path, formatting=None, masked=True):
+    """Write a graph to the specified path."""
     writable = writable_from_graph(graph, ordered=True, masked=masked)
-    write_file = open_ext(path, 'wt')
-    json.dump(writable, write_file, indent=2, cls=Encoder)
-    write_file.close()
+    dump(writable, path, formatting)
 
-def read_json(path):
-    """ """
-    read_file = open_path(path)
-    writable = json.load(read_file)
-    read_file.close()
-    return graph_from_writable(writable)
+def write_metagraph(metagraph, path, formatting=None):
+    """Write a graph to the specified path."""
+    writable = writable_from_metagraph(metagraph, ordered=True)
+    dump(writable, path, formatting)
 
-def write_yaml(graph, path, masked=True):
-    """ """
-    import yaml
-    writable = writable_from_graph(graph, ordered=False, masked=masked)
-    write_file = open_ext(path, 'w')
-    try:
-        dumper = yaml.CSafeDumper
-    except AttributeError:
-        dumper = yaml.SafeDumper
-    yaml.dump(writable, write_file, Dumper=dumper)
-    write_file.close()
+def dump(writable, path, formatting=None):
+    """Dump a writable to a path"""
+    if formatting is None:
+        formatting = detect_formatting(path)
+
+    # JSON formatted
+    if formatting == 'json':
+        write_file = open_ext(path, 'wt')
+        json.dump(writable, write_file, indent=2, cls=Encoder)
+        write_file.close()
+
+    # YAML formatted
+    if formatting == 'yaml':
+        import yaml
+        try:
+            dumper = yaml.CSafeDumper
+        except AttributeError:
+            dumper = yaml.SafeDumper
+        write_file = open_ext(path, 'wt')
+        yaml.dump(writable, write_file, Dumper=dumper)
+        write_file.close()
+
+    # pickle formatted
+    if formatting == 'pkl':
+        write_file = open_ext(path, 'wb')
+        pickle.dump(writable, write_file)
+        write_file.close()
+
+    # Unsupported format
+    raise ValueError('Unsupported format: {}'.format(formatting))
 
 def metagraph_from_writable(writable):
     """Create a metagraph from a writable"""
