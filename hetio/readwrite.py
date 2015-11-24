@@ -1,23 +1,36 @@
 import collections
-import pickle
-import gzip
-import json
-import os
-import io
-import re
-import operator
 import csv
+import gzip
+import io
+import json
+import operator
+import pickle
 import random
-import requests
+import re
 
 from hetio.hetnet import Graph, MetaGraph
 
-class Encoder(json.JSONEncoder):
+def read_graph(path, formatting=None):
+    """Read a graph from a path"""
+    writable = extract_writable(path, formatting)
+    graph = graph_from_writable(writable)
+    return graph
 
-    def default(self, o):
-        if type(o).__module__ == 'numpy':
-            return o.item()
-        return json.JSONEncoder.default(self, o)
+def read_metagraph(path, formatting=None):
+    """Read a metagraph from a path"""
+    writable = extract_writable(path, formatting)
+    metagraph = metagraph_from_writable(writable)
+    return metagraph
+
+def write_graph(graph, path, formatting=None, masked=True):
+    """Write a graph to the specified path."""
+    writable = writable_from_graph(graph, masked=masked)
+    dump(writable, path, formatting)
+
+def write_metagraph(metagraph, path, formatting=None):
+    """Write a graph to the specified path."""
+    writable = writable_from_metagraph(metagraph)
+    dump(writable, path, formatting)
 
 def open_path(path):
     """
@@ -28,6 +41,7 @@ def open_path(path):
 
     # url
     if re.match('^https?://', path):
+        import requests
         response = requests.get(path)
         if is_gzipped:
             b = io.BytesIO(response.content)
@@ -69,16 +83,6 @@ def load(read_file, formatting):
     # Unsupported format
     raise ValueError('Unsupported format: {}'.format(formatting))
 
-def detect_formatting(path):
-    """Detect the formatting using filename extension"""
-    if '.json' in path:
-        return 'json'
-    if '.yaml' in path:
-        return 'yaml'
-    if '.pkl' in path:
-        return 'pkl'
-    raise ValueError('Cannot detect the format of {}'.format(path))
-
 def extract_writable(path, formatting=None):
     """Extract a writable from the file specified by path"""
     if formatting is None:
@@ -87,28 +91,6 @@ def extract_writable(path, formatting=None):
     writable = load(read_file, formatting)
     read_file.close()
     return writable
-
-def read_graph(path, formatting=None):
-    """Read a graph from a path"""
-    writable = extract_writable(path, formatting)
-    graph = graph_from_writable(writable)
-    return graph
-
-def read_metagraph(path, formatting=None):
-    """Read a metagraph from a path"""
-    writable = extract_writable(path, formatting)
-    metagraph = metagraph_from_writable(writable)
-    return metagraph
-
-def write_graph(graph, path, formatting=None, masked=True):
-    """Write a graph to the specified path."""
-    writable = writable_from_graph(graph, masked=masked)
-    dump(writable, path, formatting)
-
-def write_metagraph(metagraph, path, formatting=None):
-    """Write a graph to the specified path."""
-    writable = writable_from_metagraph(metagraph)
-    dump(writable, path, formatting)
 
 def dump(writable, path, formatting=None):
     """Dump a writable to a path"""
@@ -143,6 +125,16 @@ def dump(writable, path, formatting=None):
     else:
         raise ValueError('Unsupported format: {}'.format(formatting))
 
+def detect_formatting(path):
+    """Detect the formatting using filename extension"""
+    if '.json' in path:
+        return 'json'
+    if '.yaml' in path:
+        return 'yaml'
+    if '.pkl' in path:
+        return 'pkl'
+    raise ValueError('Cannot detect the format of {}'.format(path))
+
 def metagraph_from_writable(writable):
     """Create a metagraph from a writable"""
     metaedge_tuples = [tuple(x) for x in writable['metaedge_tuples']]
@@ -166,39 +158,6 @@ def graph_from_writable(writable):
         graph.add_edge(**edge)
 
     return graph
-
-
-def write_sif(graph, path, max_edges=None, seed=0):
-    if max_edges is not None:
-        assert isinstance(max_edges, int)
-    sif_file = gzip.open(path, 'wt') if path.endswith('.gz') else open(path, 'w')
-    writer = csv.writer(sif_file, delimiter='\t')
-    writer.writerow(['source', 'metaedge', 'target'])
-    metaedge_to_edges = graph.get_metaedge_to_edges(exclude_inverts=True)
-    random.seed(seed)
-    for metaedge, edges in metaedge_to_edges.items():
-        if max_edges is not None and len(edges) > max_edges:
-            edges = random.sample(edges, k=max_edges)
-        for edge in edges:
-            row = edge.source, edge.metaedge.get_abbrev(), edge.target
-            writer.writerow(row)
-    sif_file.close()
-
-def write_nodetable(graph, path):
-    rows = list()
-    for node in graph.node_dict.values():
-        row = collections.OrderedDict()
-        row['kind'] = node.metanode.identifier
-        row['id'] = str(node)
-        row['name'] = node.name
-        rows.append(row)
-    rows.sort(key=operator.itemgetter('kind', 'id'))
-    fieldnames = ['id', 'name', 'kind']
-    write_file = open(path, 'w')
-    writer = csv.DictWriter(write_file, fieldnames=fieldnames, delimiter='\t')
-    writer.writeheader()
-    writer.writerows(rows)
-    write_file.close()
 
 def writable_from_metagraph(metagraph):
     """Create a writable from a metagraph"""
@@ -247,3 +206,50 @@ def writable_from_graph(graph, int_id=False, masked=True):
     writable['edges'] = edges
 
     return writable
+
+
+class Encoder(json.JSONEncoder):
+    """
+    A JSONEncoder that supports numpy types by converting them
+    to standard python types.
+    """
+
+    def default(self, o):
+        if type(o).__module__ == 'numpy':
+            return o.item()
+        return json.JSONEncoder.default(self, o)
+
+
+def write_nodetable(graph, path):
+    """Write a tabular encoding of the graph nodes."""
+    rows = list()
+    for node in graph.node_dict.values():
+        row = collections.OrderedDict()
+        row['kind'] = node.metanode.identifier
+        row['id'] = str(node)
+        row['name'] = node.name
+        rows.append(row)
+    rows.sort(key=operator.itemgetter('kind', 'id'))
+    fieldnames = ['id', 'name', 'kind']
+    write_file = open_ext(path, 'wt')
+    writer = csv.DictWriter(write_file, fieldnames=fieldnames, delimiter='\t')
+    writer.writeheader()
+    writer.writerows(rows)
+    write_file.close()
+
+def write_sif(graph, path, max_edges=None, seed=0):
+    """Write a sif encoding of the graph edges."""
+    if max_edges is not None:
+        assert isinstance(max_edges, int)
+    sif_file = open_ext(path, 'wt')
+    writer = csv.writer(sif_file, delimiter='\t')
+    writer.writerow(['source', 'metaedge', 'target'])
+    metaedge_to_edges = graph.get_metaedge_to_edges(exclude_inverts=True)
+    random.seed(seed)
+    for metaedge, edges in metaedge_to_edges.items():
+        if max_edges is not None and len(edges) > max_edges:
+            edges = random.sample(edges, k=max_edges)
+        for edge in edges:
+            row = edge.source, edge.metaedge.get_abbrev(), edge.target
+            writer.writerow(row)
+    sif_file.close()
