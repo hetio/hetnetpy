@@ -3,10 +3,12 @@ import pickle
 import gzip
 import json
 import os
+import io
 import re
 import operator
 import csv
 import random
+import requests
 
 from hetio.hetnet import Graph, MetaGraph
 
@@ -17,8 +19,30 @@ class Encoder(json.JSONEncoder):
             return o.item()
         return json.JSONEncoder.default(self, o)
 
+def open_path(path):
+    """
+    Return a text mode file object from the path.
+    Automatically detects and supports urls and gzip compression.
+    """
+    is_gzipped = path.endswith('.gz')
+
+    # url
+    if re.match('^https?://', path):
+        response = requests.get(path)
+        if is_gzipped:
+            b = io.BytesIO(response.content)
+            return gzip.open(b, 'rt')
+        return io.StringIO(response.text)
+
+    # not url
+    if is_gzipped:
+        return gzip.open(path, 'rt')
+    return open(path, 'r')
 
 def open_ext(path, *args, **kwargs):
+    """
+    Return a file object. Automically detects gzip extension.
+    """
     open_fxn = gzip.open if path.endswith('.gz') else open
     return open_fxn(path, *args, **kwargs)
 
@@ -37,7 +61,7 @@ def read_pickle(path):
 def read_yaml(path):
     """ """
     import yaml
-    read_file = open_ext(path)
+    read_file = open_path(path)
     try:
         loader = yaml.CSafeLoader
     except AttributeError:
@@ -56,7 +80,7 @@ def write_json(graph, path, masked=True):
 
 def read_json(path):
     """ """
-    read_file = open_ext(path, 'rt')
+    read_file = open_path(path)
     writable = json.load(read_file)
     read_file.close()
     return graph_from_writable(writable)
