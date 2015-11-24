@@ -102,12 +102,12 @@ def read_metagraph(path, formatting=None):
 
 def write_graph(graph, path, formatting=None, masked=True):
     """Write a graph to the specified path."""
-    writable = writable_from_graph(graph, ordered=True, masked=masked)
+    writable = writable_from_graph(graph, masked=masked)
     dump(writable, path, formatting)
 
 def write_metagraph(metagraph, path, formatting=None):
     """Write a graph to the specified path."""
-    writable = writable_from_metagraph(metagraph, ordered=True)
+    writable = writable_from_metagraph(metagraph)
     dump(writable, path, formatting)
 
 def dump(writable, path, formatting=None):
@@ -122,24 +122,26 @@ def dump(writable, path, formatting=None):
         write_file.close()
 
     # YAML formatted
-    if formatting == 'yaml':
+    elif formatting == 'yaml':
         import yaml
         try:
             dumper = yaml.CSafeDumper
         except AttributeError:
             dumper = yaml.SafeDumper
+        writable = dict(writable)
         write_file = open_ext(path, 'wt')
         yaml.dump(writable, write_file, Dumper=dumper)
         write_file.close()
 
     # pickle formatted
-    if formatting == 'pkl':
+    elif formatting == 'pkl':
         write_file = open_ext(path, 'wb')
         pickle.dump(writable, write_file)
         write_file.close()
 
     # Unsupported format
-    raise ValueError('Unsupported format: {}'.format(formatting))
+    else:
+        raise ValueError('Unsupported format: {}'.format(formatting))
 
 def metagraph_from_writable(writable):
     """Create a metagraph from a writable"""
@@ -198,27 +200,27 @@ def write_nodetable(graph, path):
     writer.writerows(rows)
     write_file.close()
 
-def writable_from_metagraph(metagraph, ordered=True):
+def writable_from_metagraph(metagraph):
     """Create a writable from a metagraph"""
     metanode_kinds = [metanode.get_id() for metanode in metagraph.get_nodes()]
     metaedge_tuples = [edge.get_id() for edge in
                        metagraph.get_edges(exclude_inverts=True)]
-    writable = collections.OrderedDict() if ordered else dict()
+    writable = collections.OrderedDict()
     writable['metanode_kinds'] = metanode_kinds
     writable['metaedge_tuples'] = metaedge_tuples
     writable['kind_to_abbrev'] = metagraph.kind_to_abbrev
     return writable
 
-def writable_from_graph(graph, ordered=True, int_id=False, masked=True):
+def writable_from_graph(graph, int_id=False, masked=True):
     """Create a writable from a graph"""
 
-    writable = writable_from_metagraph(graph.metagraph, ordered)
+    writable = writable_from_metagraph(graph.metagraph)
 
     nodes = list()
     for i, node in enumerate(graph.node_dict.values()):
         if not masked and node.is_masked():
             continue
-        node_as_dict = collections.OrderedDict() if ordered else dict()
+        node_as_dict = collections.OrderedDict()
         node_as_dict['kind'] = node.metanode.identifier
         node_as_dict['identifier'] = node.identifier
         node_as_dict['name'] = node.name
@@ -236,7 +238,7 @@ def writable_from_graph(graph, ordered=True, int_id=False, masked=True):
         edge_id_keys = ('source_id', 'target_id', 'kind', 'direction')
         edge_id = edge.get_id()
         edge_items = list(zip(edge_id_keys, edge_id))
-        edge_as_dict = collections.OrderedDict(edge_items) if ordered else dict(edge_items)
+        edge_as_dict = collections.OrderedDict(edge_items)
         edge_as_dict['data'] = edge.data
         if int_id:
             edge_as_dict['source_int'] = edge.source.int_id
