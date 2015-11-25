@@ -115,7 +115,7 @@ def metapath_to_metarels(metapath):
 @functools.lru_cache()
 def metaedge_to_metarel(metaedge):
     source, target, kind, direction = metaedge.get_id()
-    return as_label(source), as_label(target), as_type(rel_type), direction
+    return as_label(source), as_label(target), as_type(metaedge), direction
 
 def cypher_path(metarels):
     """
