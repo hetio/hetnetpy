@@ -1,3 +1,4 @@
+import functools
 import textwrap
 import re
 
@@ -6,6 +7,7 @@ import py2neo.packages.httpstream
 import pandas
 
 import hetio.hetnet
+from hetio.abbreviation import arrange_metaege
 
 # Avoid SocketError
 py2neo.packages.httpstream.http.socket_timeout = 1e8
@@ -73,7 +75,7 @@ class Creator(list):
         #print('{} nodes created\r'.format(self.n_created), end='')
         del self[:]
 
-
+@functools.lru_cache()
 def as_label(metanode):
     """Convert metanode to a label-formatted str"""
     label = str(metanode)
@@ -81,15 +83,17 @@ def as_label(metanode):
     label = label.replace(' ', '')
     return label
 
+@functools.lru_cache()
 def as_type(metaedge):
     """Convert metaedge to a rel_type-formatted str"""
-    if isinstance(metaedge, str):
-        rel_type = metaedge
-    if isinstance(metaedge, hetio.hetnet.MetaEdge):
-        rel_type = str(metaedge.kind)
+    assert isinstance(metaedge, hetio.hetnet.MetaEdge)
+    rel_type = str(metaedge.kind)
     rel_type = rel_type.upper()
     rel_type = rel_type.replace(' ', '_')
-    return rel_type
+    abbrev = metaedge.get_abbrev()
+    abbrev = arrange_metaege(abbrev)
+    abbrev = re.sub('[<>]', '', abbrev)
+    return '{}_{}'.format(rel_type, abbrev)
 
 def sanitize_data(data):
     """Create neo4j safe properties"""
@@ -108,10 +112,10 @@ def sanitize_data(data):
 def metapath_to_metarels(metapath):
     return tuple(metaedge_to_metarel(metaedge) for metaedge in metapath)
 
+@functools.lru_cache()
 def metaedge_to_metarel(metaedge):
     source, target, kind, direction = metaedge.get_id()
-    rel_type = '{}_{}'.format(as_type(kind), re.sub('[<>]', '', metaedge.get_abbrev()))
-    return as_label(source), as_label(target), rel_type, direction
+    return as_label(source), as_label(target), as_type(rel_type), direction
 
 def cypher_path(metarels):
     """
