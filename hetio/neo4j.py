@@ -138,9 +138,19 @@ def cypher_path(metarels):
         q += '{dir0}[:{rel_type}]{dir1}(n{i}{target_label})'.format(**kwargs)
     return q
 
-def construct_dwpc_query(metarels, property='name'):
+def construct_dwpc_query(metarels, property='name', using=True):
     """
-    Create a cypher query for computing the DWPC for a type of path.
+    Create a cypher query for computing the *DWPC* for a type of path.
+
+    Parameters
+    ----------
+    metarels : a metarels or MetaPath object
+        the metapath (path type) to create a query for
+    property : str
+        which property to use for soure and target node lookup
+    using : bool
+        whether to add `USING` clauses into the query, which direct neo4j to
+        start traversal from both ends of the path and meet in the middle.
     """
     # Convert metapath to metarels
     if isinstance(metarels, hetio.hetnet.MetaPath):
@@ -168,10 +178,23 @@ def construct_dwpc_query(metarels, property='name'):
             ).format(**kwargs))
     degree_query = ',\n'.join(degree_strs)
 
+    if using:
+        using_query = textwrap.dedent('''\
+        USING INDEX n0:{source_label}({property})
+        USING INDEX n{length}:{target_label}({property})
+        ''').format(
+            property = property,
+            source_label = metarels[0][0],
+            target_label = metarels[-1][1],
+            length = len(metarels)
+        )
+    else:
+        using_query = ''
+
     # combine cypher fragments into a single query and add DWPC logic
     query = textwrap.dedent('''\
         MATCH paths = {metapath_query}
-        WHERE n0.{property} = {{ source }}
+        {using_query}WHERE n0.{property} = {{ source }}
         AND n{length}.{property} = {{ target }}
         WITH
         [
@@ -181,8 +204,9 @@ def construct_dwpc_query(metarels, property='name'):
         COUNT(paths) AS PC,
         sum(reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }})) AS DWPC\
         ''').format(
-        degree_query = degree_query,
         metapath_query = metapath_query,
+        using_query = using_query,
+        degree_query = degree_query,
         length=len(metarels),
         property=property)
 
