@@ -1,4 +1,5 @@
 import functools
+import itertools
 import textwrap
 import re
 
@@ -138,7 +139,7 @@ def cypher_path(metarels):
         q += '{dir0}[:{rel_type}]{dir1}(n{i}{target_label})'.format(**kwargs)
     return q
 
-def construct_dwpc_query(metarels, property='name', using=True):
+def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=False):
     """
     Create a cypher query for computing the *DWPC* for a type of path.
 
@@ -151,6 +152,13 @@ def construct_dwpc_query(metarels, property='name', using=True):
     using : bool
         whether to add `USING` clauses into the query, which direct neo4j to
         start traversal from both ends of the path and meet in the middle.
+    unique_nodes : bool or str
+        whether to exclude paths with duplicate nodes. `True` or `nested` uses
+        the path-length independent query:
+        `ALL (x IN nodes(paths) WHERE size(filter(z IN nodes(paths) WHERE z = x)) = 1)`
+        whereas `expanded` uses the combinatorial and path-length dependent form:
+        `NOT (n0=n1 OR n0=n2 OR n0=n3 OR n1=n2 OR n1=n3 OR n2=n3)`. To not
+        enforce node uniqueness, use `False`.
     """
     # Convert metapath to metarels
     if isinstance(metarels, hetio.hetnet.MetaPath):
@@ -191,11 +199,22 @@ def construct_dwpc_query(metarels, property='name', using=True):
     else:
         using_query = ''
 
+    # Unique node constraint (pevent paths with duplicate nodes)
+    if unique_nodes is True or unique_nodes == 'nested':
+        unique_nodes_query = '\nAND ALL (x IN nodes(paths) WHERE size(filter(z IN nodes(paths) WHERE z = x)) = 1)'
+    elif unique_nodes == 'expanded':
+        pair_str = ' OR '.join('n{} = n{}'.format(a, b) for a, b in
+            itertools.combinations(range(len(metarels) + 1), 2))
+        unique_nodes_query = '\nAND NOT ({})'.format(pair_str)
+    else:
+        assert unique_nodes is False
+        unique_nodes_query = ''
+
     # combine cypher fragments into a single query and add DWPC logic
     query = textwrap.dedent('''\
         MATCH paths = {metapath_query}
         {using_query}WHERE n0.{property} = {{ source }}
-        AND n{length}.{property} = {{ target }}
+        AND n{length}.{property} = {{ target }}{unique_nodes_query}
         WITH
         [
         {degree_query}
@@ -206,6 +225,7 @@ def construct_dwpc_query(metarels, property='name', using=True):
         ''').format(
         metapath_query = metapath_query,
         using_query = using_query,
+        unique_nodes_query = unique_nodes_query,
         degree_query = degree_query,
         length=len(metarels),
         property=property)
