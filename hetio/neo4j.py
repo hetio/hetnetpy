@@ -157,8 +157,10 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Fal
         the path-length independent query:
         `ALL (x IN nodes(paths) WHERE size(filter(z IN nodes(paths) WHERE z = x)) = 1)`
         whereas `expanded` uses the combinatorial and path-length dependent form:
-        `NOT (n0=n1 OR n0=n2 OR n0=n3 OR n1=n2 OR n1=n3 OR n2=n3)`. To not
-        enforce node uniqueness, use `False`.
+        `NOT (n0=n1 OR n0=n2 OR n0=n3 OR n1=n2 OR n1=n3 OR n2=n3)`. Specify
+        `labeled` to perform an intelligent version of `expanded` where only
+        nodes with the same label are checked for duplicity. To not enforce
+        node uniqueness, use `False`.
     """
     # Convert metapath to metarels
     if isinstance(metarels, hetio.hetnet.MetaPath):
@@ -203,9 +205,18 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Fal
     if unique_nodes is True or unique_nodes == 'nested':
         unique_nodes_query = '\nAND ALL (x IN nodes(paths) WHERE size(filter(z IN nodes(paths) WHERE z = x)) = 1)'
     elif unique_nodes == 'expanded':
-        pair_str = ' OR '.join('n{} = n{}'.format(a, b) for a, b in
-            itertools.combinations(range(len(metarels) + 1), 2))
-        unique_nodes_query = '\nAND NOT ({})'.format(pair_str)
+        pairs = itertools.combinations(range(len(metarels) + 1), 2)
+        unique_nodes_query = format_expanded_clause(pairs)
+    elif unique_nodes == 'labeled':
+        labels = [metarel[0] for metarel in metarels]
+        labels.append(metarels[-1][1])
+        label_to_nodes = dict()
+        for i, label in enumerate(labels):
+            label_to_nodes.setdefault(label, list()).append(i)
+        pairs = list()
+        for nodes in label_to_nodes.values():
+            pairs.extend(itertools.combinations(nodes, 2))
+        unique_nodes_query = format_expanded_clause(pairs)
     else:
         assert unique_nodes is False
         unique_nodes_query = ''
@@ -231,3 +242,13 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Fal
         property=property)
 
     return query
+
+def format_expanded_clause(pairs):
+    """
+    Given an iterable of node-index pairs, return a cypher `WHERE` clause
+    for excluding paths where a pair of nodes are equal.
+    """
+    if not pairs:
+        return ''
+    pair_str = ' OR '.join('n{} = n{}'.format(a, b) for a, b in pairs)
+    return '\nAND NOT ({})'.format(pair_str)
