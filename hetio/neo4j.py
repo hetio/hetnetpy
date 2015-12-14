@@ -231,7 +231,7 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Fal
         {degree_query}
         ] AS degrees, paths
         RETURN
-        COUNT(paths) AS PC,
+        count(paths) AS PC,
         sum(reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }})) AS DWPC\
         ''').format(
         metapath_query = metapath_query,
