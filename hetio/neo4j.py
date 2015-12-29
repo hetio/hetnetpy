@@ -1,6 +1,7 @@
 import functools
 import itertools
 import textwrap
+import random
 import re
 
 import py2neo
@@ -252,3 +253,87 @@ def format_expanded_clause(pairs):
         return ''
     pair_str = ' OR '.join('n{} = n{}'.format(a, b) for a, b in pairs)
     return '\nAND NOT ({})'.format(pair_str)
+
+def permute(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, max_tries_mult=20, seed=0):
+    """
+    Permute neo4j graph using the XSwap algorithm [1]_.
+
+    Parameters
+    ----------
+    uri : str
+        neo4j server connection information
+    rel_type : str
+        the relationship type to permute
+    nswap : None or int, optional
+        the number of successful swaps to perform
+    max_tries : None or int, optional
+        the maximum number of attempted swaps
+    nswap_mult : float or int, optional
+        when `nswap_mult is None`, set `nswap` to the total number of
+        relationships multiplied by `nswap_mult`
+    max_tries_mult : float or int, optional
+        when `max_tries is None`, set `max_tries` to the total number of
+        relationships multiplied by `max_tries_mult`
+    seed : int or None, optional
+        value used to initialize the random generation of relationships for
+        swapping
+
+    References
+    ----------
+
+    .. [1] Sami Hanhijärvi, Gemma C. Garriga, Kai Puolamäki (2009)
+       Randomization Techniques for Graphs. SIAM International Conference on
+       Data Mining. https://doi.org/10.1137/1.9781611972795.67
+    """
+
+    neo = py2neo.Graph(uri)
+
+    # retrieve relationship IDs
+    query = textwrap.dedent('''/
+    MATCH ()-[r:{rel_type}]->()
+    RETURN id(r)
+    '''.format(rel_type=rel_type))
+    ids = [row.id for row in neo.cypher.execute(query)]
+    nrel = len(ids)
+    if nswap is None:
+        nswap = round(nrel * nswap_mult)
+    if max_tries is None:
+        max_tries = round(nrel * max_tries_mult)
+
+    query = textwrap.dedent('''/
+    MATCH (u)-[r0:{rel_type}]->(v)
+    MATCH (x)-[r1:{rel_type}]->(y)
+    WHERE r0.id = {{ id_0 }}
+    AND r1.id = {{ id_1 }}
+    AND u <> x
+    AND v <> y
+    AND NOT exists((u)-[:{rel_type}]-(x))
+    AND NOT exists((v)-[:{rel_type}]-(y))
+    CREATE (u)-[nr0:{rel_type}]->(x)
+    CREATE (v)-[nr1:{rel_type}]->(y)
+    SET nr0 = r0
+    SET nr1 = r1
+    DELETE r0, r1
+    RETURN id(nr0) AS id_nr0, id(nr1) AS id_nr1
+    '''.format(rel_type=rel_type))
+
+    swaps = 0
+    tries = 0
+    random.seed(seed, version=2)
+    while swaps < nswap and tries < max_tries:
+        index_0, index_1 = random.sample(nrel, 2)
+        id_0 = ids[index_0]
+        id_1 = ids[index_1]
+
+        result = neo.cypher.execute(query, id_0=id_0, id_1=id_1)
+        if result:
+            ids[index_0] = result.one.id_nr0
+            ids[index_1] = result.one.id_nr1
+            swaps += 1
+        tries += 1
+
+    stats = {
+        'swaps': swaps,
+        'tries': tries,
+    }
+    return stats
