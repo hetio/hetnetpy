@@ -254,9 +254,10 @@ def format_expanded_clause(pairs):
     pair_str = ' OR '.join('n{} = n{}'.format(a, b) for a, b in pairs)
     return '\nAND NOT ({})'.format(pair_str)
 
-def permute(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, max_tries_mult=20, seed=0):
+def permute_rel_type(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, max_tries_mult=20, seed=None):
     """
-    Permute neo4j graph using the XSwap algorithm [1]_.
+    Permute the specified relationship type in a neo4j graph using the XSwap
+    algorithm [1]_.
 
     Parameters
     ----------
@@ -289,9 +290,9 @@ def permute(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, max_tries_
     neo = py2neo.Graph(uri)
 
     # retrieve relationship IDs
-    query = textwrap.dedent('''/
+    query = textwrap.dedent('''\
     MATCH ()-[r:{rel_type}]->()
-    RETURN id(r)
+    RETURN id(r) AS id\
     '''.format(rel_type=rel_type))
     ids = [row.id for row in neo.cypher.execute(query)]
     nrel = len(ids)
@@ -300,28 +301,26 @@ def permute(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, max_tries_
     if max_tries is None:
         max_tries = round(nrel * max_tries_mult)
 
-    query = textwrap.dedent('''/
+    query = textwrap.dedent('''\
     MATCH (u)-[r0:{rel_type}]->(v)
     MATCH (x)-[r1:{rel_type}]->(y)
-    WHERE r0.id = {{ id_0 }}
-    AND r1.id = {{ id_1 }}
+    WHERE id(r0) = {{ id_0 }}
+    AND id(r1) = {{ id_1 }}
     AND u <> x
     AND v <> y
-    AND NOT exists((u)-[:{rel_type}]-(x))
-    AND NOT exists((v)-[:{rel_type}]-(y))
-    CREATE (u)-[nr0:{rel_type}]->(x)
-    CREATE (v)-[nr1:{rel_type}]->(y)
-    SET nr0 = r0
-    SET nr1 = r1
+    AND NOT exists((u)-[:{rel_type}]-(y))
+    AND NOT exists((x)-[:{rel_type}]-(v))
+    CREATE (u)-[nr0:{rel_type}]->(y)
+    CREATE (x)-[nr1:{rel_type}]->(v)
     DELETE r0, r1
-    RETURN id(nr0) AS id_nr0, id(nr1) AS id_nr1
+    RETURN id(nr0) AS id_nr0, id(nr1) AS id_nr1\
     '''.format(rel_type=rel_type))
 
     swaps = 0
     tries = 0
     random.seed(seed, version=2)
     while swaps < nswap and tries < max_tries:
-        index_0, index_1 = random.sample(nrel, 2)
+        index_0, index_1 = random.sample(range(nrel), 2)
         id_0 = ids[index_0]
         id_1 = ids[index_1]
 
