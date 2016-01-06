@@ -301,15 +301,22 @@ def permute_rel_type(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, m
     if max_tries is None:
         max_tries = round(nrel * max_tries_mult)
 
-    query = textwrap.dedent('''\
-    MATCH (u)-[r0:{rel_type}]->(v)
-    MATCH (x)-[r1:{rel_type}]->(y)
-    WHERE id(r0) = {{ id_0 }}
-    AND id(r1) = {{ id_1 }}
+    match_query =  textwrap.dedent('''\
+    MATCH (u)-[r0]->(v)
+    MATCH (x)-[r1]->(y)
+    WHERE id(r0) = { id_0 }
+    AND id(r1) = { id_1 }
+    ''')
+
+    read_query = match_query + textwrap.dedent('''\
     AND u <> x
     AND v <> y
     AND NOT exists((u)-[:{rel_type}]-(y))
     AND NOT exists((x)-[:{rel_type}]-(v))
+    RETURN count(*) AS valid\
+    '''.format(rel_type=rel_type))
+
+    write_query = match_query + textwrap.dedent('''\
     CREATE (u)-[nr0:{rel_type}]->(y)
     CREATE (x)-[nr1:{rel_type}]->(v)
     DELETE r0, r1
@@ -324,10 +331,11 @@ def permute_rel_type(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, m
         id_0 = ids[index_0]
         id_1 = ids[index_1]
 
-        result = neo.cypher.execute(query, id_0=id_0, id_1=id_1)
-        if result:
-            ids[index_0] = result.one.id_nr0
-            ids[index_1] = result.one.id_nr1
+        valid = neo.cypher.execute_one(read_query, id_0=id_0, id_1=id_1)
+        if valid:
+            row = neo.cypher.execute(write_query, id_0=id_0, id_1=id_1).one
+            ids[index_0] = row.id_nr0
+            ids[index_1] = row.id_nr1
             swaps += 1
         tries += 1
 
