@@ -1,8 +1,9 @@
 import collections
 import csv
-import gzip
 import io
+import importlib
 import json
+import mimetypes
 import operator
 import pickle
 import random
@@ -32,36 +33,40 @@ def write_metagraph(metagraph, path, formatting=None):
     writable = writable_from_metagraph(metagraph)
     dump(writable, path, formatting)
 
-def open_path(path):
+def open_read_file(path):
     """
-    Return a text mode file object from the path.
-    Automatically detects and supports urls and gzip compression.
+    Return a read-text mode file object from the path.
+    Automatically detects and supports urls and gzip/bzip2 compression.
     """
-    is_gzipped = path.endswith('.gz')
+    opener = get_opener(path)
 
-    # url
+    # Read from URL
     if re.match('^https?://', path):
+
         import requests
         response = requests.get(path)
-        if is_gzipped:
+
+        if opener == io.open:
+            return io.StringIO(response.text)
+        else:
             b = io.BytesIO(response.content)
-            return gzip.open(b, 'rt')
-        return io.StringIO(response.text)
+            return opener(b, 'rt')
 
-    # not url
-    if is_gzipped:
-        return gzip.open(path, 'rt')
-    return open(path, 'r')
+    # Read from file
+    return opener(path, 'rt')
 
-def open_ext(path, *args, **kwargs):
+def open_write_file(path, mode='wt'):
     """
-    Return a file object. Automically detects gzip extension.
+    Return a write-text mode file object from the path.
+    Automatically detects and supports gzip/bzip2 compression.
     """
-    open_fxn = gzip.open if path.endswith('.gz') else open
-    return open_fxn(path, *args, **kwargs)
+    opener = get_opener(path)
+    return opener(path, mode)
 
 def load(read_file, formatting):
-    """Return a writable from a read_file"""
+    """
+    Return a writable from read_file. Support json, yaml, and pkl formats.
+    """
 
     # JSON formatted
     if formatting == 'json':
@@ -87,19 +92,19 @@ def extract_writable(path, formatting=None):
     """Extract a writable from the file specified by path"""
     if formatting is None:
         formatting = detect_formatting(path)
-    read_file = open_path(path)
+    read_file = open_read_file(path)
     writable = load(read_file, formatting)
     read_file.close()
     return writable
 
 def dump(writable, path, formatting=None):
-    """Dump a writable to a path"""
+    """Dump a writable to a path. Support json, yaml, and pkl formats."""
     if formatting is None:
         formatting = detect_formatting(path)
 
     # JSON formatted
     if formatting == 'json':
-        write_file = open_ext(path, 'wt')
+        write_file = open_write_file(path)
         json.dump(writable, write_file, indent=2, cls=Encoder)
         write_file.close()
 
@@ -111,13 +116,13 @@ def dump(writable, path, formatting=None):
         except AttributeError:
             dumper = yaml.SafeDumper
         writable = dict(writable)
-        write_file = open_ext(path, 'wt')
+        write_file = open_write_file(path)
         yaml.dump(writable, write_file, Dumper=dumper)
         write_file.close()
 
     # pickle formatted
     elif formatting == 'pkl':
-        write_file = open_ext(path, 'wb')
+        write_file = open_write_file(path, 'wb')
         pickle.dump(writable, write_file)
         write_file.close()
 
@@ -134,6 +139,21 @@ def detect_formatting(path):
     if '.pkl' in path:
         return 'pkl'
     raise ValueError('Cannot detect the format of {}'.format(path))
+
+encoding_to_module = {
+    'gzip': 'gzip',
+    'bzip2': 'bz2',
+}
+
+def get_opener(filename):
+    """Automatically detect compression and return the file opening function."""
+    type_, encoding = mimetypes.guess_type(filename)
+    if encoding is None:
+        opener = io.open
+    else:
+        module = encoding_to_module[encoding]
+        opener = importlib.import_module(module).open
+    return opener
 
 def metagraph_from_writable(writable):
     """Create a metagraph from a writable"""
@@ -231,7 +251,7 @@ def write_nodetable(graph, path):
         rows.append(row)
     rows.sort(key=operator.itemgetter('kind', 'id'))
     fieldnames = ['id', 'name', 'kind']
-    write_file = open_ext(path, 'wt')
+    write_file = open_write_file(path)
     writer = csv.DictWriter(write_file, fieldnames=fieldnames, delimiter='\t')
     writer.writeheader()
     writer.writerows(rows)
@@ -241,7 +261,7 @@ def write_sif(graph, path, max_edges=None, seed=0):
     """Write a sif encoding of the graph edges."""
     if max_edges is not None:
         assert isinstance(max_edges, int)
-    sif_file = open_ext(path, 'wt')
+    sif_file = open_write_file(path)
     writer = csv.writer(sif_file, delimiter='\t')
     writer.writerow(['source', 'metaedge', 'target'])
     metaedge_to_edges = graph.get_metaedge_to_edges(exclude_inverts=True)
