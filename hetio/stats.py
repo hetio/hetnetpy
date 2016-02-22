@@ -57,17 +57,19 @@ def get_metanode_df(graph):
         series['nodes'] = len(nodes)
         series['unconnected_nodes'] = sum(not any(node.edges.values()) for node in nodes)
         rows.append(series)
-    return pandas.DataFrame(rows).sort_values('metanode')
+
+    metanode_df = pandas.DataFrame(rows).sort_values('metanode')
+    return metanode_df
 
 def get_metaedge_df(graph):
     rows = list()
-    for metaedge, edges in graph.get_metaedge_to_edges().items():
+    for metaedge, edges in graph.get_metaedge_to_edges(exclude_inverts=True).items():
         series = pandas.Series()
         series['metaedge'] = str(metaedge)
         series['abbreviation'] = metaedge.get_abbrev()
-        series['inverted'] = int(metaedge.inverted)
         series['edges'] = len(edges)
         series['source_nodes'] = len(set(edge.source for edge in edges))
         series['target_nodes'] = len(set(edge.target for edge in edges))
         rows.append(series)
-    return pandas.DataFrame(rows).sort_values('metaedge')
+    metaedge_df = pandas.DataFrame(rows).sort_values('metaedge')
+    return metaedge_df
