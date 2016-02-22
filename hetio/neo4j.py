@@ -9,7 +9,6 @@ import py2neo.packages.httpstream
 import pandas
 
 import hetio.hetnet
-from hetio.abbreviation import arrange_metaege
 
 # Avoid SocketError
 py2neo.packages.httpstream.http.socket_timeout = 1e8
@@ -92,9 +91,7 @@ def as_type(metaedge):
     rel_type = str(metaedge.kind)
     rel_type = rel_type.upper()
     rel_type = rel_type.replace(' ', '_')
-    abbrev = metaedge.get_abbrev()
-    abbrev = arrange_metaege(abbrev)
-    abbrev = re.sub('[<>]', '', abbrev)
+    abbrev = metaedge.get_standard_abbrev()
     return '{}_{}'.format(rel_type, abbrev)
 
 def sanitize_data(data):

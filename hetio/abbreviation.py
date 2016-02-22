@@ -1,5 +1,7 @@
 import collections
 
+import hetio.hetnet
+
 def validate_abbreviations(metagraph):
     """Check that abbreviations are unambigious"""
     valid = True
@@ -87,13 +89,26 @@ def create_abbreviations(metagraph):
 
     return kind_to_abbrev
 
-def metaedges_from_metapath(abbreviation, arrange=False):
-    """Get the abbreviated metaedges for an abbreviated metapath."""
+def metaedges_from_metapath(abbreviation, standardize_by=None):
+    """
+    Get the abbreviated metaedges for an abbreviated metapath.
+    Pass a hetio.MetaGraph object to `standardize_by` to standardize metaedge
+    abbreviations based on the non-inverted orietatation. Pass `text` to
+    standardize by alphabetical/forward-direction arrangment of the
+    abbreviation. Default (`None`) does not standardize.
+    """
+    if isinstance(standardize_by, hetio.hetnet.MetaGraph):
+        metapath = standardize_by.metapath_from_abbrev(abbreviation)
+        return [metaedge.get_standard_abbrev() for metaedge in metapath]
     import regex
-    metaedges = regex.findall('(?<=^|[a-z<>])[A-Z]+[a-z<>]+[A-Z]+', abbreviation, overlapped=True)
-    if arrange:
-        metaedges = [arrange_metaege(metaedge) for metaedge in metaedges]
-    return metaedges
+    metaedge_abbrevs = regex.findall('(?<=^|[a-z<>])[A-Z]+[a-z<>]+[A-Z]+', abbreviation, overlapped=True)
+    if standardize_by is None:
+        return metaedge_abbrevs
+    elif standardize_by == 'text':
+        metaedge_abbrevs = [arrange_metaedge(x) for x in metaedge_abbrevs]
+        return metaedge_abbrevs
+    else:
+        raise ValueError('Invalid value for standardize_by')
 
 def metaedge_id_from_abbreviation(metagraph, abbreviation):
     import regex
@@ -119,15 +134,21 @@ def metaedge_id_from_abbreviation(metagraph, abbreviation):
         direction = 'both'
     return source_kind, target_kind, kind, direction
 
-def arrange_metaege(abbreviation):
-    """Return the same metaedge abbreviation for a metaedge and its inverse."""
+def arrange_metaedge(abbreviation):
+    """
+    Return the same metaedge abbreviation for a metaedge and its inverse. Uses
+    alphabetical order for undirected metaedges. Uses forward direction for
+    directed edges. Removes direction indicators (`<` or `>`).
+
+    Referred to as the `text` method because it standardizes abbreviations
+    using only the abbreviation text without requiring a metagraph.
+
+    Deprecated::
+    Use :func:`hetnet.MetaEdge.get_standard_abbrev` instead
+    """
     import regex
-    if '>' in abbreviation:
-        return abbreviation
     source, target = regex.split('[a-z<>]+', abbreviation)
     edge = regex.search('[a-z]+', abbreviation).group()
-    if '<' in abbreviation:
-        return '{}{}>{}'.format(target, edge, source)
-    if source > target:
-        return '{}{}{}'.format(target, edge, source)
-    return abbreviation
+    if '<' in abbreviation or (source > target):
+        source, target = target, source
+    return '{}{}{}'.format(source, edge, target)

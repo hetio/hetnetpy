@@ -2,6 +2,7 @@
 import abc
 import itertools
 import collections
+import re
 
 import hetio.abbreviation
 
@@ -307,6 +308,17 @@ class MetaEdge(BaseEdge):
 
     def get_abbrev(self):
         return self.source.abbrev + self.kind_abbrev + self.target.abbrev
+
+    def get_standard_abbrev(self):
+        """
+        Return the standard abbreviation, the abbrevation of the non-inverted
+        metaedge with inequality symbols removed. Inequality symbols indicate
+        the directionality of directed metaedges and can be removed safely here.
+        """
+        metaedge = self.inverse if self.inverted else self
+        abbrev = metaedge.get_abbrev()
+        abbrev = re.sub('[<>]', '', abbrev)
+        return abbrev
 
     def filesystem_str(self):
         s = '{0}{2}{1}-{3}'.format(self.source.abbrev, self.target.abbrev,
