@@ -149,7 +149,7 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Fal
         which property to use for soure and target node lookup
     using : bool
         whether to add `USING` clauses into the query, which direct neo4j to
-        start traversal from both ends of the path and meet in the middle.
+        start traversal from both ends of the path and join in the middle.
     unique_nodes : bool or str
         whether to exclude paths with duplicate nodes. `True` or `nested` uses
         the path-length independent query:
@@ -190,11 +190,13 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Fal
         using_query = textwrap.dedent('''\
         USING INDEX n0:{source_label}({property})
         USING INDEX n{length}:{target_label}({property})
+        USING JOIN ON {join_index}
         ''').format(
             property = property,
             source_label = metarels[0][0],
             target_label = metarels[-1][1],
-            length = len(metarels)
+            length = len(metarels),
+            join_index = len(metarels) // 2
         )
     else:
         using_query = ''
