@@ -190,7 +190,7 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Fal
         using_query = textwrap.dedent('''\
         USING INDEX n0:{source_label}({property})
         USING INDEX n{length}:{target_label}({property})
-        USING JOIN ON {join_index}
+        USING JOIN ON n{join_index}
         ''').format(
             property = property,
             source_label = metarels[0][0],
@@ -232,8 +232,8 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Fal
         ] AS degrees, paths
         RETURN
         count(paths) AS PC,
-        sum(reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }})) AS DWPC\
-        ''').format(
+        sum(reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }})) AS DWPC
+        ''').rstrip().format(
         metapath_query = metapath_query,
         using_query = using_query,
         unique_nodes_query = unique_nodes_query,
