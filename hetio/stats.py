@@ -13,9 +13,34 @@ def get_degrees_for_metanode(graph, metanode):
     rows = list()
     for node in nodes:
         for metaedge, edges in node.edges.items():
-            rows.append((str(node), node.name, str(metaedge), len(edges)))
+            rows.append((node.identifier, node.name, str(metaedge), len(edges)))
     df = pandas.DataFrame(rows, columns=['node_id', 'node_name', 'metaedge', 'degree'])
     return df.sort_values(['node_name', 'metaedge'])
+
+def get_metanode_to_degree_df(graph):
+    """
+    Return a dictionary of metanode to degree_df, where degree_df is a
+    wide-format dataframe of node degrees.
+    """
+    metanode_to_degree_df = dict()
+    for metanode in graph.metagraph.get_nodes():
+        degree_df = get_degrees_for_metanode(graph, metanode)
+        degree_df = pandas.pivot_table(degree_df, values='degree',
+            index=['node_id', 'node_name'], columns='metaedge').reset_index()
+        metanode_to_degree_df[metanode] = degree_df
+    return metanode_to_degree_df
+
+def degrees_to_excel(graph, path):
+    """
+    Write node degrees to a multisheet excel spreadsheet. Path should end in
+    a valid excel extension that `pandas.ExcelWriter` can detect, such as
+    `.xlsx`.
+    """
+    metanode_to_degree_df = get_metanode_to_degree_df(graph)
+    writer = pandas.ExcelWriter(path)
+    for metanode, degree_df in metanode_to_degree_df.items():
+        degree_df.to_excel(writer, sheet_name=str(metanode), index=False)
+    writer.close()
 
 def plot_degrees_for_metanode(graph, metanode, col_wrap=2, facet_height=4):
     """
