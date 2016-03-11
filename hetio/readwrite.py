@@ -41,7 +41,7 @@ def open_read_file(path):
     opener = get_opener(path)
 
     # Read from URL
-    if re.match('^https?://', path):
+    if re.match('^(http|ftp)s?://', path):
 
         import requests
         response = requests.get(path)
