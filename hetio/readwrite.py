@@ -185,8 +185,8 @@ def writable_from_metagraph(metagraph):
     metaedge_tuples = [edge.get_id() for edge in
                        metagraph.get_edges(exclude_inverts=True)]
     writable = collections.OrderedDict()
-    writable['metanode_kinds'] = metanode_kinds
-    writable['metaedge_tuples'] = metaedge_tuples
+    writable['metanode_kinds'] = sorted(metanode_kinds)
+    writable['metaedge_tuples'] = sorted(metaedge_tuples)
     writable['kind_to_abbrev'] = metagraph.kind_to_abbrev
     return writable
 
