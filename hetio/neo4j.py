@@ -137,7 +137,7 @@ def cypher_path(metarels):
         q += '{dir0}[:{rel_type}]{dir1}(n{i}{target_label})'.format(**kwargs)
     return q
 
-def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=False):
+def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=True):
     """
     Create a cypher query for computing the *DWPC* for a type of path.
 
@@ -151,14 +151,13 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Fal
         whether to add `USING` clauses into the query, which direct neo4j to
         start traversal from both ends of the path and join in the middle.
     unique_nodes : bool or str
-        whether to exclude paths with duplicate nodes. `True` or `nested` uses
-        the path-length independent query:
-        `ALL (x IN nodes(paths) WHERE size(filter(z IN nodes(paths) WHERE z = x)) = 1)`
-        whereas `expanded` uses the combinatorial and path-length dependent form:
-        `NOT (n0=n1 OR n0=n2 OR n0=n3 OR n1=n2 OR n1=n3 OR n2=n3)`. Specify
+        whether to exclude paths with duplicate nodes. To not enforce node
+        uniqueness, use `False`. Methods for enforcing node uniqueness are:
+        `nested` the path-length independent query (`ALL (x IN nodes(paths) WHERE size(filter(z IN nodes(paths) WHERE z = x)) = 1)`)
+        `expanded` for the combinatorial and path-length dependent form (`NOT (n0=n1 OR n0=n2 OR n0=n3 OR n1=n2 OR n1=n3 OR n2=n3)`).
         `labeled` to perform an intelligent version of `expanded` where only
-        nodes with the same label are checked for duplicity. To not enforce
-        node uniqueness, use `False`.
+        nodes with the same label are checked for duplicity. Specifying `True`,
+        which is the default, uses the `labeled` method.
     """
     # Convert metapath to metarels
     if isinstance(metarels, hetio.hetnet.MetaPath):
@@ -202,12 +201,12 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Fal
         using_query = ''
 
     # Unique node constraint (pevent paths with duplicate nodes)
-    if unique_nodes is True or unique_nodes == 'nested':
+    if unique_nodes == 'nested':
         unique_nodes_query = '\nAND ALL (x IN nodes(paths) WHERE size(filter(z IN nodes(paths) WHERE z = x)) = 1)'
     elif unique_nodes == 'expanded':
         pairs = itertools.combinations(range(len(metarels) + 1), 2)
-        unique_nodes_query = format_expanded_clause(pairs)
-    elif unique_nodes == 'labeled':
+        unique_nodes_query = '\nAND ' + format_expanded_clause(pairs)
+    elif unique_nodes == 'labeled' or unique_nodes is True:
         labels = [metarel[0] for metarel in metarels]
         labels.append(metarels[-1][1])
         label_to_nodes = dict()
@@ -216,7 +215,7 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Fal
         pairs = list()
         for nodes in label_to_nodes.values():
             pairs.extend(itertools.combinations(nodes, 2))
-        unique_nodes_query = format_expanded_clause(pairs)
+        unique_nodes_query = '\nAND ' + format_expanded_clause(pairs)
     else:
         assert unique_nodes is False
         unique_nodes_query = ''
@@ -250,8 +249,7 @@ def format_expanded_clause(pairs):
     """
     if not pairs:
         return ''
-    pair_str = ' OR '.join('n{} = n{}'.format(a, b) for a, b in pairs)
-    return '\nAND NOT ({})'.format(pair_str)
+    return ' AND '.join('n{} <> n{}'.format(a, b) for a, b in pairs)
 
 def permute_rel_type(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, max_tries_mult=20, seed=None):
     """
