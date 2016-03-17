@@ -153,7 +153,7 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Tru
     unique_nodes : bool or str
         whether to exclude paths with duplicate nodes. To not enforce node
         uniqueness, use `False`. Methods for enforcing node uniqueness are:
-        `nested` the path-length independent query (`ALL (x IN nodes(paths) WHERE size(filter(z IN nodes(paths) WHERE z = x)) = 1)`)
+        `nested` the path-length independent query (`ALL (x IN nodes(path) WHERE size(filter(z IN nodes(path) WHERE z = x)) = 1)`)
         `expanded` for the combinatorial and path-length dependent form (`NOT (n0=n1 OR n0=n2 OR n0=n3 OR n1=n2 OR n1=n3 OR n2=n3)`).
         `labeled` to perform an intelligent version of `expanded` where only
         nodes with the same label are checked for duplicity. Specifying `True`,
@@ -202,7 +202,7 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Tru
 
     # Unique node constraint (pevent paths with duplicate nodes)
     if unique_nodes == 'nested':
-        unique_nodes_query = '\nAND ALL (x IN nodes(paths) WHERE size(filter(z IN nodes(paths) WHERE z = x)) = 1)'
+        unique_nodes_query = '\nAND ALL (x IN nodes(path) WHERE size(filter(z IN nodes(path) WHERE z = x)) = 1)'
     elif unique_nodes == 'expanded':
         pairs = itertools.combinations(range(len(metarels) + 1), 2)
         unique_nodes_query = '\nAND ' + format_expanded_clause(pairs)
@@ -222,15 +222,15 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Tru
 
     # combine cypher fragments into a single query and add DWPC logic
     query = textwrap.dedent('''\
-        MATCH paths = {metapath_query}
+        MATCH path = {metapath_query}
         {using_query}WHERE n0.{property} = {{ source }}
         AND n{length}.{property} = {{ target }}{unique_nodes_query}
         WITH
         [
         {degree_query}
-        ] AS degrees, paths
+        ] AS degrees, path
         RETURN
-        count(paths) AS PC,
+        count(path) AS PC,
         sum(reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }})) AS DWPC
         ''').rstrip().format(
         metapath_query = metapath_query,
