@@ -25,6 +25,8 @@ def get_metanode_to_degree_df(graph):
     metanode_to_degree_df = dict()
     for metanode in graph.metagraph.get_nodes():
         degree_df = get_degrees_for_metanode(graph, metanode)
+        if degree_df.empty:
+            continue
         degree_df = pandas.pivot_table(degree_df, values='degree',
             index=['node_id', 'node_name'], columns='metaedge').reset_index()
         metanode_to_degree_df[metanode] = degree_df
