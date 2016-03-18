@@ -42,8 +42,9 @@ def degrees_to_excel(graph, path):
     writer = pandas.ExcelWriter(path)
     for metanode, degree_df in metanode_to_degree_df.items():
         degree_df.to_excel(writer, sheet_name=str(metanode), index=False)
-    for sheet in writer.sheets.values():
-        sheet.freeze_panes(1, 0)
+    if writer.engine == 'xlsxwriter':
+        for sheet in writer.sheets.values():
+            sheet.freeze_panes(1, 0)
     writer.close()
 
 def plot_degrees_for_metanode(graph, metanode, col_wrap=2, facet_height=4):
