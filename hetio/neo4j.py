@@ -137,7 +137,7 @@ def cypher_path(metarels):
         q += '{dir0}[:{rel_type}]{dir1}(n{i}{target_label})'.format(**kwargs)
     return q
 
-def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=True):
+def construct_dwpc_query(metarels, property='name', join_hint='midpoint', index_hint=False, unique_nodes=True):
     """
     Create a cypher query for computing the *DWPC* for a type of path.
 
@@ -147,9 +147,16 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Tru
         the metapath (path type) to create a query for
     property : str
         which property to use for soure and target node lookup
-    using : bool
-        whether to add `USING` clauses into the query, which direct neo4j to
-        start traversal from both ends of the path and join in the middle.
+    join_hint : 'midpoint', bool, or int
+        whether to add a join hint to tell neo4j to traverse form both ends of
+        the path and join at a specific index. `'midpoint'` or `True` specifies
+        joining at the middle node in the path (rounded down if an even number
+        of nodes). `False` specifies not to add a join hint. An int specifies
+        the node to join on.
+    index_hint : bool
+        whether to add index hints which specifies the properties of the source
+        and target nodes to use for lookup. Enabling both `index_hint` and
+        `join_hint` can cause the query to fail.
     unique_nodes : bool or str
         whether to exclude paths with duplicate nodes. To not enforce node
         uniqueness, use `False`. Methods for enforcing node uniqueness are:
@@ -185,20 +192,27 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Tru
             ).format(**kwargs))
     degree_query = ',\n'.join(degree_strs)
 
-    if using:
-        using_query = textwrap.dedent('''\
+    using_query = ''
+    # Specify index hint for node lookup
+    if index_hint:
+        using_query = '\n' + textwrap.dedent('''\
         USING INDEX n0:{source_label}({property})
         USING INDEX n{length}:{target_label}({property})
-        USING JOIN ON n{join_index}
-        ''').format(
+        ''').rstrip().format(
             property = property,
             source_label = metarels[0][0],
             target_label = metarels[-1][1],
-            length = len(metarels),
-            join_index = len(metarels) // 2
+            length = len(metarels)
         )
-    else:
-        using_query = ''
+
+    # Specify join hint with node to join on
+    if join_hint is not False:
+        if join_hint is True or join_hint == 'midpoint':
+            join_hint = len(metarels) // 2
+        join_hint = int(join_hint)
+        assert join_hint >= 0
+        assert join_hint <= len(metarels)
+        using_query += "\nUSING JOIN ON n{}".format(join_hint)
 
     # Unique node constraint (pevent paths with duplicate nodes)
     if unique_nodes == 'nested':
@@ -222,8 +236,8 @@ def construct_dwpc_query(metarels, property='name', using=True, unique_nodes=Tru
 
     # combine cypher fragments into a single query and add DWPC logic
     query = textwrap.dedent('''\
-        MATCH path = {metapath_query}
-        {using_query}WHERE n0.{property} = {{ source }}
+        MATCH path = {metapath_query}{using_query}
+        WHERE n0.{property} = {{ source }}
         AND n{length}.{property} = {{ target }}{unique_nodes_query}
         WITH
         [
