@@ -219,7 +219,7 @@ def construct_dwpc_query(metarels, property='name', join_hint='midpoint', index_
         unique_nodes_query = '\nAND ALL (x IN nodes(path) WHERE size(filter(z IN nodes(path) WHERE z = x)) = 1)'
     elif unique_nodes == 'expanded':
         pairs = itertools.combinations(range(len(metarels) + 1), 2)
-        unique_nodes_query = '\nAND ' + format_expanded_clause(pairs)
+        unique_nodes_query = format_expanded_clause(pairs)
     elif unique_nodes == 'labeled' or unique_nodes is True:
         labels = [metarel[0] for metarel in metarels]
         labels.append(metarels[-1][1])
@@ -229,7 +229,7 @@ def construct_dwpc_query(metarels, property='name', join_hint='midpoint', index_
         pairs = list()
         for nodes in label_to_nodes.values():
             pairs.extend(itertools.combinations(nodes, 2))
-        unique_nodes_query = '\nAND ' + format_expanded_clause(pairs)
+        unique_nodes_query = format_expanded_clause(pairs)
     else:
         assert unique_nodes is False
         unique_nodes_query = ''
@@ -263,7 +263,7 @@ def format_expanded_clause(pairs):
     """
     if not pairs:
         return ''
-    return ' AND '.join('n{} <> n{}'.format(a, b) for a, b in pairs)
+    return '\nAND ' + ' AND '.join('n{} <> n{}'.format(a, b) for a, b in pairs)
 
 def permute_rel_type(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, max_tries_mult=20, seed=None):
     """
