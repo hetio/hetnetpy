@@ -11,6 +11,7 @@ direction_to_inverse = {'forward': 'backward',
                          'both': 'both'}
 
 direction_to_abbrev = {'forward': '>', 'backward': '<', 'both': '-'}
+direction_to_unicode_abbrev = {'forward': '→', 'backward': '←', 'both': '–'}
 
 class ElemMask(object):
 
@@ -98,6 +99,11 @@ class BaseEdge(ElemMask):
         source, target, kind, direction = self.get_id()
         dir_abbrev = direction_to_abbrev[direction]
         return '{0} {3} {2} {3} {1}'.format(source, target, kind, dir_abbrev)
+
+    def get_unicode_str(self):
+        source, target, kind, direction = self.get_id()
+        dir_abbrev = direction_to_unicode_abbrev[direction]
+        return '{0}{3}{2}{3}{1}'.format(source, target, kind, dir_abbrev)
 
 class BasePath(IterMask):
 

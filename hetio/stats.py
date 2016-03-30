@@ -103,3 +103,22 @@ def get_metaedge_df(graph):
         rows.append(series)
     metaedge_df = pandas.DataFrame(rows).sort_values('metaedge')
     return metaedge_df
+
+def get_metaedge_style_df(metagraph):
+    """
+    Get metaedge representations in various styles.
+    """
+    rows = list()
+    for metaedge in metagraph.get_edges(exclude_inverts=False):
+        series = pandas.Series()
+        series['metaedge'] = str(metaedge)
+        series['unicode_metaedge'] = metaedge.get_unicode_str()
+        series['standard_metaedge'] = str(metaedge.inverse if metaedge.inverted else metaedge)
+        series['abbreviation'] = metaedge.get_abbrev()
+        series['standard_abbreviation'] = metaedge.get_standard_abbrev()
+        series['source'] = str(metaedge.source)
+        series['target'] = str(metaedge.target)
+        series['inverted'] = int(metaedge.inverted)
+        rows.append(series)
+    metaedge_style_df = pandas.DataFrame(rows).sort_values('metaedge')
+    return metaedge_style_df
