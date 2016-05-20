@@ -80,7 +80,7 @@ class BaseNode(ElemMask):
         return self.get_id() < other.get_id()
 
     def __eq__(self, other):
-        return self.get_id() == other.get_id()
+        return (type(other) is type(self)) and (self.get_id() == other.get_id())
 
 class BaseEdge(ElemMask):
 
@@ -153,7 +153,7 @@ class BasePath(IterMask):
         return hash(self.edges)
 
     def __eq__(self, other):
-        return self.edges == other.edges
+        return (type(other) is type(self)) and (self.edges == other.edges)
 
 class MetaGraph(BaseGraph):
 
