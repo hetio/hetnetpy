@@ -101,6 +101,9 @@ class BaseEdge(ElemMask):
         return '{0} {3} {2} {3} {1}'.format(source, target, kind, dir_abbrev)
 
     def get_unicode_str(self):
+        """
+        Returns a pretty str representation of an edge or metaedge.
+        """
         source, target, kind, direction = self.get_id()
         dir_abbrev = direction_to_unicode_abbrev[direction]
         return '{0}{3}{2}{3}{1}'.format(source, target, kind, dir_abbrev)
@@ -139,6 +142,21 @@ class BasePath(IterMask):
             if self[:len_other] == other:
                 return other
         return None
+
+    def get_unicode_str(self):
+        """
+        Returns a pretty, unicode, human-readable, and verbose str for a path
+        or metapath.
+        """
+        s = ''
+        for edge in self:
+            *temp, kind, direction = edge.get_id()
+            source = edge.source.name if hasattr(edge, 'name') else edge.source.identifier
+            dir_abbrev = direction_to_unicode_abbrev[direction]
+            s += '{0}{2}{1}{2}'.format(source, kind, dir_abbrev)
+        target = edge.target.name if hasattr(edge, 'name') else edge.target.identifier
+        s += target
+        return s
 
     def __iter__(self):
         return iter(self.edges)
@@ -343,7 +361,6 @@ class MetaPath(BasePath):
         s = ''.join(edge.source.abbrev + edge.kind_abbrev for edge in self)
         s += self.target().abbrev
         return s
-
 
 class Graph(BaseGraph):
 
