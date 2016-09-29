@@ -17,7 +17,13 @@
 
 [![PyPI](https://img.shields.io/pypi/v/hetio.svg)](https://pypi.python.org/pypi/hetio)
 
-Please use Python 3.4 or higher. To install the current version, run
+Please use Python 3.4 or higher. To install the current PyPI version (recommended), run:
+
+```sh
+pip install hetio
+```
+
+For the latest GitHub version, run:
 
 ```sh
 pip install git+https://github.com/dhimmel/hetio.git#egg=hetio
