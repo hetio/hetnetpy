@@ -1,13 +1,11 @@
 import setuptools
-import pypandoc
 
-# Use README.md to generate the long_description rather than write rst.
-# See https://github.com/pypa/pypi-legacy/issues/148#issuecomment-227757822
-long_description = pypandoc.convert('README.md', 'rst')
+with open('README.rst') as read_file:
+    long_description = read_file.read()
 
 setuptools.setup(
     name = 'hetio',
-    version = '0.2.0',
+    version = '0.2.1',
     author = 'Daniel Himmelstein',
     author_email = 'daniel.himmelstein@gmail.com',
     url = 'https://github.com/dhimmel/hetio',
