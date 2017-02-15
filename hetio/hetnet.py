@@ -38,6 +38,9 @@ class BaseGraph(object):
         self.node_dict = dict()
         self.edge_dict = dict()
         self.path_dict = dict()
+        self.n_nodes = 0  # Number of nodes
+        self.n_edges = 0  # Number of edges excluding inverts
+        self.n_inverts = 0  # Number of inverted edges
 
     def get_node(self, kind):
         return self.node_dict[kind]
@@ -216,6 +219,7 @@ class MetaGraph(BaseGraph):
     def add_node(self, kind):
         metanode = MetaNode(kind)
         self.node_dict[kind] = metanode
+        self.n_nodes += 1
 
     def add_edge(self, edge_id):
         """source_kind, target_kind, kind, direction"""
@@ -228,6 +232,7 @@ class MetaGraph(BaseGraph):
         self.edge_dict[edge_id] = metaedge
         source.edges.add(metaedge)
         metaedge.inverted = False
+        self.n_edges += 1
 
         if source == target and direction == 'both':
             metaedge.inverse = metaedge
@@ -242,6 +247,7 @@ class MetaGraph(BaseGraph):
             metaedge.inverse = inverse
             inverse.inverse = metaedge
             inverse.inverted = True
+            self.n_inverts += 1
 
     def extract_metapaths(self, source_kind, target_kind, max_length):
         source = self.node_dict[source_kind]
@@ -379,6 +385,7 @@ class Graph(BaseGraph):
         node_id = node.get_id()
         assert node_id not in self
         self.node_dict[node_id] = node
+        self.n_nodes += 1
         return node
 
     def add_edge(self, source_id, target_id, kind, direction, data=dict()):
@@ -398,6 +405,8 @@ class Graph(BaseGraph):
 
         edge.inverse = inverse
         inverse.inverse = edge
+        self.n_edges += 1
+        self.n_inverts += 1
 
         return edge, inverse
 

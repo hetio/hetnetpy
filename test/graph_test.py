@@ -24,6 +24,10 @@ def test_creation():
         assert metanode.get_id() == metanode_id
         assert hash(metanode) == hash(metanode_id)
 
+    assert metagraph.n_nodes == len(metanode_ids)
+    assert metagraph.n_edges == len(metaedge_tuples)
+    assert metagraph.n_inverts == 3
+
     graph = hetio.hetnet.Graph(metagraph)
     ms = graph.add_node('disease', 'DOID:2377', 'multiple sclerosis')
     assert ms.metanode.identifier == 'disease'
@@ -33,3 +37,7 @@ def test_creation():
     with pytest.raises(KeyError):
         # misordered args
         graph.add_node('DOID:2377', 'multiple sclerosis', 'disease')
+
+    assert graph.n_nodes == 1
+    assert graph.n_edges == 0
+    assert graph.n_inverts == 0
