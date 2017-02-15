@@ -2,6 +2,7 @@
 
 [![Latest DOI](https://zenodo.org/badge/14475/dhimmel/hetio.svg)](https://zenodo.org/badge/latestdoi/14475/dhimmel/hetio)
 [![GitHub issues](https://img.shields.io/github/issues/dhimmel/hetio.svg)](https://github.com/dhimmel/hetio/issues)
+[![Build Status](https://travis-ci.org/dhimmel/hetio.svg?branch=master)](https://travis-ci.org/dhimmel/hetio)
 
 ## Background
 
