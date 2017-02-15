@@ -1,12 +1,12 @@
-import pytest
-
 import hetio.abbreviation
+
 
 def test__get_duplicates():
     get_duplicates = hetio.abbreviation.get_duplicates
-    assert not get_duplicates(range(5))
-    assert not get_duplicates('abcd')
+    assert get_duplicates(range(5)) == set()
+    assert get_duplicates('abcd') == set()
     assert get_duplicates('abbccd') == {'b', 'c'}
+
 
 def test__find_abbrevs():
     """For a list of strings (kinds), find the shortest unique abbreviation."""
