@@ -383,7 +383,7 @@ class Graph(BaseGraph):
         metanode = self.metagraph.node_dict[kind]
         node = Node(metanode, identifier, name, data)
         node_id = node.get_id()
-        assert node_id not in self
+        assert node_id not in self, 'node already exists'
         self.node_dict[node_id] = node
         self.n_nodes += 1
         return node
@@ -392,23 +392,40 @@ class Graph(BaseGraph):
         """source_id and target_id are (metanode, node) tuples"""
         source = self.node_dict[source_id]
         target = self.node_dict[target_id]
-        metaedge_id = source.metanode.get_id(), target.metanode.get_id(), kind, direction
+        metaedge_id = (
+            source.metanode.get_id(),
+            target.metanode.get_id(),
+            kind,
+            direction,
+        )
         metaedge = self.metagraph.edge_dict[metaedge_id]
+
+        # Check that edges do not already exist
+        edge_id = source_id, target_id, kind, metaedge.direction
+        inverse_id = target_id, source_id, kind, metaedge.inverse.direction
+        assert edge_id not in self.edge_dict, 'edge already exists'
+        assert inverse_id not in self.edge_dict, 'inverse edge already exists'
+
+        # Create edge
         edge = Edge(source, target, metaedge, data)
         self.edge_dict[edge.get_id()] = edge
         edge.inverted = metaedge.inverted
-
-        inverse = Edge(target, source, metaedge.inverse, data)
-        inverse_id = inverse.get_id()
-        self.edge_dict[inverse_id] = inverse
-        inverse.inverted = not edge.inverted
-
-        edge.inverse = inverse
-        inverse.inverse = edge
         self.n_edges += 1
-        self.n_inverts += 1
 
-        return edge, inverse
+        # Create inverse edge if not identical
+        if edge_id == inverse_id:
+            # Self loop of a bidirectional edge
+            edge.inverse = edge
+        else:
+            inverse = Edge(target, source, metaedge.inverse, data)
+            inverse_id = inverse.get_id()
+            self.edge_dict[inverse_id] = inverse
+            inverse.inverted = not edge.inverted
+            edge.inverse = inverse
+            inverse.inverse = edge
+            self.n_inverts += 1
+
+        return edge, edge.inverse
 
     def unmask(self):
         """Unmask all nodes and edges contained within the graph"""

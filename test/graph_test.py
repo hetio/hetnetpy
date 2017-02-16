@@ -46,8 +46,12 @@ def test_creation():
     SPI1 = graph.add_node('gene', 6688, name='SPI1',
                           data={'description': 'Spi-1 proto-oncogene'})
 
+    # Attempt to add a duplicate node
+    with pytest.raises(AssertionError):
+        graph.add_node('gene', 3575, 'IL7R')
+
+    # Misordered node creation arguments
     with pytest.raises(KeyError):
-        # misordered args
         graph.add_node('DOID:2377', 'multiple sclerosis', 'disease')
 
     graph.add_edge(IL7R.get_id(), SPI1.get_id(), 'transcribes', 'forward')
@@ -55,8 +59,20 @@ def test_creation():
     graph.add_edge(ms.get_id(), IL7R.get_id(), 'associates', 'both')
 
     # Enable in future to check that creating a duplicate edge throws an error
-    # graph.add_edge(SPI1.get_id(), IL7R.get_id(), 'transcribes', 'backward')
+    with pytest.raises(AssertionError) as excinfo:
+        graph.add_edge(IL7R.get_id(), SPI1.get_id(), 'transcribes', 'forward')
+    excinfo.match(r'edge already exists')
+    with pytest.raises(AssertionError):
+        graph.add_edge(SPI1.get_id(), IL7R.get_id(), 'transcribes', 'backward')
 
+    # Add bidirectional self loop
+    graph.add_edge(IL7R.get_id(), IL7R.get_id(), 'interacts', 'both')
+
+    # Test node and edge counts
     assert graph.n_nodes == 3
-    assert graph.n_edges == 3
+    assert graph.n_edges == 4
     assert graph.n_inverts == 3
+    assert graph.n_nodes == len(list(graph.get_nodes()))
+    assert graph.n_edges == len(list(graph.get_edges(exclude_inverts=True)))
+    assert (graph.n_edges + graph.n_inverts == 
+        len(list(graph.get_edges(exclude_inverts=False))))
