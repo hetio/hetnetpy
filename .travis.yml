@@ -7,14 +7,17 @@ addons:
   apt_packages:
     - pandoc
 install:
-  - pip install .
+  - python setup.py install
+  - python setup.py sdist bdist_wheel
 script: py.test
 deploy:
   - provider: releases
     api_key:
       secure: TTVYP35Oj5AS7zxwt5AgsUwmDcnhnty9XN8WztqaZqOyKmwEqbAE5WWQ03NW9oeGUMFx47RCehYhC0bl5AUAFq047dvphqD3RQU13j1cQ+069ACjJ0/b7xbvR5g8oJibJqc9C+XJX4VSuwufmeQkVAIAJYCXJ8YuqqWNokCujzXWdtwFV674RdRxx4VDsaJXOxeYIT5X/szyaTXRNpAoFcK0blKajRQR5mYVKBNXBIaEhtgPXBBhAQ0R83UmN8NbkJmPNGCTJyfbv32XNYDkODmXkcb8KNw2Nwcmgb2/byv1cxcIlg3nzx0YngwC7v5h5C4Eh9u67XxVxGMbZi1x4B2u7MNYnkN3OrzDmpOE/cd6oRlf6M1e9MzXUDwECktk7jP4CmFmWWcOHrEDFfd1bw/IzwZR8dnxO8S/UUEyxaqfckSLRBHpd6/GMes1iFALbfKSB3UDBqV/3+uFaT5zP+0Bfsnxu5hbEiXhUE1zOy0DYcUOHCoUCWtmAP/f1ZeLVkUnNNwiKffISf91zsIgFKJDc+JCgKDUuExlcp8JiMU2iIfUUuuMXvprs6durEJP9MTjaTnPozG3zN5QuYZ+8iJa7DJxZSswmoh1OnEBaN8eBq7H39PLt6xBv0nZzYMJ/Rwo2xHLL++SeBtj/0mwdm1s/t9ATeNP2nDq/kpjMjk=
     file_glob: true
-    file: dist/hetio-*.tar.gz
+    file:
+      - dist/hetio-*.tar.gz
+      - dist/hetio-*.whl
     on:
       python: '3.6'
       repo: dhimmel/hetio
@@ -27,5 +30,5 @@ deploy:
       python: '3.6'
       repo: dhimmel/hetio
       tags: true
-      distributions: sdist
+      distributions: sdist bdist_wheel
       branch: deploy
