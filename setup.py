@@ -1,7 +1,19 @@
+import subprocess
+
 import setuptools
 
-with open('README.rst') as read_file:
-    long_description = read_file.read()
+
+# Try to create an rst long_description from README.md
+try:
+    args = 'pandoc', '--to', 'rst', 'README.md'
+    long_description = subprocess.check_output(args)
+    long_description = long_description.decode()
+except Exception as error:
+    print('README.md conversion to reStructuredText failed. Error:')
+    print(error)
+    print('Setting long_description to None.')
+    long_description = None
+
 
 setuptools.setup(
     name = 'hetio',

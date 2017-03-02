@@ -3,6 +3,9 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+addons:
+  apt_packages:
+    - pandoc
 install:
   - pip install .
 script: py.test
