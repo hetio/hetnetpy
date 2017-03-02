@@ -2,20 +2,18 @@ import functools
 import itertools
 import textwrap
 import random
-import re
-
 from operator import or_
 from functools import reduce
 
 import py2neo
 import py2neo.packages.httpstream
 import pandas
-
 from tqdm import tqdm
 
-PY2NEO_VER = int(py2neo.__version__[0])
-
 import hetio.hetnet
+
+# Get py2neo version
+PY2NEO_VER = int(py2neo.__version__[0])
 
 # Avoid SocketError
 py2neo.packages.httpstream.http.socket_timeout = 1e8
@@ -94,14 +92,13 @@ class Creator(list):
         if not self:
             return
 
-    # http://stackoverflow.com/questions/37676731/typeerror-create-takes-2-positional-arguments-but-4-were-given
+        # http://stackoverflow.com/a/37697792/4651668
         if PY2NEO_VER >= 3:
             self.db_graph.create(reduce(or_, self))
         else:
             self.db_graph.create(*self)
 
         self.n_created += len(self)
-        #print('{} nodes created\r'.format(self.n_created), end='')
         del self[:]
 
 @functools.lru_cache()
