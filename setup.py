@@ -13,7 +13,7 @@ setuptools.setup(
     long_description=long_description,
     license = 'CC0 1.0',
     packages = ['hetio'],
-    classifiers=[
+    classifiers = [
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
         'Topic :: Scientific/Engineering :: Information Analysis',
@@ -22,7 +22,10 @@ setuptools.setup(
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
 
-    install_requires=['tqdm']
+    install_requires = [
+        'tqdm'
+    ]
 )
