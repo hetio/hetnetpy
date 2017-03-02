@@ -18,7 +18,7 @@ PY2NEO_VER = int(py2neo.__version__[0])
 # Avoid SocketError
 py2neo.packages.httpstream.http.socket_timeout = 1e8
 
-def export_neo4j(graph, uri, node_queue=100, edge_queue=100, show_progress=False):
+def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
     """Export hetnet to neo4j"""
 
     if isinstance(uri, py2neo.Graph):
