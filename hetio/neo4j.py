@@ -4,18 +4,29 @@ import textwrap
 import random
 import re
 
+from operator import or_
+from functools import reduce
+
 import py2neo
 import py2neo.packages.httpstream
 import pandas
+
+from tqdm import tqdm
+
+PY2NEO_VER = int(py2neo.__version__[0])
 
 import hetio.hetnet
 
 # Avoid SocketError
 py2neo.packages.httpstream.http.socket_timeout = 1e8
 
-def export_neo4j(graph, uri, node_queue=100, edge_queue=100):
+def export_neo4j(graph, uri, node_queue=100, edge_queue=100, show_progress=False):
     """Export hetnet to neo4j"""
-    db_graph = py2neo.Graph(uri)
+
+    if isinstance(uri, py2neo.Graph):
+        db_graph = uri
+    else:
+        db_graph = py2neo.Graph(uri)
 
     # Delete all existing nodes
     db_graph.delete_all()
@@ -28,18 +39,30 @@ def export_neo4j(graph, uri, node_queue=100, edge_queue=100):
         if 'name' not in db_graph.schema.get_indexes(label):
             db_graph.schema.create_index(label, 'name')
 
+
     # Create nodes
     creator = Creator(db_graph, node_queue)
-    for node in graph.get_nodes():
+
+    queue = graph.get_nodes()
+    if show_progress:
+        queue = tqdm(queue, total=graph.n_nodes, desc="Importing nodes")
+
+    for node in queue:
         label = as_label(node.metanode)
         data = sanitize_data(node.data)
         neo_node = py2neo.Node(label, identifier=node.identifier, name=node.name, **data)
         creator.append(neo_node)
     creator.create()
 
+
     # Create edges
     creator = Creator(db_graph, edge_queue)
-    for edge in graph.get_edges(exclude_inverts=True):
+
+    queue = graph.get_edges(exclude_inverts=True)
+    if show_progress:
+        queue = tqdm(queue, total=graph.n_edges, desc = "Importing edges")
+
+    for edge in queue:
         metaedge = edge.metaedge
         rel_type = as_type(metaedge)
         source_label = as_label(metaedge.source)
@@ -52,7 +75,6 @@ def export_neo4j(graph, uri, node_queue=100, edge_queue=100):
     creator.create()
 
     return db_graph
-
 
 class Creator(list):
     """Batch creation of py2neo objects"""
@@ -71,7 +93,13 @@ class Creator(list):
     def create(self):
         if not self:
             return
-        self.db_graph.create(*self)
+
+    # http://stackoverflow.com/questions/37676731/typeerror-create-takes-2-positional-arguments-but-4-were-given
+        if PY2NEO_VER >= 3:
+            self.db_graph.create(reduce(or_, self))
+        else:
+            self.db_graph.create(*self)
+
         self.n_created += len(self)
         #print('{} nodes created\r'.format(self.n_created), end='')
         del self[:]
