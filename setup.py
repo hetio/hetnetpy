@@ -17,7 +17,7 @@ except Exception as error:
 
 setuptools.setup(
     name = 'hetio',
-    version = '0.2.2',
+    version = '0.2.3',
     author = 'Daniel Himmelstein',
     author_email = 'daniel.himmelstein@gmail.com',
     url = 'https://github.com/dhimmel/hetio',
