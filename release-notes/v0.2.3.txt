@@ -1,4 +1,4 @@
-# Release notes for v0.2.3
+dhimmel/hetio v0.2.3: fix PyPI description formatting
 
 This version upgrades the Travis CI environment to fix a Pandoc bug
 that resulted in a malformated long_description in `setup.py`. As

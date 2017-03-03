@@ -42,3 +42,27 @@ A Graph object stores a heterogeneous network and relies on the following classe
 2. MetaGraph
 3. Edge
 4. MetaEdge
+
+## Release instructions
+
+This section is only relevant for project maintainers.
+Travis CI deployments are used to upload releases to [PyPI](https://pypi.org/project/hetio) and [GitHub releases](https://github.com/dhimmel/hetio/releases).
+To create a new release, do the following:
+
+1. Bump the version in [`setup.py`](setup.py).
+
+2. Add a release notes file in [`release-notes`](release-notes).
+  Format as a commit message that will be used as the GitHub release description.
+
+3. Run the following commands:
+    
+  ```sh
+  TAG=v`python setup.py --version`
+  git add setup.py release-notes/$TAG.*
+  git commit --message "Upgrade to $TAG"
+  git push
+  git tag --annotate $TAG --file release-notes/$TAG.*
+  git push --tags
+  ```
+
+4. Recommended: Edit the GitHub release to improve formating and add a Zenodo badge.
