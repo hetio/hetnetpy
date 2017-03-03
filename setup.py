@@ -5,7 +5,7 @@ import setuptools
 
 # Try to create an rst long_description from README.md
 try:
-    args = 'pandoc', '--to', 'rst', 'README.md'
+    args = 'pandoc', '--from', 'markdown_github', '--to', 'rst', 'README.md'
     long_description = subprocess.check_output(args)
     long_description = long_description.decode()
 except Exception as error:
