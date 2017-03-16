@@ -1,17 +1,26 @@
-# daniel.himmelstein@gmail.com
 import abc
-import itertools
-import collections
 import re
 
 import hetio.abbreviation
 
-direction_to_inverse = {'forward': 'backward',
-                         'backward': 'forward',
-                         'both': 'both'}
+direction_to_inverse = {
+    'forward': 'backward',
+    'backward': 'forward',
+    'both': 'both',
+}
 
-direction_to_abbrev = {'forward': '>', 'backward': '<', 'both': '-'}
-direction_to_unicode_abbrev = {'forward': '→', 'backward': '←', 'both': '–'}
+direction_to_abbrev = {
+    'forward': '>',
+    'backward': '<',
+    'both': '-',
+}
+
+direction_to_unicode_abbrev = {
+    'forward': '→',
+    'backward': '←',
+    'both': '–',
+}
+
 
 class ElemMask(object):
 
@@ -27,10 +36,12 @@ class ElemMask(object):
     def unmask(self):
         self.masked = False
 
+
 class IterMask(object):
 
     def is_masked(self):
         return any(elem.is_masked() for elem in self.mask_elem_iter())
+
 
 class BaseGraph(object):
 
@@ -63,6 +74,7 @@ class BaseGraph(object):
     def __contains__(self, item):
         return item in self.node_dict
 
+
 class BaseNode(ElemMask):
 
     def __init__(self, identifier):
@@ -83,7 +95,8 @@ class BaseNode(ElemMask):
         return self.get_id() < other.get_id()
 
     def __eq__(self, other):
-        return (type(other) is type(self)) and (self.get_id() == other.get_id())
+        return type(other) is type(self) and self.get_id() == other.get_id()
+
 
 class BaseEdge(ElemMask):
 
@@ -110,6 +123,7 @@ class BaseEdge(ElemMask):
         source, target, kind, direction = self.get_id()
         dir_abbrev = direction_to_unicode_abbrev[direction]
         return '{0}{3}{2}{3}{1}'.format(source, target, kind, dir_abbrev)
+
 
 class BasePath(IterMask):
 
@@ -175,6 +189,7 @@ class BasePath(IterMask):
 
     def __eq__(self, other):
         return (type(other) is type(self)) and (self.edges == other.edges)
+
 
 class MetaGraph(BaseGraph):
 
@@ -308,6 +323,7 @@ class MetaGraph(BaseGraph):
             metaedges.append(self.get_edge(metaedge_id))
         return self.get_metapath(tuple(metaedges))
 
+
 class MetaNode(BaseNode):
 
     def __init__(self, identifier):
@@ -352,7 +368,7 @@ class MetaEdge(BaseEdge):
 
     def filesystem_str(self):
         s = '{0}{2}{1}-{3}'.format(self.source.abbrev, self.target.abbrev,
-                                      self.kind_abbrev, self.direction)
+                                   self.kind_abbrev, self.direction)
         return s.translate(None, '><')
 
 
@@ -367,6 +383,7 @@ class MetaPath(BasePath):
         s = ''.join(edge.source.abbrev + edge.kind_abbrev for edge in self)
         s += self.target().abbrev
         return s
+
 
 class Graph(BaseGraph):
 
@@ -481,6 +498,7 @@ class Node(BaseNode):
     def __str__(self):
         return '{}::{}'.format(*self.get_id())
 
+
 class Edge(BaseEdge):
 
     def __init__(self, source, target, metaedge, data):
@@ -494,6 +512,7 @@ class Edge(BaseEdge):
 
     def get_id(self):
         return self.source.get_id(), self.target.get_id(), self.metaedge.kind, self.metaedge.direction
+
 
 class Path(BasePath):
 
