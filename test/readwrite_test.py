@@ -5,6 +5,11 @@ import hetio.readwrite
 
 directory = os.path.dirname(os.path.abspath(__file__))
 
+formats = [
+    'json',
+    'pkl',
+]
+
 extensions = [
     '',
     '.gz',

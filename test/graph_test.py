@@ -1,9 +1,18 @@
+import os
+
 import pytest
 
 import hetio.hetnet
+import hetio.readwrite
+
+from .readwrite_test import formats, extensions
 
 
-def test_creation():
+def test_creation(tmpdir):
+    # Convert py._path.local.LocalPath to a string
+    tmpdir = str(tmpdir)
+
+    # Construct metagraph
     metaedge_tuples = [
         ('compound', 'disease', 'treats', 'both'),
         ('disease', 'gene', 'associates', 'both'),
@@ -76,3 +85,16 @@ def test_creation():
     assert graph.n_edges == len(list(graph.get_edges(exclude_inverts=True)))
     assert (graph.n_edges + graph.n_inverts == 
         len(list(graph.get_edges(exclude_inverts=False))))
+
+    # Test writing then reading graph
+    for extension in extensions:
+        for format_ in formats:
+            ext = '.{}{}'.format(format_, extension)
+            # Write metagraph
+            path = os.path.join(tmpdir, 'metagraph' + ext)
+            hetio.readwrite.write_metagraph(metagraph, path)
+            hetio.readwrite.read_metagraph(path)
+            # Write graph
+            path = os.path.join(tmpdir, 'graph' + ext)
+            hetio.readwrite.write_graph(graph, path)
+            hetio.readwrite.read_graph(path)

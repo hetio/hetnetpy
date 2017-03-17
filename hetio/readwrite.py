@@ -34,30 +34,33 @@ def write_metagraph(metagraph, path, formatting=None):
     writable = writable_from_metagraph(metagraph)
     dump(writable, path, formatting)
 
-def open_read_file(path):
+def open_read_file(path, text_mode=True):
     """
-    Return a read-text mode file object from the path.
+    Return a file object from the path.
     Automatically detects and supports urls and gzip/bzip2 compression.
+
+    text_mode : bool
+        whether to return a text mode or byte mode file
     """
     opener = get_opener(path)
-
+    mode = 'rt' if text_mode else 'rb'
     # Read from URL
     if re.match('^(http|ftp)s?://', path):
 
         with urlopen(path) as response:
             content = response.read()
 
-        if opener == io.open:
+        if text_mode and opener == io.open:
             encoding = response.headers.get_content_charset()
             text = content.decode(encoding)
             return io.StringIO(text)
 
         else:
             b = io.BytesIO(content)
-            return opener(b, 'rt')
+            return opener(b, mode)
 
     # Read from file
-    return opener(path, 'rt')
+    return opener(path, mode)
 
 def open_write_file(path, mode='wt'):
     """
@@ -69,21 +72,12 @@ def open_write_file(path, mode='wt'):
 
 def load(read_file, formatting):
     """
-    Return a writable from read_file. Support json, yaml, and pkl formats.
+    Return a writable from read_file. Support json, and pkl formats.
     """
 
     # JSON formatted
     if formatting == 'json':
         return json.load(read_file)
-
-    # YAML formatted
-    if formatting == 'yaml':
-        import yaml
-        try:
-            loader = yaml.CSafeLoader
-        except AttributeError:
-            loader = yaml.SafeLoader
-        return yaml.load(read_file, Loader=loader)
 
     # pickle formatted
     if formatting == 'pkl':
@@ -96,13 +90,17 @@ def extract_writable(path, formatting=None):
     """Extract a writable from the file specified by path"""
     if formatting is None:
         formatting = detect_formatting(path)
-    read_file = open_read_file(path)
+    format_to_text_mode = {
+        'json': True,
+        'pkl': False,
+    }
+    read_file = open_read_file(path, text_mode=format_to_text_mode[formatting])
     writable = load(read_file, formatting)
     read_file.close()
     return writable
 
 def dump(writable, path, formatting=None):
-    """Dump a writable to a path. Support json, yaml, and pkl formats."""
+    """Dump a writable to a path. Support json, and pkl formats."""
     if formatting is None:
         formatting = detect_formatting(path)
 
@@ -110,18 +108,6 @@ def dump(writable, path, formatting=None):
     if formatting == 'json':
         write_file = open_write_file(path)
         json.dump(writable, write_file, indent=2, cls=Encoder)
-        write_file.close()
-
-    # YAML formatted
-    elif formatting == 'yaml':
-        import yaml
-        try:
-            dumper = yaml.CSafeDumper
-        except AttributeError:
-            dumper = yaml.SafeDumper
-        writable = dict(writable)
-        write_file = open_write_file(path)
-        yaml.dump(writable, write_file, Dumper=dumper)
         write_file.close()
 
     # pickle formatted
@@ -138,8 +124,6 @@ def detect_formatting(path):
     """Detect the formatting using filename extension"""
     if '.json' in path:
         return 'json'
-    if '.yaml' in path:
-        return 'yaml'
     if '.pkl' in path:
         return 'pkl'
     raise ValueError('Cannot detect the format of {}'.format(path))
