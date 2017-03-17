@@ -8,6 +8,7 @@ import operator
 import pickle
 import random
 import re
+from urllib.request import urlopen
 
 from hetio.hetnet import Graph, MetaGraph
 
@@ -43,13 +44,16 @@ def open_read_file(path):
     # Read from URL
     if re.match('^(http|ftp)s?://', path):
 
-        import requests
-        response = requests.get(path)
+        with urlopen(path) as response:
+            content = response.read()
 
         if opener == io.open:
-            return io.StringIO(response.text)
+            encoding = response.headers.get_content_charset()
+            text = content.decode(encoding)
+            return io.StringIO(text)
+
         else:
-            b = io.BytesIO(response.content)
+            b = io.BytesIO(content)
             return opener(b, 'rt')
 
     # Read from file
@@ -143,6 +147,7 @@ def detect_formatting(path):
 encoding_to_module = {
     'gzip': 'gzip',
     'bzip2': 'bz2',
+    'xz': 'lzma',
 }
 
 def get_opener(filename):
