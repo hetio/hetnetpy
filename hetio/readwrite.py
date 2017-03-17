@@ -12,11 +12,13 @@ from urllib.request import urlopen
 
 from hetio.hetnet import Graph, MetaGraph
 
+
 def read_graph(path, formatting=None):
     """Read a graph from a path"""
     writable = extract_writable(path, formatting)
     graph = graph_from_writable(writable)
     return graph
+
 
 def read_metagraph(path, formatting=None):
     """Read a metagraph from a path"""
@@ -24,15 +26,18 @@ def read_metagraph(path, formatting=None):
     metagraph = metagraph_from_writable(writable)
     return metagraph
 
+
 def write_graph(graph, path, formatting=None, masked=True):
     """Write a graph to the specified path."""
     writable = writable_from_graph(graph, masked=masked)
     dump(writable, path, formatting)
 
+
 def write_metagraph(metagraph, path, formatting=None):
     """Write a graph to the specified path."""
     writable = writable_from_metagraph(metagraph)
     dump(writable, path, formatting)
+
 
 def open_read_file(path, text_mode=True):
     """
@@ -62,6 +67,7 @@ def open_read_file(path, text_mode=True):
     # Read from file
     return opener(path, mode)
 
+
 def open_write_file(path, mode='wt'):
     """
     Return a write-text mode file object from the path.
@@ -69,6 +75,7 @@ def open_write_file(path, mode='wt'):
     """
     opener = get_opener(path)
     return opener(path, mode)
+
 
 def load(read_file, formatting):
     """
@@ -86,6 +93,7 @@ def load(read_file, formatting):
     # Unsupported format
     raise ValueError('Unsupported format: {}'.format(formatting))
 
+
 def extract_writable(path, formatting=None):
     """Extract a writable from the file specified by path"""
     if formatting is None:
@@ -98,6 +106,7 @@ def extract_writable(path, formatting=None):
     writable = load(read_file, formatting)
     read_file.close()
     return writable
+
 
 def dump(writable, path, formatting=None):
     """Dump a writable to a path. Support json, and pkl formats."""
@@ -120,6 +129,7 @@ def dump(writable, path, formatting=None):
     else:
         raise ValueError('Unsupported format: {}'.format(formatting))
 
+
 def detect_formatting(path):
     """Detect the formatting using filename extension"""
     if '.json' in path:
@@ -134,8 +144,11 @@ encoding_to_module = {
     'xz': 'lzma',
 }
 
+
 def get_opener(filename):
-    """Automatically detect compression and return the file opening function."""
+    """
+    Automatically detect compression and return the file opening function.
+    """
     type_, encoding = mimetypes.guess_type(filename)
     if encoding is None:
         opener = io.open
@@ -144,12 +157,14 @@ def get_opener(filename):
         opener = importlib.import_module(module).open
     return opener
 
+
 def metagraph_from_writable(writable):
     """Create a metagraph from a writable"""
     metaedge_tuples = [tuple(x) for x in writable['metaedge_tuples']]
     kind_to_abbrev = writable.get('kind_to_abbrev')
     metagraph = MetaGraph.from_edge_tuples(metaedge_tuples, kind_to_abbrev)
     return metagraph
+
 
 def graph_from_writable(writable):
     """Create a graph from a writable"""
@@ -168,6 +183,7 @@ def graph_from_writable(writable):
 
     return graph
 
+
 def writable_from_metagraph(metagraph):
     """Create a writable from a metagraph"""
     metanode_kinds = [metanode.get_id() for metanode in metagraph.get_nodes()]
@@ -178,6 +194,7 @@ def writable_from_metagraph(metagraph):
     writable['metaedge_tuples'] = sorted(metaedge_tuples)
     writable['kind_to_abbrev'] = metagraph.kind_to_abbrev
     return writable
+
 
 def writable_from_graph(graph, int_id=False, masked=True):
     """Create a writable from a graph"""
@@ -245,6 +262,7 @@ def write_nodetable(graph, path):
     writer.writeheader()
     writer.writerows(rows)
     write_file.close()
+
 
 def write_sif(graph, path, max_edges=None, seed=0):
     """Write a sif encoding of the graph edges."""
