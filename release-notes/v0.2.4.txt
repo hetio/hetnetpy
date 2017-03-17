@@ -1,0 +1,10 @@
+dhimmel/hetio v0.2.4: readwrite and dependencies updates
+
+Removes YAML support for writing metagraphs and graphs.
+
+Improves reliability of reading json or pickle files with or without
+compression.
+
+Support xz compression.
+
+Improve readwrite test coverage.

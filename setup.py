@@ -19,7 +19,7 @@ except Exception as error:
 setuptools.setup(
     # Package details
     name='hetio',
-    version='0.2.3',
+    version='0.2.4',
     url='https://github.com/dhimmel/hetio',
     description='Hetnets in Python',
     long_description=long_description,
