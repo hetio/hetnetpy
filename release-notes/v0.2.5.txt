@@ -1,0 +1,5 @@
+dhimmel/hetio v0.2.5: test @hetio-release-bot deploy
+
+@hetio-release-bot is an account for automatically deploying
+GitHub releases from Travis CI. It's purpose is to limit the
+scope of GitHUb's OAuth to a single repository.
