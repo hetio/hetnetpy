@@ -58,7 +58,7 @@ To create a new release, do the following:
     
   ```sh
   TAG=v`python setup.py --version`
-  git add setup.py release-notes/$TAG.*
+  git add hetio/__init__.py release-notes/$TAG.*
   git commit --message "Upgrade to $TAG"
   git push
   git tag --annotate $TAG --file release-notes/$TAG.*
