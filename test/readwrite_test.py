@@ -54,5 +54,6 @@ def test_metagraph_reading_no_abbrev():
     """
     Test reading metagraph without abbreviations from path.
     """
-    path = os.path.join(directory, 'data', 'hetionet-v1.0-metagraph-no-abbrev.json')
+    path = os.path.join(
+        directory, 'data', 'hetionet-v1.0-metagraph-no-abbrev.json')
     read_hetionet_v1_0_metagraph(path)

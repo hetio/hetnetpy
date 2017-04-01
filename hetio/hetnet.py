@@ -168,10 +168,10 @@ class BasePath(IterMask):
         s = ''
         for edge in self:
             *temp, kind, direction = edge.get_id()
-            source = edge.source.name if hasattr(edge, 'name') else edge.source.identifier
+            source = edge.source.name
             dir_abbrev = direction_to_unicode_abbrev[direction]
             s += '{0}{2}{1}{2}'.format(source, kind, dir_abbrev)
-        target = edge.target.name if hasattr(edge, 'name') else edge.target.identifier
+        target = edge.target.name
         s += target
         return s
 
@@ -278,11 +278,13 @@ class MetaGraph(BaseGraph):
             current_metapaths = list()
             for metapath in previous_metapaths:
                 for add_edge in metapath.target().edges:
-                    new_metapath = self.get_metapath(metapath.edges + (add_edge, ))
+                    new_metapath = self.get_metapath(
+                        metapath.edges + (add_edge, ))
                     current_metapaths.append(new_metapath)
             metapaths.extend(current_metapaths)
             previous_metapaths = current_metapaths
-        metapaths = [metapath for metapath in metapaths if metapath.target() == target]
+        metapaths = [metapath for metapath in metapaths
+                     if metapath.target() == target]
         return metapaths
 
     def get_metapath(self, edges):
@@ -319,7 +321,8 @@ class MetaGraph(BaseGraph):
         metaedges = list()
         metaedge_abbrevs = hetio.abbreviation.metaedges_from_metapath(abbrev)
         for metaedge_abbrev in metaedge_abbrevs:
-            metaedge_id = hetio.abbreviation.metaedge_id_from_abbreviation(self, metaedge_abbrev)
+            metaedge_id = hetio.abbreviation.metaedge_id_from_abbreviation(
+                self, metaedge_abbrev)
             metaedges.append(self.get_edge(metaedge_id))
         return self.get_metapath(tuple(metaedges))
 
@@ -327,7 +330,6 @@ class MetaGraph(BaseGraph):
 class MetaNode(BaseNode):
 
     def __init__(self, identifier):
-        """ """
         BaseNode.__init__(self, identifier)
         self.edges = set()
         self.hash_ = hash(self)
@@ -349,8 +351,17 @@ class MetaEdge(BaseEdge):
         self.hash_ = hash(self)
 
     def get_id(self):
-        """ """
-        return self.source.identifier, self.target.identifier, self.kind, self.direction
+        """
+        Get the metaedge_id as a tuple like:
+        (source_id, target_id, kind, direction)
+        """
+        metaedge_id = (
+            self.source.identifier,
+            self.target.identifier,
+            self.kind,
+            self.direction,
+        )
+        return metaedge_id
 
     def get_abbrev(self):
         return self.source.abbrev + self.kind_abbrev + self.target.abbrev
@@ -359,7 +370,8 @@ class MetaEdge(BaseEdge):
         """
         Return the standard abbreviation, the abbrevation of the non-inverted
         metaedge with inequality symbols removed. Inequality symbols indicate
-        the directionality of directed metaedges and can be removed safely here.
+        the directionality of directed metaedges and can be removed safely
+        here.
         """
         metaedge = self.inverse if self.inverted else self
         abbrev = metaedge.get_abbrev()
@@ -388,13 +400,35 @@ class MetaPath(BasePath):
 class Graph(BaseGraph):
 
     def __init__(self, metagraph, data=dict()):
-        """ """
+        """
+        Create a graph.
+
+        Parameters
+        ----------
+        metagraph : hetio.hetnet.MetaGraph
+            metagraph with the potential types of nodes and relationships
+        """
         BaseGraph.__init__(self)
         self.metagraph = metagraph
         self.data = data
 
     def add_node(self, kind, identifier, name=None, data={}):
-        """ """
+        """
+        Add a node to the graph.
+
+        Parameters
+        ----------
+        metagraph : hetio.hetnet.MetaGraph
+            metagraph with the potential types of nodes and relationships
+        kind : str
+            metanode kind
+        identifier : str or int
+            node identifier
+        name : str
+            node name. defaults to identifier
+        data : dict
+            node properties / attributes
+        """
         if name is None:
             name = identifier
         metanode = self.metagraph.node_dict[kind]
@@ -539,19 +573,25 @@ class Edge(BaseEdge):
         self.source.edges[metaedge].add(self)
 
     def get_id(self):
-        return self.source.get_id(), self.target.get_id(), self.metaedge.kind, self.metaedge.direction
+        edge_id = (
+            self.source.get_id(),
+            self.target.get_id(),
+            self.metaedge.kind,
+            self.metaedge.direction,
+        )
+        return edge_id
 
 
 class Path(BasePath):
 
     def __init__(self, edges):
-        """potentially metapath should be an input although it can be calculated"""
         BasePath.__init__(self, edges)
 
     def __repr__(self):
         s = ''
         for edge in self:
             dir_abbrev = direction_to_abbrev[edge.metaedge.direction]
-            s += '{0} {1} {2} {1} '.format(edge.source, dir_abbrev, edge.metaedge.kind)
+            s += '{0} {1} {2} {1} '.format(
+                edge.source, dir_abbrev, edge.metaedge.kind)
         s = '{}{}'.format(s, self.target())
         return s
