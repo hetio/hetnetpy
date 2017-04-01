@@ -68,7 +68,7 @@ def test_creation(tmpdir):
     graph.add_edge(ms.get_id(), IL7R, 'associates', 'both')
 
     # Enable in future to check that creating a duplicate edge throws an error
-    with pytest.raises(AssertionError) as excinfo:
+    with pytest.raises(AssertionError):
         graph.add_edge(IL7R, SPI1, 'transcribes', 'forward')
     # excinfo.match(r'edge already exists') # Disabled since new pytest feature
     with pytest.raises(AssertionError):
@@ -83,8 +83,8 @@ def test_creation(tmpdir):
     assert graph.n_inverts == 3
     assert graph.n_nodes == len(list(graph.get_nodes()))
     assert graph.n_edges == len(list(graph.get_edges(exclude_inverts=True)))
-    assert (graph.n_edges + graph.n_inverts == 
-        len(list(graph.get_edges(exclude_inverts=False))))
+    assert (graph.n_edges + graph.n_inverts ==
+            len(list(graph.get_edges(exclude_inverts=False))))
 
     # Test writing then reading graph
     for extension in extensions:
