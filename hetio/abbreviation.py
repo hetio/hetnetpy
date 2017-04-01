@@ -1,6 +1,9 @@
 import collections
 
+import regex
+
 import hetio.hetnet
+
 
 def validate_abbreviations(metagraph):
     """Check that abbreviations are unambigious"""
@@ -13,13 +16,16 @@ def validate_abbreviations(metagraph):
     metaedge_kinds = {metaedge.kind for metaedge in metaedges}
     duplicated_kinds = metanode_kinds & metaedge_kinds
     if duplicated_kinds:
-        print('Duplicated kinds between metanodes and metaedges:', duplicated_kinds)
+        msg = 'Duplicated kinds between metanodes and metaedges: {}'
+        print(msg.format(duplicated_kinds))
         valid = False
 
     # Check that metanodes do not have any duplicated abbreviations
     kind_to_abbrev = metagraph.kind_to_abbrev
-    metanode_kind_to_abbrev = {k: v for k, v in kind_to_abbrev.items() if k in metanode_kinds}
-    duplicated_metanode_abbrevs = get_duplicates(metanode_kind_to_abbrev.values())
+    metanode_kind_to_abbrev = {
+        k: v for k, v in kind_to_abbrev.items() if k in metanode_kinds}
+    duplicated_metanode_abbrevs = get_duplicates(
+        metanode_kind_to_abbrev.values())
     if duplicated_metanode_abbrevs:
         print('Duplicated metanode abbrevs:', duplicated_metanode_abbrevs)
         valid = False
@@ -42,15 +48,18 @@ def validate_abbreviations(metagraph):
     metaedge_abbrevs = [metaedge.get_abbrev() for metaedge in metaedges]
     duplicated_meataedge_abbrevs = get_duplicates(metaedge_abbrevs)
     if duplicated_meataedge_abbrevs:
-        print('Duplicated metaedge abbreviations:', duplicated_meataedge_abbrevs)
+        msg = 'Duplicated metaedge abbreviations: {}'
+        print(msg.format(duplicated_meataedge_abbrevs))
         valid = False
 
     return valid
+
 
 def get_duplicates(iterable):
     """Return a set of the elements which appear multiple times in iterable."""
     counter = collections.Counter(iterable)
     return {key for key, count in counter.items() if count > 1}
+
 
 def find_abbrevs(kinds):
     """
@@ -66,6 +75,7 @@ def find_abbrevs(kinds):
                 kind_to_abbrev[kind] = abbrev
         duplicates = get_duplicates(kind_to_abbrev.values())
     return kind_to_abbrev
+
 
 def create_abbreviations(metagraph):
     """Creates abbreviations for node and edge kinds."""
@@ -89,6 +99,7 @@ def create_abbreviations(metagraph):
 
     return kind_to_abbrev
 
+
 def metaedges_from_metapath(abbreviation, standardize_by=None):
     """
     Get the abbreviated metaedges for an abbreviated metapath.
@@ -100,8 +111,8 @@ def metaedges_from_metapath(abbreviation, standardize_by=None):
     if isinstance(standardize_by, hetio.hetnet.MetaGraph):
         metapath = standardize_by.metapath_from_abbrev(abbreviation)
         return [metaedge.get_standard_abbrev() for metaedge in metapath]
-    import regex
-    metaedge_abbrevs = regex.findall('(?<=^|[a-z<>])[A-Z]+[a-z<>]+[A-Z]+', abbreviation, overlapped=True)
+    pattern = regex.compile('(?<=^|[a-z<>])[A-Z]+[a-z<>]+[A-Z]+')
+    metaedge_abbrevs = pattern.findall(abbreviation, overlapped=True)
     if standardize_by is None:
         return metaedge_abbrevs
     elif standardize_by == 'text':
@@ -110,8 +121,8 @@ def metaedges_from_metapath(abbreviation, standardize_by=None):
     else:
         raise ValueError('Invalid value for standardize_by')
 
+
 def metaedge_id_from_abbreviation(metagraph, abbreviation):
-    import regex
     source_abbrev, target_abbrev = regex.split('[a-z<>]+', abbreviation)
     edge_abbrev = regex.search('[a-z<>]+', abbreviation).group()
     abbrev_to_kind = {v: k for k, v in metagraph.kind_to_abbrev.items()}
@@ -134,6 +145,7 @@ def metaedge_id_from_abbreviation(metagraph, abbreviation):
         direction = 'both'
     return source_kind, target_kind, kind, direction
 
+
 def arrange_metaedge(abbreviation):
     """
     Return the same metaedge abbreviation for a metaedge and its inverse. Uses
@@ -146,7 +158,6 @@ def arrange_metaedge(abbreviation):
     Deprecated::
     Use :func:`hetnet.MetaEdge.get_standard_abbrev` instead
     """
-    import regex
     source, target = regex.split('[a-z<>]+', abbreviation)
     edge = regex.search('[a-z]+', abbreviation).group()
     if '<' in abbreviation or (source > target):
