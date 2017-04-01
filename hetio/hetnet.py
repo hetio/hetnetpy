@@ -555,7 +555,12 @@ class Node(BaseNode):
         return edges
 
     def __repr__(self):
-        return '{!s}({!r})'.format(self.__class__, self.__dict__)
+        node_as_dict = self.__dict__.copy()
+        del node_as_dict['edges']
+        return '{!s}({!r})'.format(self.__class__, node_as_dict)
+
+    def _repr_pretty_(self, p, cycle):
+        p.text(str(self))
 
     def __str__(self):
         return '{}::{}'.format(*self.get_id())

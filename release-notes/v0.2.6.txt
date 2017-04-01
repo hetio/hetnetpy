@@ -2,3 +2,8 @@ dhimmel/hetio v0.2.6
 
 hetio.hetnet.Graph.add_edge() now accepts nodes in addition to node_ids
 as input to source_id and target_id.
+
+Fix node display in Jupyter notebooks. Previously, edge information was
+printed causing notebooks to crash.
+
+Test coverage for path count and degree-weighted path count computation.
