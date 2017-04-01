@@ -406,9 +406,37 @@ class Graph(BaseGraph):
         return node
 
     def add_edge(self, source_id, target_id, kind, direction, data=dict()):
-        """source_id and target_id are (metanode, node) tuples"""
-        source = self.node_dict[source_id]
-        target = self.node_dict[target_id]
+        """
+        Add an edge to the graph. Edge cannot already exist.
+
+        Parameters
+        ----------
+        source_id : hetio.hetnet.Node or tuple of (metanode, node) identifiers
+            the source node for the edge
+        target_id : hetio.hetnet.Node or tuple of (metanode, node) identifiers
+            the target node for the edge
+        kind : str
+            the metaedge kind
+        direction : str
+            the metaedge direction
+        data : dict
+            edge attributes / properties
+
+        Returns
+        -------
+        edge, edge.inverse : tuple of edges
+            the created edge and its inverse
+        """
+        source = source_id
+        if not isinstance(source, Node):
+            source = self.node_dict[source]
+        source_id = source.get_id()
+
+        target = target_id
+        if not isinstance(target, Node):
+            target = self.node_dict[target]
+        target_id = target.get_id()
+
         metaedge_id = (
             source.metanode.get_id(),
             target.metanode.get_id(),
