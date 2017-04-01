@@ -1,0 +1,255 @@
+{
+  "metanode_kinds": [
+    "Disease",
+    "Gene",
+    "Tissue"
+  ],
+  "metaedge_tuples": [
+    [
+      "Disease",
+      "Tissue",
+      "localization",
+      "both"
+    ],
+    [
+      "Gene",
+      "Disease",
+      "association",
+      "both"
+    ],
+    [
+      "Gene",
+      "Gene",
+      "interaction",
+      "both"
+    ],
+    [
+      "Gene",
+      "Tissue",
+      "expression",
+      "both"
+    ]
+  ],
+  "kind_to_abbrev": {
+    "Disease": "D",
+    "Gene": "G",
+    "Tissue": "T",
+    "association": "a",
+    "expression": "e",
+    "localization": "l",
+    "interaction": "i"
+  },
+  "nodes": [
+    {
+      "kind": "Gene",
+      "identifier": "STAT3",
+      "name": "STAT3",
+      "data": {}
+    },
+    {
+      "kind": "Gene",
+      "identifier": "IRF1",
+      "name": "IRF1",
+      "data": {}
+    },
+    {
+      "kind": "Gene",
+      "identifier": "SUMO1",
+      "name": "SUMO1",
+      "data": {}
+    },
+    {
+      "kind": "Gene",
+      "identifier": "IL2RA",
+      "name": "IL2RA",
+      "data": {}
+    },
+    {
+      "kind": "Gene",
+      "identifier": "IRF8",
+      "name": "IRF8",
+      "data": {}
+    },
+    {
+      "kind": "Gene",
+      "identifier": "ITCH",
+      "name": "ITCH",
+      "data": {}
+    },
+    {
+      "kind": "Gene",
+      "identifier": "CXCR4",
+      "name": "CXCR4",
+      "data": {}
+    },
+    {
+      "kind": "Tissue",
+      "identifier": "Lung",
+      "name": "Lung",
+      "data": {}
+    },
+    {
+      "kind": "Tissue",
+      "identifier": "Leukocyte",
+      "name": "Leukocyte",
+      "data": {}
+    },
+    {
+      "kind": "Disease",
+      "identifier": "Crohn's Disease",
+      "name": "Crohn's Disease",
+      "data": {}
+    },
+    {
+      "kind": "Disease",
+      "identifier": "Multiple Sclerosis",
+      "name": "Multiple Sclerosis",
+      "data": {}
+    }
+  ],
+  "edges": [
+    {
+      "source_id": [
+        "Gene",
+        "IRF1"
+      ],
+      "target_id": [
+        "Gene",
+        "SUMO1"
+      ],
+      "kind": "interaction",
+      "direction": "both",
+      "data": {}
+    },
+    {
+      "source_id": [
+        "Gene",
+        "IRF1"
+      ],
+      "target_id": [
+        "Gene",
+        "IL2RA"
+      ],
+      "kind": "interaction",
+      "direction": "both",
+      "data": {}
+    },
+    {
+      "source_id": [
+        "Gene",
+        "IRF1"
+      ],
+      "target_id": [
+        "Gene",
+        "IRF8"
+      ],
+      "kind": "interaction",
+      "direction": "both",
+      "data": {}
+    },
+    {
+      "source_id": [
+        "Gene",
+        "IRF1"
+      ],
+      "target_id": [
+        "Gene",
+        "CXCR4"
+      ],
+      "kind": "interaction",
+      "direction": "both",
+      "data": {}
+    },
+    {
+      "source_id": [
+        "Gene",
+        "ITCH"
+      ],
+      "target_id": [
+        "Gene",
+        "CXCR4"
+      ],
+      "kind": "interaction",
+      "direction": "both",
+      "data": {}
+    },
+    {
+      "source_id": [
+        "Gene",
+        "IRF1"
+      ],
+      "target_id": [
+        "Disease",
+        "Crohn's Disease"
+      ],
+      "kind": "association",
+      "direction": "both",
+      "data": {}
+    },
+    {
+      "source_id": [
+        "Gene",
+        "STAT3"
+      ],
+      "target_id": [
+        "Disease",
+        "Crohn's Disease"
+      ],
+      "kind": "association",
+      "direction": "both",
+      "data": {}
+    },
+    {
+      "source_id": [
+        "Gene",
+        "STAT3"
+      ],
+      "target_id": [
+        "Disease",
+        "Multiple Sclerosis"
+      ],
+      "kind": "association",
+      "direction": "both",
+      "data": {}
+    },
+    {
+      "source_id": [
+        "Gene",
+        "IRF1"
+      ],
+      "target_id": [
+        "Tissue",
+        "Lung"
+      ],
+      "kind": "expression",
+      "direction": "both",
+      "data": {}
+    },
+    {
+      "source_id": [
+        "Gene",
+        "IRF1"
+      ],
+      "target_id": [
+        "Tissue",
+        "Leukocyte"
+      ],
+      "kind": "expression",
+      "direction": "both",
+      "data": {}
+    },
+    {
+      "source_id": [
+        "Disease",
+        "Multiple Sclerosis"
+      ],
+      "target_id": [
+        "Tissue",
+        "Leukocyte"
+      ],
+      "kind": "localization",
+      "direction": "both",
+      "data": {}
+    }
+  ]
+}

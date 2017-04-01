@@ -98,3 +98,60 @@ def test_creation(tmpdir):
             path = os.path.join(tmpdir, 'graph' + ext)
             hetio.readwrite.write_graph(graph, path)
             hetio.readwrite.read_graph(path)
+
+
+def test_disase_gene_example():
+    """
+    Recreate hetnet from https://doi.org/10.1371/journal.pcbi.1004259.g002.
+    """
+    metaedge_tuples = [
+        ('Gene', 'Disease', 'association', 'both'),
+        ('Gene', 'Tissue', 'expression', 'both'),
+        ('Disease', 'Tissue', 'localization', 'both'),
+        ('Gene', 'Gene', 'interaction', 'both'),
+    ]
+    metagraph = hetio.hetnet.MetaGraph.from_edge_tuples(metaedge_tuples)
+    graph = hetio.hetnet.Graph(metagraph)
+    nodes = dict()
+
+    # Add gene nodes
+    for symbol in ['STAT3', 'IRF1', 'SUMO1', 'IL2RA', 'IRF8', 'ITCH', 'CXCR4']:
+        node = graph.add_node('Gene', symbol)
+        nodes[symbol] = node
+
+    # Add tissue nodes
+    for tissue in ['Lung', 'Leukocyte']:
+        node = graph.add_node('Tissue', tissue)
+        nodes[tissue] = node
+
+    # Add disease nodes
+    for disease in ["Crohn's Disease", 'Multiple Sclerosis']:
+        node = graph.add_node('Disease', disease)
+        nodes[disease] = node
+
+    assert graph.n_nodes == 11
+
+    # Add GiG edges
+    graph.add_edge(nodes['IRF1'], nodes['SUMO1'], 'interaction', 'both')
+    graph.add_edge(nodes['IRF1'], nodes['IL2RA'], 'interaction', 'both')
+    graph.add_edge(nodes['IRF1'], nodes['IRF8'], 'interaction', 'both')
+    graph.add_edge(nodes['IRF1'], nodes['CXCR4'], 'interaction', 'both')
+    graph.add_edge(nodes['ITCH'], nodes['CXCR4'], 'interaction', 'both')
+
+    # Add GaD edges
+    graph.add_edge(
+        nodes['IRF1'], nodes["Crohn's Disease"], 'association', 'both')
+    graph.add_edge(
+        nodes["Crohn's Disease"], nodes['STAT3'], 'association', 'both')
+    graph.add_edge(
+        nodes['STAT3'], nodes['Multiple Sclerosis'], 'association', 'both')
+
+    # Add TeG edges
+    graph.add_edge(nodes['IRF1'], nodes["Lung"], 'expression', 'both')
+    graph.add_edge(nodes['IRF1'], nodes["Leukocyte"], 'expression', 'both')
+
+    # Add DlT edges
+    graph.add_edge(nodes['Multiple Sclerosis'], nodes["Leukocyte"],
+                   'localization', 'both')
+
+    assert graph.n_edges == 11
