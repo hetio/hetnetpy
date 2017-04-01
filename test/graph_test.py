@@ -139,12 +139,13 @@ def test_disase_gene_example():
     graph.add_edge(nodes['ITCH'], nodes['CXCR4'], 'interaction', 'both')
 
     # Add GaD edges
-    graph.add_edge(
-        nodes['IRF1'], nodes["Crohn's Disease"], 'association', 'both')
-    graph.add_edge(
-        nodes["Crohn's Disease"], nodes['STAT3'], 'association', 'both')
-    graph.add_edge(
-        nodes['STAT3'], nodes['Multiple Sclerosis'], 'association', 'both')
+    meta = 'association', 'both'
+    graph.add_edge(nodes['IRF1'], nodes["Crohn's Disease"], *meta)
+    graph.add_edge(nodes["Crohn's Disease"], nodes['STAT3'], *meta)
+    graph.add_edge(nodes['STAT3'], nodes['Multiple Sclerosis'], *meta)
+    graph.add_edge(nodes['IL2RA'], nodes['Multiple Sclerosis'], *meta)
+    graph.add_edge(nodes['IRF8'], nodes['Multiple Sclerosis'], *meta)
+    graph.add_edge(nodes['CXCR4'], nodes['Multiple Sclerosis'], *meta)
 
     # Add TeG edges
     graph.add_edge(nodes['IRF1'], nodes["Lung"], 'expression', 'both')
@@ -154,4 +155,4 @@ def test_disase_gene_example():
     graph.add_edge(nodes['Multiple Sclerosis'], nodes["Leukocyte"],
                    'localization', 'both')
 
-    assert graph.n_edges == 11
+    assert graph.n_edges == 14

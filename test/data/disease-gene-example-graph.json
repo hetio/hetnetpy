@@ -32,8 +32,8 @@
   ],
   "kind_to_abbrev": {
     "Disease": "D",
-    "Gene": "G",
     "Tissue": "T",
+    "Gene": "G",
     "association": "a",
     "expression": "e",
     "localization": "l",
@@ -203,6 +203,45 @@
       "source_id": [
         "Gene",
         "STAT3"
+      ],
+      "target_id": [
+        "Disease",
+        "Multiple Sclerosis"
+      ],
+      "kind": "association",
+      "direction": "both",
+      "data": {}
+    },
+    {
+      "source_id": [
+        "Gene",
+        "IL2RA"
+      ],
+      "target_id": [
+        "Disease",
+        "Multiple Sclerosis"
+      ],
+      "kind": "association",
+      "direction": "both",
+      "data": {}
+    },
+    {
+      "source_id": [
+        "Gene",
+        "IRF8"
+      ],
+      "target_id": [
+        "Disease",
+        "Multiple Sclerosis"
+      ],
+      "kind": "association",
+      "direction": "both",
+      "data": {}
+    },
+    {
+      "source_id": [
+        "Gene",
+        "CXCR4"
       ],
       "target_id": [
         "Disease",
