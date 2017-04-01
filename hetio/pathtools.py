@@ -4,17 +4,25 @@ import operator
 
 from hetio.hetnet import Node, Path
 
+
 def DWPC(paths, damping_exponent, exclude_edges=set(), exclude_masked=True):
     """
     Calculated the degree-weighted path count of a path.
     https://dx.doi.org/10.1371/journal.pcbi.1004259#article1.body1.sec4.sec3.sec6.p1
     """
-    degree_products = (path_degree_product(path, damping_exponent, exclude_edges=exclude_edges, exclude_masked=exclude_masked) for path in paths)
+    kwargs = {
+        'damping_exponent': damping_exponent,
+        'exclude_edges': exclude_edges,
+        'exclude_masked': exclude_masked,
+    }
+    degree_products = (path_degree_product(path, **kwargs) for path in paths)
     path_weights = (1.0 / degree_product for degree_product in degree_products)
     dwpc = sum(path_weights)
     return dwpc
 
-def path_degree_product(path, damping_exponent, exclude_edges=set(), exclude_masked=True):
+
+def path_degree_product(
+        path, damping_exponent, exclude_edges=set(), exclude_masked=True):
     """
     Calculated the path degree product of a path.
     https://dx.doi.org/10.1371/journal.pcbi.1004259#article1.body1.sec4.sec3.sec6.p1
@@ -22,7 +30,8 @@ def path_degree_product(path, damping_exponent, exclude_edges=set(), exclude_mas
     degrees = list()
     for edge in path:
         source_edges = edge.source.get_edges(edge.metaedge, exclude_masked)
-        target_edges = edge.target.get_edges(edge.metaedge.inverse, exclude_masked)
+        target_edges = edge.target.get_edges(
+            edge.metaedge.inverse, exclude_masked)
         if exclude_edges:
             source_edges -= exclude_edges
             target_edges -= exclude_edges
@@ -34,6 +43,7 @@ def path_degree_product(path, damping_exponent, exclude_edges=set(), exclude_mas
     damped_degrees = [degree ** damping_exponent for degree in degrees]
     degree_product = functools.reduce(operator.mul, damped_degrees)
     return degree_product
+
 
 def paths_from(graph, source, metapath,
                duplicates=False, masked=True,
@@ -110,18 +120,20 @@ def paths_between(graph, source, target, metapath,
 
     if len(metapath) <= 1:
         paths = paths_from(graph, source, metapath, duplicates, masked,
-                                exclude_nodes, exclude_edges)
+                           exclude_nodes, exclude_edges)
         paths = [path for path in paths if path.target() == target]
         return paths
-
 
     split_index = len(metapath) // 2
 
     get_metapath = graph.metagraph.get_metapath
     metapath_head = get_metapath(metapath[:split_index])
-    metapath_tail = get_metapath(tuple(mp.inverse for mp in reversed(metapath[split_index:])))
-    paths_head = paths_from(graph, source, metapath_head, duplicates, masked, exclude_nodes, exclude_edges)
-    paths_tail = paths_from(graph, target, metapath_tail, duplicates, masked, exclude_nodes, exclude_edges)
+    metapath_tail = get_metapath(
+        tuple(mp.inverse for mp in reversed(metapath[split_index:])))
+    paths_head = paths_from(graph, source, metapath_head, duplicates, masked,
+                            exclude_nodes, exclude_edges)
+    paths_tail = paths_from(graph, target, metapath_tail, duplicates, masked,
+                            exclude_nodes, exclude_edges)
 
     node_intersect = (set(path.target() for path in paths_head) &
                       set(path.target() for path in paths_tail))
