@@ -49,7 +49,7 @@ This section is only relevant for project maintainers.
 Travis CI deployments are used to upload releases to [PyPI](https://pypi.org/project/hetio) and [GitHub releases](https://github.com/dhimmel/hetio/releases).
 To create a new release, do the following:
 
-1. Bump the version in [`setup.py`](setup.py).
+1. Bump the version in [`__init__.py`](hetio/__init__.py).
 
 2. Add a release notes file in [`release-notes`](release-notes).
   Format as a commit message that will be used as the GitHub release description.
