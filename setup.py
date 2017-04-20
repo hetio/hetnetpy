@@ -58,6 +58,9 @@ setuptools.setup(
 
     packages=['hetio'],
 
+    # Specify python version
+    python_requires='>=3.4',
+
     # Run-time dependencies
     install_requires=[
         'regex',
