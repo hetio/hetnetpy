@@ -74,6 +74,11 @@ class BaseGraph(object):
     def __contains__(self, item):
         return item in self.node_dict
 
+    def __eq__(self, other):
+        return (type(other) is type(self) and
+                self.node_dict == other.node_dict and
+                self.edge_dict == other.edge_dict)
+
 
 class BaseNode(ElemMask):
 
@@ -110,6 +115,9 @@ class BaseEdge(ElemMask):
             return self.hash_
         except AttributeError:
             return hash(self.get_id())
+
+    def __eq__(self, other):
+        return type(other) is type(self) and self.get_id() == other.get_id()
 
     def __str__(self):
         source, target, kind, direction = self.get_id()
@@ -525,6 +533,77 @@ class Graph(BaseGraph):
         for edge in self.get_edges(exclude_inverts):
             metaedge_to_edges[edge.metaedge].append(edge)
         return metaedge_to_edges
+
+    def get_subgraph(self, metanodes=None, metaedges=None, nodes=None):
+        """
+        Return a subgraph of the hetnet. By default, creates a copy of the
+        hetnet. If both metanode and metaedge subsets are specified, then
+        only the intersection (rather than the union) is preserved.
+
+        Parameters
+        ----------
+        metanodes : None or set
+            metanodes to keep.
+        metaedges : None or set
+            metaedges to keep. None keeps all metaedges, subject to the
+            metanode subset.
+        nodes : None or list
+            nodes to keep. None keeps all nodes, subject to the metanode and
+            metanode subsets.
+        """
+        if metanodes is None:
+            metanodes = self.metagraph.get_nodes()
+        metanodes = set(metanodes)
+        if metaedges is None:
+            metaedges = self.metagraph.get_edges()
+        metaedges = set(metaedges)
+        metaedges |= {metaedge.inverse for metaedge in metaedges}
+        metaedges = {me for me in metaedges if not me.inverted}
+
+        metaedge_tuples = list()
+        for metaedge in self.metagraph.get_edges():
+            if metaedge.source not in metanodes:
+                continue
+            if metaedge.target not in metanodes:
+                continue
+            if metaedge not in metaedges:
+                continue
+            metaedge_tuples.append(metaedge.get_id())
+        metagraph = MetaGraph.from_edge_tuples(
+            metaedge_tuples, kind_to_abbrev=self.metagraph.kind_to_abbrev)
+        graph = Graph(metagraph, data=self.data)
+
+        # Overwrite based on metagraph
+        metanodes = set(metagraph.get_nodes())
+        metaedges = set(metagraph.get_edges(exclude_inverts=True))
+
+        # Create nodes and edges
+        if nodes is None:
+            nodes = [n for n in self.get_nodes() if n.metanode in metanodes]
+        nodes = list(nodes)
+        for node in nodes:
+            graph.add_node(
+                kind=node.metanode.get_id(),
+                identifier=node.identifier,
+                name=node.name,
+                data=node.data.copy(),
+            )
+        for node in nodes:
+            node = self.node_dict[node.get_id()]
+            for metaedge in metaedges:
+                if metaedge not in node.edges:
+                    continue
+                for edge in node.edges[metaedge]:
+                    if edge.inverted:
+                        continue
+                    target_id = edge.target.get_id()
+                    if target_id not in graph.node_dict:
+                        continue
+                    kind = metaedge.kind
+                    direction = metaedge.direction
+                    graph.add_edge(node, target_id, kind, direction)
+
+        return graph
 
 
 class Node(BaseNode):
