@@ -569,8 +569,12 @@ class Graph(BaseGraph):
             if metaedge not in metaedges:
                 continue
             metaedge_tuples.append(metaedge.get_id())
-        metagraph = MetaGraph.from_edge_tuples(
-            metaedge_tuples, kind_to_abbrev=self.metagraph.kind_to_abbrev)
+        metagraph = MetaGraph.from_edge_tuples(metaedge_tuples)
+        kinds = set(metagraph.kind_to_abbrev)
+        kind_to_abbrev = {
+            k: v for k, v in self.metagraph.kind_to_abbrev.items()
+            if k in kinds}
+        metagraph.set_abbreviations(kind_to_abbrev)
         graph = Graph(metagraph, data=self.data)
 
         # Overwrite based on metagraph

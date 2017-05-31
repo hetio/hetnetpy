@@ -24,6 +24,7 @@ def test_subgraph_copy():
     assert graph.n_nodes == subgraph.n_nodes
     assert graph.n_edges == subgraph.n_edges
     assert graph == subgraph
+    assert graph.metagraph.kind_to_abbrev == subgraph.metagraph.kind_to_abbrev
 
 
 def test_subgraph_node_subset():
@@ -41,6 +42,7 @@ def test_subgraph_node_subset():
     nodes = [graph.get_node(node) for node in nodes]
     subgraph = graph.get_subgraph(nodes=nodes)
     assert subgraph.metagraph == graph.metagraph
+    assert subgraph.metagraph.kind_to_abbrev == graph.metagraph.kind_to_abbrev
     assert subgraph.n_nodes == 5
     assert subgraph.n_edges == 3
 
@@ -58,6 +60,11 @@ def test_subgraph_metanode_subset():
     subgraph = graph.get_subgraph(metanodes=metanodes)
     assert subgraph.metagraph.n_nodes == 2
     assert subgraph.metagraph.n_edges == 1
+    assert subgraph.metagraph.kind_to_abbrev == {
+        'Disease': 'D',
+        'Tissue': 'T',
+        'localization': 'l',
+    }
     assert subgraph.n_nodes == 4
     assert subgraph.n_edges == 1
 
@@ -82,6 +89,12 @@ def test_subgraph_node_metanode_subset():
     subgraph = graph.get_subgraph(nodes=nodes, metanodes=metanodes)
     assert subgraph.metagraph.n_nodes == 2
     assert subgraph.metagraph.n_edges == 2
+    assert subgraph.metagraph.kind_to_abbrev == {
+        'Disease': 'D',
+        'Gene': 'G',
+        'association': 'a',
+        'interaction': 'i',
+    }
     assert subgraph.n_nodes == 4
     assert subgraph.n_edges == 3
 
@@ -96,6 +109,10 @@ def test_subgraph_metaedges_subset():
     ]
     metaedges = [graph.metagraph.get_edge(me) for me in metaedges]
     subgraph = graph.get_subgraph(metaedges=metaedges)
+    assert subgraph.metagraph.kind_to_abbrev == {
+        'Gene': 'G',
+        'interaction': 'i',
+    }
     assert subgraph.metagraph.n_nodes == 1
     assert subgraph.metagraph.n_edges == 1
     assert subgraph.n_nodes == 7
