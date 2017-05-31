@@ -176,10 +176,12 @@ class BasePath(IterMask):
         s = ''
         for edge in self:
             *temp, kind, direction = edge.get_id()
-            source = edge.source.name
+            source = (edge.source.name if hasattr(edge, 'name')
+                      else edge.source.identifier)
             dir_abbrev = direction_to_unicode_abbrev[direction]
             s += '{0}{2}{1}{2}'.format(source, kind, dir_abbrev)
-        target = edge.target.name
+        target = (edge.target.name if hasattr(edge, 'name') else
+                  edge.target.identifier)
         s += target
         return s
 

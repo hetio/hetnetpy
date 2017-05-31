@@ -23,6 +23,9 @@ def test_disease_gene_example_dwpc():
 
     # Define GeTlD traversal
     metapath = metagraph.metapath_from_abbrev('GeTlD')
+    # Test metapath unicode formatting
+    unicode_str = 'Gene–expression–Tissue–localization–Disease'
+    assert unicode_str == metapath.get_unicode_str()
     # Extract paths
     paths = paths_between(graph, source_id, target_id, metapath)
     assert len(paths) == 1
