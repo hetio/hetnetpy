@@ -1,0 +1,8 @@
+dhimmel/hetio v0.2.7
+
+Add subgraph functionality. `graph.get_subgraph()` allows subseting a hetnet to
+return a new hetnet. This can be useful for creating hetnets for testing or
+development. Subgraphs of Hetionet v1.0 have been added to `test/data`.
+
+Fixes a bug that caused AttributeError when calling `metapath.get_unicode_str()`.
+https://github.com/dhimmel/hetio/commit/62c4dd1db11733f9e50c980e38a0ccc483aa1546
