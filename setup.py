@@ -28,6 +28,11 @@ except Exception as error:
     with open(readme_path) as read_file:
         long_description = read_file.read()
 
+# Testing dependencies
+tests_require = [
+    'numpy',
+    'scipy',
+]
 
 setuptools.setup(
     # Package details
@@ -66,9 +71,14 @@ setuptools.setup(
         'regex',
     ],
 
+    # Testing dependencies
+    tests_require=tests_require,
+
     # Additional groups of dependencies
     extras_require={
         'stats': ['pandas', 'matplotlib', 'seaborn'],
         'neo4j': ['pandas', 'py2neo', 'tqdm'],
+        'matrix': ['numpy', 'scipy'],
+        'test': tests_require,
     }
 )

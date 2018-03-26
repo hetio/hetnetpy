@@ -9,9 +9,10 @@ addons:
   apt_packages:
     - pandoc
 install:
-  - python setup.py install
+  - pip install .[test]
   - python setup.py sdist bdist_wheel
-script: py.test
+script:
+  - py.test
 deploy:
   - provider: releases
     api_key:

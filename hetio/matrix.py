@@ -1,8 +1,9 @@
 from collections import OrderedDict
 
-import hetio.hetnet
 import numpy
-from scipy import sparse
+import scipy.sparse
+
+import hetio.hetnet
 
 
 def get_node_to_position(graph, metanode):
@@ -18,8 +19,8 @@ def get_node_to_position(graph, metanode):
     return node_to_position
 
 
-def metaedge_to_adjacency_matrix(graph, metaedge, dtype=numpy.bool_,
-                                 sparse_threshold=0):
+def metaedge_to_adjacency_matrix(
+        graph, metaedge, dtype=numpy.bool_, dense_threshold=0):
     """
     Returns an adjacency matrix where source nodes are rows and target
     nodes are columns.
@@ -29,9 +30,15 @@ def metaedge_to_adjacency_matrix(graph, metaedge, dtype=numpy.bool_,
     graph : hetio.hetnet.graph
     metaedge : hetio.hetnet.MetaEdge
     dtype : type
-    sparse_threshold : float (0 < sparse_threshold < 1)
-        sets the density threshold above which a sparse matrix will be
-        converted to a dense automatically.
+    dense_threshold : float (0 ≤ dense_threshold ≤ 1)
+        minimum proportion of nonzero values at which to output a dense matrix.
+        Default of 0 ensures output is always dense.
+
+    Returns
+    =======
+    row_names : list
+    column_names : list
+    matrix : numpy.ndarray or scipy.sparse
     """
     if not isinstance(metaedge, hetio.hetnet.MetaEdge):
         # metaedge is an abbreviation
@@ -45,45 +52,15 @@ def metaedge_to_adjacency_matrix(graph, metaedge, dtype=numpy.bool_,
             row.append(i)
             col.append(target_node_to_position[edge.target])
             data.append(1)
-    adjacency_matrix = sparse.csc_matrix((data, (row, col)), shape=shape,
-                                         dtype=dtype)
-    adjacency_matrix = auto_convert(adjacency_matrix, sparse_threshold)
+    adjacency_matrix = scipy.sparse.csc_matrix(
+        (data, (row, col)), shape=shape, dtype=dtype)
+    adjacency_matrix = auto_convert(adjacency_matrix, dense_threshold)
     row_names = [node.identifier for node in source_nodes]
     column_names = [node.identifier for node in target_node_to_position]
     return row_names, column_names, adjacency_matrix
 
 
-def normalize(matrix, vector, axis, damping_exponent):
-    """
-    Normalize a 2D numpy.ndarray.
-
-    Parameters
-    ==========
-    matrix : numpy.ndarray or scipy.sparse
-    vector : numpy.ndarray
-        Vector used for row or column normalization of matrix.
-    axis : str
-        'rows' or 'columns' for which axis to normalize
-    damping_exponent : float
-        exponent to use in scaling a node's row or column
-    """
-    assert matrix.ndim == 2
-    assert vector.ndim == 1
-    if damping_exponent == 0:
-        return matrix
-    with numpy.errstate(divide='ignore'):
-        vector **= -damping_exponent
-    vector[numpy.isinf(vector)] = 0
-    vector = sparse.diags(vector)
-    if axis == 'rows':
-        # equivalent to `vector @ matrix` but returns sparse.csc not sparse.csr
-        matrix = (matrix.transpose() @ vector).transpose()
-    else:
-        matrix = matrix @ vector
-    return matrix
-
-
-def auto_convert(matrix, threshold):
+def auto_convert(matrix, dense_threshold=0.3):
     """
     Automatically convert a scipy.sparse to a numpy.ndarray if the percent
     nonzero is above a given threshold. Automatically convert a numpy.ndarray
@@ -92,34 +69,21 @@ def auto_convert(matrix, threshold):
     Parameters
     ==========
     matrix : numpy.ndarray or scipy.sparse
-    threshold : float (0 < threshold < 1)
-        percent nonzero above which the matrix is converted to dense
+    dense_threshold : float (0 ≤ dense_threshold ≤ 1)
+        minimum proportion of nonzero values at which to output a dense matrix.
+        Setting to 0 ensures output is dense. Setting to 1 ensures output is
+        sparse, unless matrix has no zero entries (use dense_threshold > 1) to
+        guarantee sparse output.
 
     Returns
     =======
     matrix : numpy.ndarray or scipy.sparse
     """
-    above_thresh = (matrix != 0).sum() / numpy.prod(matrix.shape) >= threshold
-    if sparse.issparse(matrix) and above_thresh:
+    density = (matrix != 0).sum() / numpy.prod(matrix.shape)
+    densify = density >= dense_threshold
+    sparse_input = scipy.sparse.issparse(matrix)
+    if sparse_input and densify:
         return matrix.toarray()
-    elif not above_thresh:
-        return sparse.csc_matrix(matrix)
-    return matrix
-
-
-def copy_array(matrix, copy=True):
-    """Returns a newly allocated array if copy is True"""
-    assert matrix.ndim == 2
-    assert matrix.dtype != 'O'  # Ensures no empty row
-    if not sparse.issparse(matrix):
-        assert numpy.isfinite(matrix).all()  # Checks NaN and Inf
-    try:
-        matrix[0, 0]  # Checks that there is a value in the matrix
-    except IndexError:
-        raise AssertionError("Array may have empty rows")
-
-    mat_type = type(matrix)
-    if mat_type == numpy.ndarray:
-        mat_type = numpy.array
-    matrix = mat_type(matrix, dtype=numpy.float64, copy=copy)
+    if not sparse_input and not densify:
+        return scipy.sparse.csc_matrix(matrix)
     return matrix
