@@ -54,13 +54,13 @@ def metaedge_to_adjacency_matrix(
             data.append(1)
     adjacency_matrix = scipy.sparse.csc_matrix(
         (data, (row, col)), shape=shape, dtype=dtype)
-    adjacency_matrix = auto_convert(adjacency_matrix, dense_threshold)
+    adjacency_matrix = sparsify_or_densify(adjacency_matrix, dense_threshold)
     row_names = [node.identifier for node in source_nodes]
     column_names = [node.identifier for node in target_node_to_position]
     return row_names, column_names, adjacency_matrix
 
 
-def auto_convert(matrix, dense_threshold=0.3):
+def sparsify_or_densify(matrix, dense_threshold=0.3):
     """
     Automatically convert a scipy.sparse to a numpy.ndarray if the percent
     nonzero is above a given threshold. Automatically convert a numpy.ndarray

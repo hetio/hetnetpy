@@ -4,13 +4,16 @@ import numpy
 import pytest
 import scipy.sparse
 
-from hetio.matrix import metaedge_to_adjacency_matrix
+from hetio.matrix import (
+    metaedge_to_adjacency_matrix,
+    sparsify_or_densify,
+)
 import hetio.readwrite
 
 directory = os.path.dirname(os.path.abspath(__file__))
 
 
-def get_arrays(edge, dtype, threshold):
+def get_arrays(edge, dtype, dense_threshold):
     # Dictionary with tuples of matrix and percent nonzero
     adj_dict = {
         'GiG': ([[0, 0, 1, 0, 1, 0, 0],
@@ -39,12 +42,9 @@ def get_arrays(edge, dtype, threshold):
     }
     row_names = node_dict[edge[0]]
     col_names = node_dict[edge[-1]]
-
-    if adj_dict[edge][1] < threshold:
-        adj_matrix = scipy.sparse.csc_matrix(adj_dict[edge][0], dtype=dtype)
-    else:
-        adj_matrix = numpy.array(adj_dict[edge][0], dtype=dtype)
-
+    matrix, density = adj_dict[edge]
+    wrapper = scipy.sparse.csc_matrix if density < dense_threshold else numpy.array
+    adj_matrix = wrapper(matrix, dtype=dtype)
     return row_names, col_names, adj_matrix
 
 
@@ -70,3 +70,21 @@ def test_metaedge_to_adjacency_matrix(test_edge, dtype, dense_threshold):
     assert adj_mat.dtype == dtype
     assert adj_mat.shape == exp_adj.shape
     assert (adj_mat != exp_adj).sum() == 0
+
+
+@pytest.mark.parametrize("array,dense_threshold,expect_sparse", [
+    ([[0, 0, 0, 0, 0, 0, 0]], 0, False),
+    ([[0, 0, 0, 0, 0, 0, 0]], 0.3, True),
+    ([[1, 1, 1, 1, 1, 1, 1]], 1, False),
+    ([[1, 1, 1, 1, 1, 1, 1]], 2, True),
+])
+def test_sparsify_or_densify(array, dense_threshold, expect_sparse):
+    # test with dense input
+    array = numpy.array(array, dtype=numpy.bool_)
+    output = sparsify_or_densify(array, dense_threshold)
+    assert scipy.sparse.issparse(output) == expect_sparse
+
+    # test with sparse input
+    array = scipy.sparse.csc_matrix(array)
+    output = sparsify_or_densify(array, dense_threshold)
+    assert scipy.sparse.issparse(output) == expect_sparse
