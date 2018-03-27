@@ -1,0 +1,3 @@
+dhimmel/hetio v0.2.8
+
+Add the hetio.matrix module for exporting edges to an adjacency matrix.
