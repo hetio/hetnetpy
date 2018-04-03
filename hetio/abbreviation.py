@@ -111,7 +111,7 @@ def metaedges_from_metapath(abbreviation, standardize_by=None):
     if isinstance(standardize_by, hetio.hetnet.MetaGraph):
         metapath = standardize_by.metapath_from_abbrev(abbreviation)
         return [metaedge.get_standard_abbrev() for metaedge in metapath]
-    pattern = regex.compile('(?<=^|[a-z<>])[A-Z]+[a-z<>]+[A-Z]+')
+    pattern = regex.compile('(?<=^|[a-z<>])[A-Z0-9]+[a-z<>]+[A-Z0-9]+')
     metaedge_abbrevs = pattern.findall(abbreviation, overlapped=True)
     if standardize_by is None:
         return metaedge_abbrevs
