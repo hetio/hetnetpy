@@ -37,11 +37,26 @@ def validate_abbreviations(metagraph):
         if not abbrev.isupper():
             print('lowercase metanode abbreviation:', abbrev)
             valid = False
+
+    # Check if metanode abbreviation starts with a digit
+    for metanode in metanodes:
+        abbrev = metanode.abbrev
+        if abbrev[0].isdigit():
+            print('digit leading metanode abbreviation:', abbrev)
+            valid = False
+
     # metaedge abbreviations should be lowercase
     for metaedge in metaedges:
         abbrev = metaedge.kind_abbrev
         if not abbrev.islower():
             print('uppercase metaedge abbreviation:', abbrev)
+            valid = False
+
+    # Check that the metaedges do not contain digits
+    for metaedge in metaedges:
+        abbrev = metaedge.kind_abbrev
+        if any(character.isdigit() for character in abbrev):
+            print('digit in metaedge abbreviation:', abbrev)
             valid = False
 
     # Check that metaedges are not ambigious
