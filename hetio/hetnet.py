@@ -275,6 +275,11 @@ class MetaGraph(BaseGraph):
             self.n_inverts += 1
 
     def extract_metapaths(self, source_kind, target_kind, max_length):
+        """
+        Extact all metapaths from the source_kind metanode to the target_kind
+        metanode up to length max_length. These metapaths are equivalent to
+        all walks on the metagraph from source_kind to target_kind.
+        """
         source = self.node_dict[source_kind]
         target = self.node_dict[target_kind]
 
@@ -296,6 +301,14 @@ class MetaGraph(BaseGraph):
         metapaths = [metapath for metapath in metapaths
                      if metapath.target() == target]
         return metapaths
+
+    def extract_all_metapaths(self, max_length):
+        """
+        Extract all metapaths up to max_length possible by walking the
+        metagraph. Unlike extract_metapaths, this function is does not limit
+        to a specific source and target metanode.
+        """
+        raise NotImplementedError
 
     def get_metapath(self, edges):
         """Store exactly one of each metapath."""
