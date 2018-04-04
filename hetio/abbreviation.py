@@ -30,31 +30,26 @@ def validate_abbreviations(metagraph):
         print('Duplicated metanode abbrevs:', duplicated_metanode_abbrevs)
         valid = False
 
-    # Check capitalizations
-    # metanode abbreviations should be uppercase
+    # Check metanode abbreviation violations
     for metanode in metanodes:
         abbrev = metanode.abbrev
+        # metanode abbreviations should be uppercase
         if not abbrev.isupper():
             print('lowercase metanode abbreviation:', abbrev)
             valid = False
-
-    # Check if metanode abbreviation starts with a digit
-    for metanode in metanodes:
-        abbrev = metanode.abbrev
+        # metanode abbreviation should not start with a digit
         if abbrev[0].isdigit():
             print('digit leading metanode abbreviation:', abbrev)
             valid = False
 
-    # metaedge abbreviations should be lowercase
+    # Check metaedge abbreviation violations
     for metaedge in metaedges:
         abbrev = metaedge.kind_abbrev
+        # metaedge abbreviations should be lowercase
         if not abbrev.islower():
             print('uppercase metaedge abbreviation:', abbrev)
             valid = False
-
-    # Check that the metaedges do not contain digits
-    for metaedge in metaedges:
-        abbrev = metaedge.kind_abbrev
+        # metaedge abbreviations should not contain digits
         if any(character.isdigit() for character in abbrev):
             print('digit in metaedge abbreviation:', abbrev)
             valid = False
@@ -126,7 +121,8 @@ def metaedges_from_metapath(abbreviation, standardize_by=None):
     if isinstance(standardize_by, hetio.hetnet.MetaGraph):
         metapath = standardize_by.metapath_from_abbrev(abbreviation)
         return [metaedge.get_standard_abbrev() for metaedge in metapath]
-    pattern = regex.compile('(?<=^|[a-z<>])[A-Z0-9]+[a-z<>]+[A-Z0-9]+')
+    regex_string = '(?<=^|[a-z<>])[A-Z][A-Z0-9]*+[a-z<>]+[A-Z][A-Z0-9]*+'
+    pattern = regex.compile(regex_string)
     metaedge_abbrevs = pattern.findall(abbreviation, overlapped=True)
     if standardize_by is None:
         return metaedge_abbrevs
