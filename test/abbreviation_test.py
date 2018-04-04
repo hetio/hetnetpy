@@ -53,3 +53,19 @@ def test__find_abbrevs():
     find_abbrevs = hetio.abbreviation.find_abbrevs
     for kind_to_abbrev in kind_to_abbrevs:
         assert kind_to_abbrev == find_abbrevs(kind_to_abbrev.keys())
+
+
+def test__metaedges_from_metapath():
+    """
+    Get metaedge subsets from metapath abbreviation
+    """
+    metapath_to_metaedge = {
+            'GpC1': ['GpC1'],
+            'GiGpBP': ['GiG', 'GpBP'],
+            'XxXyYyyYzzZZzZZZ': ['XxX', 'XyY', 'YyyY', 'YzzZZ', 'ZZzZZZ'],
+            'X111yX2zY3Y3Y': ['X111yX2', 'X2zY3Y3Y']
+        }
+
+    for metapath in metapath_to_metaedge:
+        result = hetio.abbreviation.metaedges_from_metapath(metapath)
+        assert result == metapath_to_metaedge[metapath]
