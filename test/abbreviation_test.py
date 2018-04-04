@@ -62,7 +62,7 @@ def test__metaedges_from_metapath():
     metapath_to_metaedge = {
             'GpC1': ['GpC1'],
             'GiGpBP': ['GiG', 'GpBP'],
-            'G1Fp1C2pC1': ['G1Fp1C2', '1C2pC1']
+            'XxXyYyyYzzZZzZZZ': ['XxX', 'XyY', 'YyyY', 'YzzZZ', 'ZZzZZZ']
         }
 
     for metapath in metapath_to_metaedge:
