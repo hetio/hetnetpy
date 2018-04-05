@@ -1,5 +1,7 @@
 import pathlib
 
+import pytest
+
 import hetio.readwrite
 
 
@@ -47,3 +49,24 @@ def test_extract_metapaths():
     # Test unspecified target starting from Symptom
     metapaths = metagraph.extract_metapaths('Symptom', None, max_length=3)
     assert len(metapaths) == 89
+
+
+@pytest.mark.parametrize('max_length,exclude_inverts,n_metapaths', [
+    (0, False, 0),
+    (0, True, 0),
+    (1, False, 44),
+    (1, True, 24),
+    (2, False, 484),
+    (2, True, 266),
+    (3, False, 4312),
+    (3, True, 2205),
+])
+def test_extract_all_metapaths(max_length, exclude_inverts, n_metapaths):
+    """
+    Test metapath extraction on the Hetionet v1.0 metagraph. Note the expected
+    values were computed using the extract_all_metapaths function and have not
+    been independently verified.
+    """
+    metagraph = get_hetionet_metagraph()
+    metapaths = metagraph.extract_all_metapaths(max_length, exclude_inverts)
+    assert len(metapaths) == n_metapaths
