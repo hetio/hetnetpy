@@ -274,14 +274,17 @@ class MetaGraph(BaseGraph):
             inverse.inverted = True
             self.n_inverts += 1
 
-    def extract_metapaths(self, source_kind, target_kind, max_length):
+    def extract_metapaths(self, source, target=None, max_length=4):
         """
-        Extact all metapaths from the source_kind metanode to the target_kind
-        metanode up to length max_length. These metapaths are equivalent to
-        all walks on the metagraph from source_kind to target_kind.
+        Extact all metapaths from the source metanode to the target metanode up
+        to length max_length. These metapaths are equivalent to all walks on
+        the metagraph from source to target. If target is None (default), then
+        metapaths to any target node are returned.
         """
-        source = self.node_dict[source_kind]
-        target = self.node_dict[target_kind]
+        if not isinstance(source, MetaNode):
+            source = self.node_dict[source]
+        if target and not isinstance(target, MetaNode):
+            target = self.node_dict[target]
 
         assert max_length >= 0
         if max_length == 0:
@@ -298,17 +301,37 @@ class MetaGraph(BaseGraph):
                     current_metapaths.append(new_metapath)
             metapaths.extend(current_metapaths)
             previous_metapaths = current_metapaths
-        metapaths = [metapath for metapath in metapaths
-                     if metapath.target() == target]
+
+        if target:
+            metapaths = [metapath for metapath in metapaths
+                         if metapath.target() == target]
         return metapaths
 
-    def extract_all_metapaths(self, max_length):
+    def extract_all_metapaths(self, max_length, exclude_inverts=False):
         """
         Extract all metapaths up to max_length possible by walking the
         metagraph. Unlike extract_metapaths, this function is does not limit
-        to a specific source and target metanode.
+        to a specific source metanode. Unlike metaedges/edges, metapaths do not
+        have standard orientations. However, it is possible for a metapath to
+        be an inverse of another metapath, e.g. CbGaD and DaGbC.
+
+        Set exclude_inverts=True to return only one orientation of two inverse
+        metapaths. This may be useful if metapaths are being used to compute
+        symmetric metrics, such as path count or DWPC. In this case, you may
+        want to optimize by computing values for only one metapath orientation.
         """
-        raise NotImplementedError
+        metapaths = list()
+        metapaths_with_inverses = set()
+        metanodes = self.get_nodes()
+        for source in metanodes:
+            from_source = self.extract_metapaths(source, max_length=max_length)
+            for metapath in from_source:
+                if exclude_inverts and metapath in metapaths_with_inverses:
+                    continue
+                metapaths.append(metapath)
+                for covered in metapath, metapath.inverse:
+                    metapaths_with_inverses.add(covered)
+        return metapaths
 
     def get_metapath(self, edges):
         """Store exactly one of each metapath."""
