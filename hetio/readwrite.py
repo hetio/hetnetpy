@@ -10,6 +10,12 @@ import random
 import re
 from urllib.request import urlopen
 
+# Import fspath function to convert path-like objects to string paths
+try:
+    from os import fspath
+except ImportError:
+    fspath = str
+
 from hetio.hetnet import Graph, MetaGraph
 
 
@@ -47,6 +53,7 @@ def open_read_file(path, text_mode=True):
     text_mode : bool
         whether to return a text mode or byte mode file
     """
+    path = fspath(path)
     opener = get_opener(path)
     mode = 'rt' if text_mode else 'rb'
     # Read from URL
@@ -73,6 +80,7 @@ def open_write_file(path, mode='wt'):
     Return a write-text mode file object from the path.
     Automatically detects and supports gzip/bzip2 compression.
     """
+    path = fspath(path)
     opener = get_opener(path)
     return opener(path, mode)
 
@@ -132,11 +140,13 @@ def dump(writable, path, formatting=None):
 
 def detect_formatting(path):
     """Detect the formatting using filename extension"""
+    path = fspath(path)
     if '.json' in path:
         return 'json'
     if '.pkl' in path:
         return 'pkl'
     raise ValueError('Cannot detect the format of {}'.format(path))
+
 
 encoding_to_module = {
     'gzip': 'gzip',
