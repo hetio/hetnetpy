@@ -29,7 +29,7 @@ def test_extract_metapaths():
     assert metapaths == []
 
     # Test max_length=4: the metapaths used in Project Rephetio (note that
-    # Project Rephetio excluded length 1 metapaths) resulting in 1206 metapaths.
+    # Project Rephetio excluded length 1 metapaths resulting in 1206 metapaths).
     metapaths = metagraph.extract_metapaths('Compound', 'Disease', max_length=4)
     assert len(metapaths) == 1208
     assert len([m for m in metapaths if len(m) == 1]) == 2

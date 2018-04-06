@@ -309,7 +309,7 @@ class MetaGraph(BaseGraph):
 
     def extract_all_metapaths(self, max_length, exclude_inverts=False):
         """
-        Extract all metapaths up to max_length possible by walking the
+        Extract all possible metapaths up to max_length by walking the
         metagraph. Unlike extract_metapaths, this function is does not limit
         to a specific source metanode. Unlike metaedges/edges, metapaths do not
         have standard orientations. However, it is possible for a metapath to
@@ -329,8 +329,8 @@ class MetaGraph(BaseGraph):
                 if exclude_inverts and metapath in metapaths_with_inverses:
                     continue
                 metapaths.append(metapath)
-                for covered in metapath, metapath.inverse:
-                    metapaths_with_inverses.add(covered)
+                for covered_metapath in metapath, metapath.inverse:
+                    metapaths_with_inverses.add(covered_metapath)
         return metapaths
 
     def get_metapath(self, edges):
