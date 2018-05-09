@@ -1,9 +1,9 @@
 from collections import OrderedDict
-
-import numpy
-import scipy.sparse
+from logging import warning
 
 import hetio.hetnet
+import numpy
+import scipy.sparse
 
 
 def get_node_to_position(graph, metanode):
@@ -83,7 +83,13 @@ def sparsify_or_densify(matrix, dense_threshold=0.3):
     densify = density >= dense_threshold
     sparse_input = scipy.sparse.issparse(matrix)
     if sparse_input and densify:
-        return matrix.toarray()
+        try:
+            return matrix.toarray()
+        except ValueError:
+            warning(("scipy.sparse does not support the conversion "
+                     "of numpy.float16 matrices to numpy.arrays. Converting "
+                     "to numpy.float32 dtype"))
+            return matrix.astype(numpy.float32).toarray()
     if not sparse_input and not densify:
         return scipy.sparse.csc_matrix(matrix)
     return matrix
