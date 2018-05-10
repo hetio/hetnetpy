@@ -1,6 +1,6 @@
 from collections import OrderedDict
-from logging import warning
 
+import logging
 import numpy
 import scipy.sparse
 
@@ -83,13 +83,15 @@ def sparsify_or_densify(matrix, dense_threshold=0.3):
     density = (matrix != 0).sum() / numpy.prod(matrix.shape)
     densify = density >= dense_threshold
     sparse_input = scipy.sparse.issparse(matrix)
+    dtype = matrix.dtype
     if sparse_input and densify:
         try:
             return matrix.toarray()
         except ValueError:
-            warning(("scipy.sparse does not support the conversion "
-                     "of numpy.float16 matrices to numpy.arrays."))
-            return matrix.astype(numpy.float32).toarray().astype(numpy.float16)
+            logging.warning("scipy.sparse does not support the conversion "
+                            "of numpy.float16 matrices to numpy.arrays. See "
+                            "https://git.io/vpXyy")
+            return matrix.astype(numpy.float32).toarray().astype(dtype)
     if not sparse_input and not densify:
-        return scipy.sparse.csc_matrix(matrix)
+        return scipy.sparse.csc_matrix(matrix, dtype=dtype)
     return matrix
