@@ -136,6 +136,9 @@ def metaedges_from_metapath(abbreviation, standardize_by=None):
 
 
 def metaedge_id_from_abbreviation(metagraph, abbreviation):
+    """
+    Return the metaedge_id corresponding to a metaedge abbreviation.
+    """
     source_abbrev, target_abbrev = regex.split('[a-z<>]+', abbreviation)
     edge_abbrev = regex.search('[a-z<>]+', abbreviation).group()
     abbrev_to_kind = {v: k for k, v in metagraph.kind_to_abbrev.items()}

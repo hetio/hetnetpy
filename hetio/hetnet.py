@@ -220,8 +220,19 @@ class MetaGraph(BaseGraph):
         # Assume metanode must be an abbreviation
         return self.get_node(self.abbrev_to_kind[metanode])
 
-    def get_metaedge(self, metanode):
-        pass
+    def get_metaedge(self, metaedge):
+        """
+        Return the metaedge specified by the input, which can be either a:
+         - MetaEdge (passthrough)
+         - metaedge_id (tuple)
+         - metaedge abbreviation
+        """
+        if isinstance(metaedge, MetaEdge):
+            return metaedge
+        if isinstance(metaedge, tuple):
+            return self.get_edge(metaedge)
+        metaedge_id = hetio.abbreviation.metaedge_id_from_abbreviation(self, metaedge)
+        return self.get_edge(metaedge_id)
 
     @staticmethod
     def from_edge_tuples(metaedge_tuples, kind_to_abbrev=None):

@@ -104,8 +104,9 @@ def test_disase_gene_example():
     """
     Recreate hetnet from https://doi.org/10.1371/journal.pcbi.1004259.g002.
     """
+    metaedge_id_GaD = 'Gene', 'Disease', 'association', 'both'
     metaedge_tuples = [
-        ('Gene', 'Disease', 'association', 'both'),
+        metaedge_id_GaD,
         ('Gene', 'Tissue', 'expression', 'both'),
         ('Disease', 'Tissue', 'localization', 'both'),
         ('Gene', 'Gene', 'interaction', 'both'),
@@ -117,6 +118,11 @@ def test_disase_gene_example():
     assert metagraph.get_metanode(gene_metanode) == gene_metanode
     assert metagraph.get_metanode('Gene') == gene_metanode
     assert metagraph.get_metanode('G') == gene_metanode
+    metaedge_GaD = metagraph.get_edge(metaedge_id_GaD)
+    assert metagraph.get_metaedge(metaedge_GaD) == metaedge_GaD
+    assert metaedge_id_GaD == metaedge_GaD.get_id()
+    assert metagraph.get_metaedge(metaedge_id_GaD) == metaedge_GaD
+    assert metagraph.get_metaedge('GaD') == metaedge_GaD
 
     # Create graph
     graph = hetio.hetnet.Graph(metagraph)
