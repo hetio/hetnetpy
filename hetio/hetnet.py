@@ -204,8 +204,35 @@ class BasePath(IterMask):
 class MetaGraph(BaseGraph):
 
     def __init__(self):
-        """ """
         BaseGraph.__init__(self)
+
+    def get_metanode(self, metanode):
+        """
+        Return the metanode specified by the input, which can be either a:
+         - MetaNode (passthrough)
+         - metanode kind (str)
+         - metanode abbreviation (str)
+        """
+        if isinstance(metanode, MetaNode):
+            return metanode
+        if metanode in self.node_dict:
+            return self.get_node(metanode)
+        # Assume metanode must be an abbreviation
+        return self.get_node(self.abbrev_to_kind[metanode])
+
+    def get_metaedge(self, metaedge):
+        """
+        Return the metaedge specified by the input, which can be either a:
+         - MetaEdge (passthrough)
+         - metaedge_id (tuple)
+         - metaedge abbreviation
+        """
+        if isinstance(metaedge, MetaEdge):
+            return metaedge
+        if isinstance(metaedge, tuple):
+            return self.get_edge(metaedge)
+        metaedge_id = hetio.abbreviation.metaedge_id_from_abbreviation(self, metaedge)
+        return self.get_edge(metaedge_id)
 
     @staticmethod
     def from_edge_tuples(metaedge_tuples, kind_to_abbrev=None):
@@ -231,6 +258,7 @@ class MetaGraph(BaseGraph):
     def set_abbreviations(self, kind_to_abbrev):
         """Add abbreviations as an attribute for metanodes and metaedges"""
         self.kind_to_abbrev = kind_to_abbrev
+        self.abbrev_to_kind = {v: k for k, v in kind_to_abbrev.items()}
         for kind, metanode in self.node_dict.items():
             metanode.abbrev = kind_to_abbrev[kind]
         for metaedge in self.edge_dict.values():
@@ -281,10 +309,9 @@ class MetaGraph(BaseGraph):
         the metagraph from source to target. If target is None (default), then
         metapaths to any target node are returned.
         """
-        if not isinstance(source, MetaNode):
-            source = self.node_dict[source]
-        if target and not isinstance(target, MetaNode):
-            target = self.node_dict[target]
+        source = self.get_metanode(source)
+        if target:
+            target = self.get_metanode(target)
 
         assert max_length >= 0
         if max_length == 0:

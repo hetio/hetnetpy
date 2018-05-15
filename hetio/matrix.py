@@ -29,7 +29,7 @@ def metaedge_to_adjacency_matrix(
     Parameters
     ==========
     graph : hetio.hetnet.graph
-    metaedge : hetio.hetnet.MetaEdge
+    metaedge : hetio.hetnet.MetaEdge or an alternative metaedge specification
     dtype : type
     dense_threshold : float (0 ≤ dense_threshold ≤ 1)
         minimum proportion of nonzero values at which to output a dense matrix.
@@ -41,9 +41,7 @@ def metaedge_to_adjacency_matrix(
     column_names : list
     matrix : numpy.ndarray or scipy.sparse
     """
-    if not isinstance(metaedge, hetio.hetnet.MetaEdge):
-        # metaedge is an abbreviation
-        metaedge = graph.metagraph.metapath_from_abbrev(metaedge)[0]
+    metaedge = graph.metagraph.get_metaedge(metaedge)
     source_nodes = list(get_node_to_position(graph, metaedge.source))
     target_node_to_position = get_node_to_position(graph, metaedge.target)
     shape = len(source_nodes), len(target_node_to_position)
