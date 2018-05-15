@@ -111,6 +111,14 @@ def test_disase_gene_example():
         ('Gene', 'Gene', 'interaction', 'both'),
     ]
     metagraph = hetio.hetnet.MetaGraph.from_edge_tuples(metaedge_tuples)
+
+    # Test metagraph getter methods
+    gene_metanode = metagraph.node_dict['Gene']
+    assert metagraph.get_metanode(gene_metanode) == gene_metanode
+    assert metagraph.get_metanode('Gene') == gene_metanode
+    assert metagraph.get_metanode('G') == gene_metanode
+
+    # Create graph
     graph = hetio.hetnet.Graph(metagraph)
     nodes = dict()
 
