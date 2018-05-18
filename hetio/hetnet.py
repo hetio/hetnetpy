@@ -234,6 +234,20 @@ class MetaGraph(BaseGraph):
         metaedge_id = hetio.abbreviation.metaedge_id_from_abbreviation(self, metaedge)
         return self.get_edge(metaedge_id)
 
+    def get_metapath(self, metapath):
+        """
+        Return the metapath specified by the input, which can be either a:
+         - MetaPath object (passthrough)
+         - tuple of edges
+         - metapath abbreviation
+        """
+        if isinstance(metapath, MetaPath):
+            return metapath
+        if isinstance(metapath, tuple):
+            return self.get_metapath_from_edges(metapath)
+        if isinstance(metapath, str):
+            return self.metapath_from_abbrev(metapath)
+
     @staticmethod
     def from_edge_tuples(metaedge_tuples, kind_to_abbrev=None):
         """Create a new metagraph defined by its edges."""
@@ -317,13 +331,13 @@ class MetaGraph(BaseGraph):
         if max_length == 0:
             return []
 
-        metapaths = [self.get_metapath((edge, )) for edge in source.edges]
+        metapaths = [self.get_metapath_from_edges((edge, )) for edge in source.edges]
         previous_metapaths = list(metapaths)
         for depth in range(1, max_length):
             current_metapaths = list()
             for metapath in previous_metapaths:
                 for add_edge in metapath.target().edges:
-                    new_metapath = self.get_metapath(
+                    new_metapath = self.get_metapath_from_edges(
                         metapath.edges + (add_edge, ))
                     current_metapaths.append(new_metapath)
             metapaths.extend(current_metapaths)
@@ -360,7 +374,7 @@ class MetaGraph(BaseGraph):
                     metapaths_with_inverses.add(covered_metapath)
         return metapaths
 
-    def get_metapath(self, edges):
+    def get_metapath_from_edges(self, edges):
         """Store exactly one of each metapath."""
         try:
             return self.path_dict[edges]
@@ -384,8 +398,8 @@ class MetaGraph(BaseGraph):
                 metapath.sub = None
                 inverse.sub = None
             else:
-                metapath.sub = self.get_metapath(sub_edges)
-                inverse.sub = self.get_metapath(inverse_edges[1:])
+                metapath.sub = self.get_metapath_from_edges(sub_edges)
+                inverse.sub = self.get_metapath_from_edges(inverse_edges[1:])
 
             return metapath
 
@@ -397,7 +411,7 @@ class MetaGraph(BaseGraph):
             metaedge_id = hetio.abbreviation.metaedge_id_from_abbreviation(
                 self, metaedge_abbrev)
             metaedges.append(self.get_edge(metaedge_id))
-        return self.get_metapath(tuple(metaedges))
+        return self.get_metapath_from_edges(tuple(metaedges))
 
 
 class MetaNode(BaseNode):

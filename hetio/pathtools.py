@@ -126,9 +126,9 @@ def paths_between(graph, source, target, metapath,
 
     split_index = len(metapath) // 2
 
-    get_metapath = graph.metagraph.get_metapath
-    metapath_head = get_metapath(metapath[:split_index])
-    metapath_tail = get_metapath(
+    get_metapath_from_edges = graph.metagraph.get_metapath_from_edges
+    metapath_head = get_metapath_from_edges(metapath[:split_index])
+    metapath_tail = get_metapath_from_edges(
         tuple(mp.inverse for mp in reversed(metapath[split_index:])))
     paths_head = paths_from(graph, source, metapath_head, duplicates, masked,
                             exclude_nodes, exclude_edges)
