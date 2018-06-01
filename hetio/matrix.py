@@ -78,7 +78,11 @@ def sparsify_or_densify(matrix, dense_threshold=0.3):
     =======
     matrix : numpy.ndarray or scipy.sparse
     """
-    density = (matrix != 0).sum() / numpy.prod(matrix.shape)
+    if scipy.sparse.issparse(matrix):
+        nnz = matrix.nnz
+    else:
+        nnz = numpy.count_nonzero(matrix)
+    density = nnz / numpy.prod(matrix.shape)
     densify = density >= dense_threshold
     sparse_input = scipy.sparse.issparse(matrix)
     dtype = matrix.dtype
