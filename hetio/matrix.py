@@ -4,18 +4,30 @@ import logging
 import numpy
 import scipy.sparse
 
-import hetio.hetnet
+
+def get_nodes(graph, metanode):
+    """
+    Return a list of nodes for a given metanode, in sorted order.
+    """
+    metanode = graph.metagraph.get_metanode(metanode)
+    metanode_to_nodes = graph.get_metanode_to_nodes()
+    nodes = sorted(metanode_to_nodes[metanode])
+    return nodes
+
+
+def get_node_identifiers(graph, metanode):
+    """
+    Returns a list of identifiers for a given metanode
+    """
+    nodes = get_nodes(graph, metanode)
+    return [node.identifier for node in nodes]
 
 
 def get_node_to_position(graph, metanode):
     """
     Given a metanode, return a dictionary of node to position
     """
-    if not isinstance(metanode, hetio.hetnet.MetaNode):
-        # metanode is a name
-        metanode = graph.metagraph.node_dict[metanode]
-    metanode_to_nodes = graph.get_metanode_to_nodes()
-    nodes = sorted(metanode_to_nodes[metanode])
+    nodes = get_nodes(graph, metanode)
     node_to_position = OrderedDict((n, i) for i, n in enumerate(nodes))
     return node_to_position
 
