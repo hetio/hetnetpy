@@ -613,6 +613,14 @@ class Graph(BaseGraph):
             metaedge_to_edges[edge.metaedge].append(edge)
         return metaedge_to_edges
 
+    def count_nodes(self, metanode):
+        """
+        Count the number of nodes for the specified metanode.
+        """
+        metanode = self.metagraph.get_metanode(metanode)
+        nodes = self.get_metanode_to_nodes()[metanode]
+        return len(nodes)
+
     def get_subgraph(self, metanodes=None, metaedges=None, nodes=None):
         """
         Return a subgraph of the hetnet. By default, creates a copy of the

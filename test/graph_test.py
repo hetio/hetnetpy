@@ -178,3 +178,5 @@ def test_disase_gene_example():
                    'localization', 'both')
 
     assert graph.n_edges == 14
+    assert graph.count_nodes('Disease') == 2
+    assert graph.count_nodes(gene_metanode) == 7
