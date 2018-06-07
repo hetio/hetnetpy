@@ -39,11 +39,13 @@ def test_extract_metapaths():
 
     # Test metapaths are sorted
     abbreviations = [str(metapath) for metapath in metapaths]
-    assert abbreviations[:4] == [
+    assert abbreviations[:6] == [
         'CpD',
         'CtD',
-        'CbGaD',
-        'CbGdD',
+        'CrCpD',
+        'CrCtD',
+        'CpDrD',
+        'CtDrD',
     ]
 
     # Test unspecified target starting from Compound
