@@ -204,11 +204,9 @@ class BasePath(IterMask):
         return (type(other) is type(self)) and (self.edges == other.edges)
 
     def __lt__(self, other):
-        if len(self) < len(other):
-            return True
-        if len(self) > len(other):
-            return False
-        return self.edges < other.edges
+        if len(self) == len(other):
+            return self.edges < other.edges
+        return len(self) < len(other)
 
 
 class MetaGraph(BaseGraph):

@@ -40,8 +40,8 @@ def test_extract_metapaths():
     # Test metapaths are sorted
     abbreviations = [str(metapath) for metapath in metapaths]
     assert abbreviations[:4] == [
-        'CtD',
         'CpD',
+        'CtD',
         'CbGaD',
         'CbGdD',
     ]
