@@ -119,6 +119,9 @@ class BaseEdge(ElemMask):
     def __eq__(self, other):
         return type(other) is type(self) and self.get_id() == other.get_id()
 
+    def __lt__(self, other):
+        return self.get_id() < other.get_id()
+
     def __str__(self):
         source, target, kind, direction = self.get_id()
         dir_abbrev = direction_to_abbrev[direction]
@@ -199,6 +202,13 @@ class BasePath(IterMask):
 
     def __eq__(self, other):
         return (type(other) is type(self)) and (self.edges == other.edges)
+
+    def __lt__(self, other):
+        if len(self) < len(other):
+            return True
+        if len(self) > len(other):
+            return False
+        return self.edges < other.edges
 
 
 class MetaGraph(BaseGraph):
@@ -346,7 +356,7 @@ class MetaGraph(BaseGraph):
         if target:
             metapaths = [metapath for metapath in metapaths
                          if metapath.target() == target]
-        return metapaths
+        return sorted(metapaths)
 
     def extract_all_metapaths(self, max_length, exclude_inverts=False):
         """
@@ -361,18 +371,15 @@ class MetaGraph(BaseGraph):
         symmetric metrics, such as path count or DWPC. In this case, you may
         want to optimize by computing values for only one metapath orientation.
         """
-        metapaths = list()
-        metapaths_with_inverses = set()
+        metapaths = set()
         metanodes = self.get_nodes()
         for source in metanodes:
             from_source = self.extract_metapaths(source, max_length=max_length)
             for metapath in from_source:
-                if exclude_inverts and metapath in metapaths_with_inverses:
-                    continue
-                metapaths.append(metapath)
-                for covered_metapath in metapath, metapath.inverse:
-                    metapaths_with_inverses.add(covered_metapath)
-        return metapaths
+                if exclude_inverts:
+                    metapath, _ = sorted([metapath, metapath.inverse])
+                metapaths.add(metapath)
+        return sorted(metapaths)
 
     def get_metapath_from_edges(self, edges):
         """Store exactly one of each metapath."""
