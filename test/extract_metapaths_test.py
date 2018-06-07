@@ -37,6 +37,15 @@ def test_extract_metapaths():
     assert len([m for m in metapaths if len(m) == 3]) == 121
     assert len([m for m in metapaths if len(m) == 4]) == 1072
 
+    # Test metapaths are sorted
+    abbreviations = [str(metapath) for metapath in metapaths]
+    assert abbreviations[:4] == [
+        'CtD',
+        'CpD',
+        'CbGaD',
+        'CbGdD',
+    ]
+
     # Test unspecified target starting from Compound
     metapaths = metagraph.extract_metapaths('Compound', None, max_length=1)
     assert len(metapaths) == 8
