@@ -31,4 +31,3 @@ deploy:
       repo: dhimmel/hetio
       tags: true
       distributions: sdist bdist_wheel
-      branch: deploy
