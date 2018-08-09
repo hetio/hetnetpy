@@ -12,7 +12,7 @@
 
 **Impetus**: Development originated with a [study](https://doi.org/10.1371/journal.pcbi.1004259 "Heterogeneous Network Edge Prediction: A Data Integration Approach to Prioritize Disease-Associated Genes") to predict disease-associated genes and continues with a successive [study](https://doi.org/10.7554/eLife.26726 "Systematic integration of biomedical knowledge prioritizes drugs for repurposing") to repurpose drugs.
 
-**Caution**: Documentation is currently spotty, testing coverage is moderate, and the API is not fully stable. Contributions are welcome. Please use [GitHub Issues](https://github.com/dhimmel/hetio/issues) for feedback, questions, or troubleshooting.
+**Caution**: Documentation is currently spotty, testing coverage is moderate, and the API is not fully stable. Contributions are welcome. Please use [GitHub Issues](https://github.com/hetio/hetio/issues) for feedback, questions, or troubleshooting.
 
 ## Installation
 

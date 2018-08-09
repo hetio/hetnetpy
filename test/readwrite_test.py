@@ -35,7 +35,7 @@ def test_metagraph_reading_from_urls():
     Test reading metagraphs from URLs.
     """
     url = 'https://github.com/{repo}/raw/{commit}/{path}'.format(
-        repo='dhimmel/hetio',
+        repo='hetio/hetio',
         commit='master',
         path='test/data/hetionet-v1.0-metagraph.json',
     )
