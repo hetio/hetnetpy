@@ -1,8 +1,8 @@
 # Hetnets in Python
 
 [![Latest DOI](https://zenodo.org/badge/14475/dhimmel/hetio.svg)](https://zenodo.org/badge/latestdoi/14475/dhimmel/hetio)
-[![GitHub issues](https://img.shields.io/github/issues/dhimmel/hetio.svg)](https://github.com/dhimmel/hetio/issues)
-[![Build Status](https://travis-ci.org/dhimmel/hetio.svg?branch=master)](https://travis-ci.org/dhimmel/hetio)
+[![GitHub issues](https://img.shields.io/github/issues/hetio/hetio.svg)](https://github.com/hetio/hetio/issues)
+[![Build Status](https://travis-ci.com/hetio/hetio.svg?branch=master)](https://travis-ci.com/hetio/hetio)
 
 ## Background
 
@@ -16,7 +16,7 @@
 
 ## Installation
 
-[![PyPI](https://img.shields.io/pypi/v/hetio.svg)](https://pypi.python.org/pypi/hetio)
+[![PyPI](https://img.shields.io/pypi/v/hetio.svg)](https://pypi.org/project/hetio/)
 
 Please use Python 3.4 or higher. To install the current PyPI version (recommended), run:
 
@@ -27,7 +27,7 @@ pip install hetio
 For the latest GitHub version, run:
 
 ```sh
-pip install git+https://github.com/dhimmel/hetio.git#egg=hetio
+pip install git+https://github.com/hetio/hetio.git#egg=hetio
 ```
 
 For development, clone or download-and-extract the repository. Then run `pip install --editable .` from the repository's root directory. The `--editable` flag specifies [editable](https://pythonhosted.org/setuptools/setuptools.html#development-mode) mode, so updating the source updates your installation.
@@ -46,7 +46,7 @@ A Graph object stores a heterogeneous network and relies on the following classe
 ## Release instructions
 
 This section is only relevant for project maintainers.
-Travis CI deployments are used to upload releases to [PyPI](https://pypi.org/project/hetio) and [GitHub releases](https://github.com/dhimmel/hetio/releases).
+Travis CI deployments are used to upload releases to [PyPI](https://pypi.org/project/hetio) and [GitHub releases](https://github.com/hetio/hetio/releases).
 To create a new release, do the following:
 
 1. Bump the version in [`__init__.py`](hetio/__init__.py).
@@ -62,7 +62,7 @@ To create a new release, do the following:
   git commit --message "Upgrade to $TAG"
   git push
   git tag --annotate $TAG --file release-notes/$TAG.*
-  git push --tags
+  git push upstream $TAG
   ```
 
-4. Recommended: Edit the GitHub release to improve formating and add a Zenodo badge.
+4. Recommended: Edit the GitHub release to improve formatting and add a Zenodo badge.
