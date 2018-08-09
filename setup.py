@@ -28,7 +28,7 @@ setuptools.setup(
     # Package details
     name='hetio',
     version=version,
-    url='https://github.com/dhimmel/hetio',
+    url='https://github.com/hetio/hetio',
     description='Hetnets in Python',
     long_description_content_type='text/markdown',
     long_description=long_description,
