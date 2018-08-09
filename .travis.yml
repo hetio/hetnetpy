@@ -13,21 +13,21 @@ script:
 deploy:
   - provider: releases
     api_key:
-      secure: EzaYFdg3fDapTW1jkM3ITU/BjcXJU71reuhUt3HzUglJzWH5/JGayjv77P+uku6SYcSNOl8IRzxAmreqlpsPUp8kYNbA995qKaw2taQQ0HcR39D3etiaVdFhS7AHIjPGMfNNtL+8YFMuBnRYG6R2OItoVtdFJ+BbFMbqxR23uNF1JcGnYURvP79GQoGr8xb+UgNPAWdJN0/XjYefIkRou42Rb0Lq97OIkSY34RofDMGLvjYjB8mhfIT/EIUiutdIovm9l9t6PxN0ULOilfi9QuMuRJZsGCKGMwTJ2Hg9gaZA0gCR0Q/KO1yhwpGe/OD9JofATPWKy17jRNy83vjQeAWb1banx4NtN7xZvNlWQD5imU/X3Rz79gxpEpFOBWFvpjlASViUxFncORGD6MgQr4jau2InIQguwy1arTaNcNfEWtYRACX8UQII8Pgz6kwhlKkfThEcVnzq7h+W636oujZL5DXASHdigiEkfXGNuIjOyT2cedfipk6BCtiIpBwdWKz6LWx/Whq/kW1TLhYtz7grk/MvGTyA9mdyf32j5uHxupu/FtEeMSoH+zclcO2U0I8EhMy5DjyiBhK1f0IhAcyC8ws+ckRAaBktCq2LsyXYIhDFji4cBR5ODkW/NRvpRmRlWlx6IMf+Uxe66zjilG4/sVmNZBOJI+ynJ2t21S4=
+      secure: wk1yDPq/hfKjvWtmBegLE8BnqjosbGjkCahFWOrtpiUG/lFW+7RRuQG9yQEUNkXjJ3ClIvRIPTXhGxywlQb1OXChhRXw5owykJxbBGDubSqnQGdGrX9nYVQa0pF70i5Lq6leabTLlSqJklxIYp8Ccv+qAlc7tP1cYI9SxKrdieU1Hq7mXC21YMsyjFWNMG+p8FH+srp3DhC1XfyNyrMJFDwFKbFyty0q1HUobD6rT8mjVmTJanlPBMNTiAkJNiZZ+Je4WEUXkrvFf85HRnUYMKg8MPPfz+sDGaV8WOHsApS0BJNX+bCPYzNITykLLdt2YzaFf6zkxDXTPvgWKuyrKanDavA+j06+vQCWRyiOzNWSSJg4ccr+UC8c64hy0T/dkKc6xaDLjXJRMCpHeBHa6h2RgJAHq8m8lH+OkHR33MXq5TTyRg88wHn2nzI6oLbNkiJhWr9IANREAKmpG5MjfUT3ogi4myxeGcVnGw1B9UJmxOOWAHTDhUtxw8nIGzgtrx4oUxQLDqds90hkH0vpFLbiAZ14rdZYaqcFFmEIp5yDw1pJu8bf3tUfQzNz0+EuoKzGwfjyH8UjlW7//PH7aAukMpa664bNlQ4p3bJZA0tYNdmwTYebf98N4vmv+zHFaEMu57rzlFtwxiltIciLP2on1Qvdfd65ukVipS3Q9Vo=
     file_glob: true
     file:
       - dist/hetio-*.tar.gz
       - dist/hetio-*.whl
     on:
       python: '3.6'
-      repo: dhimmel/hetio
+      repo: hetio/hetio
       tags: true
   - provider: pypi
     user: dhimmel
     password:
-      secure: DG8uk3jcTfy6veFO7G0EpSK6KzCsCJV05dyOj/gixuZ6POJLEfOeDO97AIO1JMwZCcSfEoHQrY/udOqmh45sMShEW/CICDo4a+BkQl/7XbnNa7sul7Gz16HugkRdAG2SmqGY8ZTUnawdfn6HAnSojhduZ1xKpoxQNXwfExt/YOHKaj4c9jdknmX4m+Y6FitciA/l3Bbd98VpAvIs8rdJvSQHVKSHLXKwKLjJUF+LeWaL663sxmKJo1LcH99b805UIbf8eIpPTcY2j/sZTIavrbhSpllF864GS260yLWdSsjP/yhGtmiHrPKdlFInwoVlPMMmbrQkkocSmgLnnOe9lXekOrb7bRbE/BB3n6Q1GQWoBROLkMuQW+uP3AU9pAx9Md4b7BSkvsvRANaJrASXGxqJT5fYGjWIj4A43Giq6nhzH2wVfBpC9Qovp12mrZ0O8AS8np0FYmyJhFxc1upfA5js8UbEeHq6Kf46ka6pWaWUZG/nRr2cEXGvekbNDeXhirzNYCl+h/SLpva9iCHW3KBc+9qUKujueba63kty0j4UsS6Tfqw12r5/WNfPbQ0OxFNBBQRpFN08jmQ2kFTbFEscLgPlaxezuZ4JVOqDenWElG+no2mdiTB+o27DJHxQQnrL9XTKJgDNYSohzW19dPOtBq5bJT5L7J2ZehqMNj8=
+      secure: i6dHe2W+ynK81i/yjdCNqhXZ39rGJcdA+Nmp1W4Qg4NjizN3lozKmS9vHObdXRrobyn+AbCXPJ6GqyXPlT5+MbOtiTYWfvWm2Yd5zJff9GYyKkh4RBvmYrFgpkUJrb6mxmn+Gdo2yRA2aU2P+IBdY8aqx7/wvCBB6Z1e1xelOaZgOamCI8yfwsjXjuim8lP1IM6ayHjhTtejj8zHw14QhUoqBM6aKV2igJtv7CgwSZr6iAeOhruuyI3QgnlY3uM1f6I2YpsA/V0MnZDtVtvJ2ddk6sU6pIR1uUj5TCrJVBcFYI/z5jgJdo5kh2CLKRaD+k/luE+m0KV8K+GkRcC6+fYhLc+tF9gDw2F8TT2nnAmfHt8UYIn29sAyZsR8MifG6zhGTLZC4KpVRQP7eREr57GeQKEzEJiA/C4Fz2Fr47BMusO029EmB/OWsm8HqXz0IwsyWBp58shpgrP9xZUZBnDHe92pQNNfOfNzWuC1ATOs7LkbqB8Ml5vUT2vOePxkh7Bt3MR0ZEqNct7ZqwgOWrh2yFjoQ8BGDwPx1DNAQhQSGKBiea4kgWUGQIVTZw/IwwM7reWNY6Yvh8TA/5jlonVuCFBAXs0v1hwXn/suHGRk64yG2cS49h2lvltG379qp9gx6FI5WViszFvbwBZSONtIOr7lhGFw1IFRLRmeVkI=
     on:
       python: '3.6'
-      repo: dhimmel/hetio
+      repo: hetio/hetio
       tags: true
     distributions: sdist bdist_wheel
