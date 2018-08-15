@@ -1,0 +1,30 @@
+hetio/hetio v0.2.9
+
+Relocate GitHub repository from dhimmel/hetio to hetio/hetio.
+
+## Other Changes
+
+Support path-like obojectes in readwrite.
+https://github.com/hetio/hetio/commit/21c64439a96326b67439d6e9bae89279c35e95ce
+
+extract_all_metapaths: get all metapaths for any source/target metanodes
+https://github.com/hetio/hetio/pull/14
+
+sparsify_or_densify: workaround scipy float16 todense bug
+https://github.com/hetio/hetio/pull/15
+
+MetaGraph: metanode and metaedge getter methods
+https://github.com/hetio/hetio/pull/18
+
+MetaGraph: metagraph.get_metapath
+https://github.com/hetio/hetio/pull/19
+
+Optimize matrix.sparsify_or_densify
+https://github.com/hetio/hetio/pull/20
+
+graph.count_nodes & matrix.get_node_identifiers functions
+https://github.com/hetio/hetio/pull/21
+
+Enable edge/path sorting
+Enable deterministic extract_metapaths ordering
+https://github.com/hetio/hetio/pull/22
