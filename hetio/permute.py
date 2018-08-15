@@ -4,10 +4,44 @@ import logging
 
 from hetio.hetnet import Graph
 
+
 def permute_graph(graph, multiplier=10, seed=0, metaedge_to_excluded=dict(), log=False):
     """
-    Shuffle edges within metaedge category. Preserves node degree but randomizes
-    edges.
+    Derive a permuted hetnet from an input hetnet. This method applies the
+    XSwap algorithm separately for each metaedge. Hence, node degree is
+    preserved for each type of edge. However, edges are randomized / shuffled.
+
+    Users are recommended to interrogate the reported statistics to ensure that
+    edges appear to be sufficiently randomized. Primarily, the number of edges
+    of a given metaedge that remain unchanged from the original hetnet should
+    have reached an assymptote. If the number of unchanged edges has not yet
+    stabalized, further randomization is possible with this approach.
+
+    Parameters
+    ----------
+    graph : hetio.hetnet.Graph
+        Input hetnet to create a permuted derivative from
+    multiplier : int or float
+        This is multiplied by the number of edges for each metaedge to
+        determine the number of swaps to attempt.
+    seed : int
+        Seed to initialize Python random number generator. When creating many
+        permuted hetnets, it's recommended to increment this number, such that
+        each round of permutation shuffles edges in a different order.
+    metaedge_to_excluded : dict (metaedge -> set)
+        Edges to exclude. This argument has not been extensively used in
+        practice.
+    log : bool
+        Whether to log diagnostic INFO via python's logging module.
+
+    Returns
+    -------
+    permuted_graph : hetio.hetnet.Graph
+        A permuted hetnet derived from the input graph.
+    stats : list of dicts
+        A list where each item is a dictionary of permutation statistics at a
+        checkpoint for a specific metaedge. These statistics allow tracking the
+        progress of the permutation as the number of attempted swaps increases.
     """
 
     if log:
@@ -48,8 +82,49 @@ def permute_graph(graph, multiplier=10, seed=0, metaedge_to_excluded=dict(), log
 
 def permute_pair_list(pair_list, directed=False, multiplier=10, excluded_pair_set=set(), seed=0, log=False):
     """
-    If n_perm is not specific, perform 10 times the number of edges of permutations
-    May not work for directed edges
+    Permute edges (of a single type) in a graph according to the XSwap function
+    described in https://doi.org/f3mn58. This method selects two edges and
+    attempts to swap their endpoints. If the swap would result in a valid edge,
+    the swap proceeds. Otherwise, the swap is skipped. The end result is that
+    node degree is preserved, but edges are shuffled, thereby losing their
+    original meaning.
+
+    Parameters
+    ----------
+    pair_list : list of tuples
+        List of edges to permute. Each edge is represented at a (source,
+        target) tuple. source and target represent nodes and can be any Python
+        objects that define __eq__. In other words, this function does not
+        assume any specific format for nodes. If the edges are from a bipartite
+        or directed graph, then all tuples must have the same alignment. For
+        example, if the edges represent the bipartite Compound-binds-Gene
+        relationship, all tuples should be of the form (compound, gene) and not
+        intermixed with (gene, compound) tuples. The only instance where order
+        of the source and target is not important is for an undirected edge
+        type where the source and target nodes are of the same type, such as
+        Gene-interacts-Gene.
+    directed : bool
+        Whether the edge should be considered directed. If False, a swap that
+        creates an a-b edge will be invalid if a b-a edge already exists.
+    multiplier : int or float
+        This is multiplied by the number of edges in pair_list to determine the
+        number of swaps to attempt.
+    excluded_pair_set : set of tuples:
+        Set of possible edges to forbid. If a swap would create an edge in this
+        set, it would be considered invalid and hence skipped.
+    seed : int
+        Seed to initialize Python random number generator.
+    log : bool
+        Whether to log diagnostic INFO via python's logging module.
+
+    Returns
+    -------
+    pair_list : list of tuples
+        The permuted edges, derived from the input pair_list.
+    stats : list of dicts
+        A list where each item is a dictionary of permutation statistics at a
+        checkpoint. Statistics are collected at 10 checkpoints, spaced evenly
+        by the number of attempts.
     """
     random.seed(seed)
 
