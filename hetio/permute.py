@@ -92,7 +92,7 @@ def permute_pair_list(pair_list, directed=False, multiplier=10, excluded_pair_se
     Parameters
     ----------
     pair_list : list of tuples
-        List of edges to permute. Each edge is represented at a (source,
+        List of edges to permute. Each edge is represented as a (source,
         target) tuple. source and target represent nodes and can be any Python
         objects that define __eq__. In other words, this function does not
         assume any specific format for nodes. If the edges are from a bipartite
