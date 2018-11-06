@@ -287,6 +287,6 @@ def write_sif(graph, path, max_edges=None, seed=0):
         if max_edges is not None and len(edges) > max_edges:
             edges = random.sample(edges, k=max_edges)
         for edge in edges:
-            row = edge.source, edge.metaedge.get_abbrev(), edge.target
+            row = edge.source, edge.metaedge.abbrev, edge.target
             writer.writerow(row)
     sif_file.close()

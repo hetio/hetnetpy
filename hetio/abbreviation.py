@@ -55,7 +55,7 @@ def validate_abbreviations(metagraph):
             valid = False
 
     # Check that metaedges are not ambigious
-    metaedge_abbrevs = [metaedge.get_abbrev() for metaedge in metaedges]
+    metaedge_abbrevs = [metaedge.abbrev for metaedge in metaedges]
     duplicated_meataedge_abbrevs = get_duplicates(metaedge_abbrevs)
     if duplicated_meataedge_abbrevs:
         msg = 'Duplicated metaedge abbreviations: {}'
