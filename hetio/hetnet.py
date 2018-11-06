@@ -457,14 +457,17 @@ class MetaEdge(BaseEdge):
 
     @property
     def abbrev(self):
-        return self.get_abbrev()
+        """
+        Return this metaedge's abbreviation.
+        """
+        return self.source.abbrev + self.kind_abbrev + self.target.abbrev
 
     def get_abbrev(self):
         """
         Getter function for a metaedge's abbreviation, kept for backwards
         compatability. Recommended API is to use metaedge.abbrev.
         """
-        return self.source.abbrev + self.kind_abbrev + self.target.abbrev
+        return self.abbrev
 
     def get_standard_abbrev(self):
         """
