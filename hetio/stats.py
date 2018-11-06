@@ -96,7 +96,7 @@ def get_metaedge_df(graph):
     for metaedge, edges in graph.get_metaedge_to_edges(exclude_inverts=True).items():
         series = pandas.Series()
         series['metaedge'] = str(metaedge)
-        series['abbreviation'] = metaedge.get_abbrev()
+        series['abbreviation'] = metaedge.abbrev
         series['edges'] = len(edges)
         series['source_nodes'] = len(set(edge.source for edge in edges))
         series['target_nodes'] = len(set(edge.target for edge in edges))
@@ -114,7 +114,7 @@ def get_metaedge_style_df(metagraph):
         series['metaedge'] = str(metaedge)
         series['unicode_metaedge'] = metaedge.get_unicode_str()
         series['standard_metaedge'] = str(metaedge.inverse if metaedge.inverted else metaedge)
-        series['abbreviation'] = metaedge.get_abbrev()
+        series['abbreviation'] = metaedge.abbrev
         series['standard_abbreviation'] = metaedge.get_standard_abbrev()
         series['source'] = str(metaedge.source)
         series['target'] = str(metaedge.target)

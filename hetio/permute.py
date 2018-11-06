@@ -71,7 +71,7 @@ def permute_graph(graph, multiplier=10, seed=0, metaedge_to_excluded=dict(), log
             excluded_pair_set=excluded_pair_set, seed=seed, log=log)
         for stat in stats:
             stat['metaedge'] = metaedge
-            stat['abbrev'] = metaedge.get_abbrev()
+            stat['abbrev'] = metaedge.abbrev
         all_stats.extend(stats)
 
         for pair in permuted_pair_list:

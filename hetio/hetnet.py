@@ -455,8 +455,19 @@ class MetaEdge(BaseEdge):
         )
         return metaedge_id
 
-    def get_abbrev(self):
+    @property
+    def abbrev(self):
+        """
+        Return this metaedge's abbreviation.
+        """
         return self.source.abbrev + self.kind_abbrev + self.target.abbrev
+
+    def get_abbrev(self):
+        """
+        Getter function for a metaedge's abbreviation, kept for backwards
+        compatability. Recommended API is to use metaedge.abbrev.
+        """
+        return self.abbrev
 
     def get_standard_abbrev(self):
         """
@@ -466,9 +477,7 @@ class MetaEdge(BaseEdge):
         here.
         """
         metaedge = self.inverse if self.inverted else self
-        abbrev = metaedge.get_abbrev()
-        abbrev = re.sub('[<>]', '', abbrev)
-        return abbrev
+        return re.sub('[<>]', '', metaedge.abbrev)
 
     def filesystem_str(self):
         s = '{0}{2}{1}-{3}'.format(self.source.abbrev, self.target.abbrev,
@@ -484,6 +493,10 @@ class MetaPath(BasePath):
         BasePath.__init__(self, edges)
 
     def __repr__(self):
+        return self.abbrev
+
+    @property
+    def abbrev(self):
         s = ''.join(edge.source.abbrev + edge.kind_abbrev for edge in self)
         s += self.target().abbrev
         return s
