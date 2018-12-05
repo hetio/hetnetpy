@@ -80,7 +80,8 @@ def permute_graph(graph, multiplier=10, seed=0, metaedge_to_excluded=dict(), log
     return permuted_graph, all_stats
 
 
-def permute_pair_list(pair_list, directed=False, multiplier=10, excluded_pair_set=set(), seed=0, log=False):
+def permute_pair_list(pair_list, directed=False, multiplier=10, excluded_pair_set=set(),
+                      seed=0, log=False, inplace=False):
     """
     Permute edges (of a single type) in a graph according to the XSwap function
     described in https://doi.org/f3mn58. This method selects two edges and
@@ -116,6 +117,8 @@ def permute_pair_list(pair_list, directed=False, multiplier=10, excluded_pair_se
         Seed to initialize Python random number generator.
     log : bool
         Whether to log diagnostic INFO via python's logging module.
+    inplace : bool
+        Whether to modify the edge list in place.
 
     Returns
     -------
@@ -127,6 +130,9 @@ def permute_pair_list(pair_list, directed=False, multiplier=10, excluded_pair_se
         by the number of attempts.
     """
     random.seed(seed)
+
+    if not inplace:
+        pair_list = pair_list.copy()
 
     pair_set = set(pair_list)
     assert len(pair_set) == len(pair_list)
