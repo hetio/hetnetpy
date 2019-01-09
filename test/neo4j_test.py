@@ -74,6 +74,11 @@ def test_construct_pdp_query():
     assert sum_percent == pytest.approx(100)
 
 def test_construct_dwpc_query():
+    """
+    Test dwpc query construction and computation on the metapath from 
+    https://doi.org/10.1371/journal.pcbi.1004259.g002
+    """
+
     url = 'https://github.com/dhimmel/hetionet/raw/76550e6c93fbe92124edc71725e8c7dd4ca8b1f5/hetnet/json/hetionet-v1.0.json.bz2'
 
     graph = hetio.readwrite.read_graph(url)

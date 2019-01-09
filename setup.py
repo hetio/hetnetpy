@@ -22,6 +22,7 @@ with readme_path.open() as read_file:
 tests_require = [
     'numpy',
     'scipy',
+    'neo4j'
 ]
 
 setuptools.setup(
