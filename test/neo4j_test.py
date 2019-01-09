@@ -1,3 +1,4 @@
+import pathlib
 from neo4j.v1 import GraphDatabase
 import hetio.readwrite
 import hetio.neo4j
@@ -14,10 +15,10 @@ def test_construct_pdp_query():
 
     # Set up the graph for querying
 
-    # Should this graph be added to the data directory?
-    url = 'https://github.com/dhimmel/hetionet/raw/76550e6c93fbe92124edc71725e8c7dd4ca8b1f5/hetnet/json/hetionet-v1.0.json.bz2'
+    directory = pathlib.Path(__file__).parent.absolute()
+    path = directory.joinpath('data/bupropion-CbGpPWpGaD-subgraph.json.gz')
 
-    graph = hetio.readwrite.read_graph(url)
+    graph = hetio.readwrite.read_graph(path)
     assert graph is not None
     metagraph = graph.metagraph
 
@@ -79,9 +80,10 @@ def test_construct_dwpc_query():
     https://doi.org/10.1371/journal.pcbi.1004259.g002
     """
 
-    url = 'https://github.com/dhimmel/hetionet/raw/76550e6c93fbe92124edc71725e8c7dd4ca8b1f5/hetnet/json/hetionet-v1.0.json.bz2'
+    directory = pathlib.Path(__file__).parent.absolute()
+    path = directory.joinpath('data/bupropion-CbGpPWpGaD-subgraph.json.gz')
 
-    graph = hetio.readwrite.read_graph(url)
+    graph = hetio.readwrite.read_graph(path)
     assert graph is not None
     metagraph = graph.metagraph
 
@@ -106,6 +108,5 @@ def test_construct_dwpc_query():
         assert results
 
     dwpc = results['DWPC']
-    print(dwpc)
 
     assert dwpc == pytest.approx(0.03287590886921623)
