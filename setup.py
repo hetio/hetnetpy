@@ -22,6 +22,10 @@ with readme_path.open() as read_file:
 tests_require = [
     'numpy',
     'scipy',
+    'neo4j',
+    'py2neo == 3',
+    'pandas',
+    'tqdm'
 ]
 
 setuptools.setup(
