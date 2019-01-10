@@ -283,7 +283,7 @@ def construct_dwpc_query(metarels, property='name', join_hint='midpoint', index_
 
 def construct_pdp_query(metarels, dwpc=None, property='name', join_hint='midpoint', index_hint=False, unique_nodes=True):
     """
-    Create a cypher query for computing the path degree product for a type of path.
+    Create a Cypher query for computing the path degree product for a type of path.
     This function is very similar to construct_dwpc_query, with the main changes occuring in the
     query's aggregation level.
 
