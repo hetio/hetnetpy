@@ -5,21 +5,29 @@ import random
 from operator import or_
 from functools import reduce
 
-import py2neo
-import py2neo.packages.httpstream
 import pandas
 from tqdm import tqdm
 
 import hetio.hetnet
 
-# Get py2neo version
-PY2NEO_VER = int(py2neo.__version__[0])
 
-# Avoid SocketError
-py2neo.packages.httpstream.http.socket_timeout = 1e8
+def import_py2neo():
+    """
+    Imports the py2neo library, checks its version, and sets the socket timeout if necessary
+    """
+    import py2neo
+    # Get py2neo version
+    PY2NEO_VER = int(py2neo.__version__[0])
+    if PY2NEO_VER < 4:
+        import py2neo.packages.httpstream
+        # Avoid SocketError
+        py2neo.packages.httpstream.http.socket_timeout = 1e8
+    return py2neo
+
 
 def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
     """Export hetnet to neo4j"""
+    py2neo = import_py2neo()
 
     if isinstance(uri, py2neo.Graph):
         db_graph = uri
@@ -89,6 +97,10 @@ class Creator(list):
             self.create()
 
     def create(self):
+        import py2neo
+
+        PY2NEO_VER = int(py2neo.__version__[0])
+
         if not self:
             return
 
@@ -162,6 +174,115 @@ def cypher_path(metarels):
         q += '{dir0}[:{rel_type}]{dir1}(n{i}{target_label})'.format(**kwargs)
     return q
 
+def construct_degree_clause(metarels):
+    """
+    Create a Cypher query clause that calculates the degree of each node
+
+    Parameters
+    ----------
+    metarels : a metarels or MetaPath object
+        the metapath to create the clause for
+    """
+
+    degree_strs = list()
+    for i, (source_label, target_label, rel_type, direction) in enumerate(metarels):
+        kwargs = {
+            'i0': i,
+            'i1': i + 1,
+            'source_label': source_label,
+            'target_label': target_label,
+            'rel_type': rel_type,
+            'dir0': '<-' if direction == 'backward' else '-',
+            'dir1': '->' if direction == 'forward' else '-',
+        }
+        degree_strs.append(textwrap.dedent(
+            '''\
+            size((n{i0}){dir0}[:{rel_type}]{dir1}()),
+            size((){dir0}[:{rel_type}]{dir1}(n{i1}))'''
+            ).format(**kwargs))
+    degree_query = ',\n'.join(degree_strs)
+
+    return degree_query
+
+def construct_using_clause(metarels, join_hint, index_hint):
+    """
+    Create a Cypher query clause that gives the planner hints to speed up the query
+    Parameters
+    ----------
+    metarels : a metarels or MetaPath object
+        the metapath to create the clause for
+    join_hint : 'midpoint', bool, or int
+        whether to add a join hint to tell neo4j to traverse form both ends of
+        the path and join at a specific index. `'midpoint'` or `True` specifies
+        joining at the middle node in the path (rounded down if an even number
+        of nodes). `False` specifies not to add a join hint. An int specifies
+        the node to join on.
+    index_hint : bool
+        whether to add index hints which specifies the properties of the source
+        and target nodes to use for lookup. Enabling both `index_hint` and
+        `join_hint` can cause the query to fail.
+    """
+    using_query = ''
+    # Specify index hint for node lookup
+    if index_hint:
+        using_query = '\n' + textwrap.dedent('''\
+        USING INDEX n0:{source_label}({property})
+        USING INDEX n{length}:{target_label}({property})
+        ''').rstrip().format(
+            property = property,
+            source_label = metarels[0][0],
+            target_label = metarels[-1][1],
+            length = len(metarels)
+        )
+
+    # Specify join hint with node to join on
+    if join_hint is not False:
+        if join_hint is True or join_hint == 'midpoint':
+            join_hint = len(metarels) // 2
+        join_hint = int(join_hint)
+        assert join_hint >= 0
+        assert join_hint <= len(metarels)
+        using_query += "\nUSING JOIN ON n{}".format(join_hint)
+
+    return using_query
+
+def construct_unique_nodes_clause(metarels, unique_nodes):
+    """
+    Create a Cypher query clause that gives the planner hints to speed up the query
+    Parameters
+    ----------
+    metarels : a metarels or MetaPath object
+        the metapath to create the clause for
+    unique_nodes : bool or str
+        whether to exclude paths with duplicate nodes. To not enforce node
+        uniqueness, use `False`. Methods for enforcing node uniqueness are:
+        `nested` the path-length independent query (`ALL (x IN nodes(path) WHERE size(filter(z IN nodes(path) WHERE z = x)) = 1)`)
+        `expanded` for the combinatorial and path-length dependent form (`NOT (n0=n1 OR n0=n2 OR n0=n3 OR n1=n2 OR n1=n3 OR n2=n3)`).
+        `labeled` to perform an intelligent version of `expanded` where only
+        nodes with the same label are checked for duplicity. Specifying `True`,
+        which is the default, uses the `labeled` method.
+    """
+    if unique_nodes == 'nested':
+        unique_nodes_query = '\nAND ALL (x IN nodes(path) WHERE size(filter(z IN nodes(path) WHERE z = x)) = 1)'
+    elif unique_nodes == 'expanded':
+        pairs = itertools.combinations(range(len(metarels) + 1), 2)
+        unique_nodes_query = format_expanded_clause(pairs)
+    elif unique_nodes == 'labeled' or unique_nodes is True:
+        labels = [metarel[0] for metarel in metarels]
+        labels.append(metarels[-1][1])
+        label_to_nodes = dict()
+        for i, label in enumerate(labels):
+            label_to_nodes.setdefault(label, list()).append(i)
+        pairs = list()
+        for nodes in label_to_nodes.values():
+            pairs.extend(itertools.combinations(nodes, 2))
+        unique_nodes_query = format_expanded_clause(pairs)
+    else:
+        assert unique_nodes is False
+        unique_nodes_query = ''
+
+    return unique_nodes_query
+
 def construct_dwpc_query(metarels, property='name', join_hint='midpoint', index_hint=False, unique_nodes=True):
     """
     Create a cypher query for computing the *DWPC* for a type of path.
@@ -199,65 +320,12 @@ def construct_dwpc_query(metarels, property='name', join_hint='midpoint', index_
     metapath_query = cypher_path(metarels)
 
     # create cypher path degree query
-    degree_strs = list()
-    for i, (source_label, target_label, rel_type, direction) in enumerate(metarels):
-        kwargs = {
-            'i0': i,
-            'i1': i + 1,
-            'source_label': source_label,
-            'target_label': target_label,
-            'rel_type': rel_type,
-            'dir0': '<-' if direction == 'backward' else '-',
-            'dir1': '->' if direction == 'forward' else '-',
-        }
-        degree_strs.append(textwrap.dedent(
-            '''\
-            size((n{i0}){dir0}[:{rel_type}]{dir1}()),
-            size((){dir0}[:{rel_type}]{dir1}(n{i1}))'''
-            ).format(**kwargs))
-    degree_query = ',\n'.join(degree_strs)
+    degree_query = construct_degree_clause(metarels)
 
-    using_query = ''
-    # Specify index hint for node lookup
-    if index_hint:
-        using_query = '\n' + textwrap.dedent('''\
-        USING INDEX n0:{source_label}({property})
-        USING INDEX n{length}:{target_label}({property})
-        ''').rstrip().format(
-            property = property,
-            source_label = metarels[0][0],
-            target_label = metarels[-1][1],
-            length = len(metarels)
-        )
-
-    # Specify join hint with node to join on
-    if join_hint is not False:
-        if join_hint is True or join_hint == 'midpoint':
-            join_hint = len(metarels) // 2
-        join_hint = int(join_hint)
-        assert join_hint >= 0
-        assert join_hint <= len(metarels)
-        using_query += "\nUSING JOIN ON n{}".format(join_hint)
+    using_query = construct_using_clause(metarels, join_hint, index_hint)
 
     # Unique node constraint (pevent paths with duplicate nodes)
-    if unique_nodes == 'nested':
-        unique_nodes_query = '\nAND ALL (x IN nodes(path) WHERE size(filter(z IN nodes(path) WHERE z = x)) = 1)'
-    elif unique_nodes == 'expanded':
-        pairs = itertools.combinations(range(len(metarels) + 1), 2)
-        unique_nodes_query = format_expanded_clause(pairs)
-    elif unique_nodes == 'labeled' or unique_nodes is True:
-        labels = [metarel[0] for metarel in metarels]
-        labels.append(metarels[-1][1])
-        label_to_nodes = dict()
-        for i, label in enumerate(labels):
-            label_to_nodes.setdefault(label, list()).append(i)
-        pairs = list()
-        for nodes in label_to_nodes.values():
-            pairs.extend(itertools.combinations(nodes, 2))
-        unique_nodes_query = format_expanded_clause(pairs)
-    else:
-        assert unique_nodes is False
-        unique_nodes_query = ''
+    unique_nodes_query = construct_unique_nodes_clause(metarels, unique_nodes)
 
     # combine cypher fragments into a single query and add DWPC logic
     query = textwrap.dedent('''\
@@ -323,65 +391,12 @@ def construct_pdp_query(metarels, dwpc=None, property='name', join_hint='midpoin
     metapath_query = cypher_path(metarels)
 
     # create cypher path degree query
-    degree_strs = list()
-    for i, (source_label, target_label, rel_type, direction) in enumerate(metarels):
-        kwargs = {
-            'i0': i,
-            'i1': i + 1,
-            'source_label': source_label,
-            'target_label': target_label,
-            'rel_type': rel_type,
-            'dir0': '<-' if direction == 'backward' else '-',
-            'dir1': '->' if direction == 'forward' else '-',
-        }
-        degree_strs.append(textwrap.dedent(
-            '''\
-            size((n{i0}){dir0}[:{rel_type}]{dir1}()),
-            size((){dir0}[:{rel_type}]{dir1}(n{i1}))'''
-            ).format(**kwargs))
-    degree_query = ',\n'.join(degree_strs)
+    degree_query = construct_degree_clause(metarels)
 
-    using_query = ''
-    # Specify index hint for node lookup
-    if index_hint:
-        using_query = '\n' + textwrap.dedent('''\
-        USING INDEX n0:{source_label}({property})
-        USING INDEX n{length}:{target_label}({property})
-        ''').rstrip().format(
-            property = property,
-            source_label = metarels[0][0],
-            target_label = metarels[-1][1],
-            length = len(metarels)
-        )
-
-    # Specify join hint with node to join on
-    if join_hint is not False:
-        if join_hint is True or join_hint == 'midpoint':
-            join_hint = len(metarels) // 2
-        join_hint = int(join_hint)
-        assert join_hint >= 0
-        assert join_hint <= len(metarels)
-        using_query += "\nUSING JOIN ON n{}".format(join_hint)
+    using_query = construct_using_clause(metarels, join_hint, index_hint)
 
     # Unique node constraint (pevent paths with duplicate nodes)
-    if unique_nodes == 'nested':
-        unique_nodes_query = '\nAND ALL (x IN nodes(path) WHERE size(filter(z IN nodes(path) WHERE z = x)) = 1)'
-    elif unique_nodes == 'expanded':
-        pairs = itertools.combinations(range(len(metarels) + 1), 2)
-        unique_nodes_query = format_expanded_clause(pairs)
-    elif unique_nodes == 'labeled' or unique_nodes is True:
-        labels = [metarel[0] for metarel in metarels]
-        labels.append(metarels[-1][1])
-        label_to_nodes = dict()
-        for i, label in enumerate(labels):
-            label_to_nodes.setdefault(label, list()).append(i)
-        pairs = list()
-        for nodes in label_to_nodes.values():
-            pairs.extend(itertools.combinations(nodes, 2))
-        unique_nodes_query = format_expanded_clause(pairs)
-    else:
-        assert unique_nodes is False
-        unique_nodes_query = ''
+    unique_nodes_query = construct_unique_nodes_clause(metarels, unique_nodes)
 
     # combine cypher fragments into a single query and add PDP logic
     query = ''
@@ -394,9 +409,9 @@ def construct_pdp_query(metarels, dwpc=None, property='name', join_hint='midpoin
             [
             {degree_query}
             ] AS degrees, path
-            WITH path, reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }}) as PDP
+            WITH path, reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }}) AS PDP
             RETURN
-            path,
+            substring(reduce(s = '', node IN nodes(path)| s + '–' + node.name), 1) AS path,
             PDP,
             100 * (PDP / {dwpc}) AS PERCENT_OF_DWPC
             ORDER BY PERCENT_OF_DWPC DESC
@@ -408,9 +423,8 @@ def construct_pdp_query(metarels, dwpc=None, property='name', join_hint='midpoin
             length=len(metarels),
             property=property,
             dwpc = dwpc)
-    # If the dwpc isn't provided, we'll have to calculate it before the PDP.
-    # Doing so roughly doubles the query execution time, as it effectively
-    # runs the query twice returning different degrees of aggregation.
+
+    # https://stackoverflow.com/questions/54245415/
     else:
         query = textwrap.dedent('''\
             MATCH path = {metapath_query}{using_query}
@@ -420,20 +434,16 @@ def construct_pdp_query(metarels, dwpc=None, property='name', join_hint='midpoin
             [
             {degree_query}
             ] AS degrees, path
-            WITH sum(reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }})) as DWPC
-
-            MATCH path = {metapath_query}{using_query}
-            WHERE n0.{property} = {{ source }}
-            AND n{length}.{property} = {{ target }}{unique_nodes_query}
-            WITH
-            [
-            {degree_query}
-            ] AS degrees, path, DWPC
-            WITH path, DWPC, reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }}) as PDP
+            WITH path, reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }}) AS PDP
+            WITH path, collect(PDP) AS pdps, PDP
+            WITH collect({{path: path, pdps: pdps}}) AS allData, sum(PDP) AS DWPC
+            UNWIND allData AS data
+            UNWIND data.pdps AS PDP
+            WITH data.path AS path, PDP, DWPC
             RETURN
-            path,
-            PDP,
-            100 * (PDP / DWPC) AS PERCENT_OF_DWPC
+              substring(reduce(s = '', node IN nodes(path)| s + '–' + node.name), 1) AS path,
+              PDP,
+              100 * (PDP / DWPC) AS PERCENT_OF_DWPC
             ORDER BY PERCENT_OF_DWPC DESC
             ''').rstrip().format(
             metapath_query = metapath_query,
@@ -442,7 +452,6 @@ def construct_pdp_query(metarels, dwpc=None, property='name', join_hint='midpoin
             degree_query = degree_query,
             length=len(metarels),
             property=property)
-
 
     return query
 
@@ -487,6 +496,7 @@ def permute_rel_type(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, m
        Randomization Techniques for Graphs. SIAM International Conference on
        Data Mining. https://doi.org/10.1137/1.9781611972795.67
     """
+    py2neo = import_py2neo()
 
     neo = py2neo.Graph(uri)
 
