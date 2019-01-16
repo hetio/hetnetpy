@@ -6,7 +6,6 @@ from operator import or_
 from functools import reduce
 
 import py2neo
-import py2neo.packages.httpstream
 import pandas
 from tqdm import tqdm
 
@@ -15,8 +14,10 @@ import hetio.hetnet
 # Get py2neo version
 PY2NEO_VER = int(py2neo.__version__[0])
 
-# Avoid SocketError
-py2neo.packages.httpstream.http.socket_timeout = 1e8
+if PY2NEO_VER < 4:
+    import py2neo.packages.httpstream
+    # Avoid SocketError
+    py2neo.packages.httpstream.http.socket_timeout = 1e8
 
 def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
     """Export hetnet to neo4j"""
