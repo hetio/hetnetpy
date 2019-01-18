@@ -1,16 +1,12 @@
 dist: trusty
 sudo: false
 language: python
-env:
-  - PY2NEO_VERSION=3
-  - PY2NEO_VERSION=4
 python:
   - "3.4"
   - "3.5"
   - "3.6"
 install:
   - pip install .[test]
-  - pip install py2neo==$PY2NEO_VERSION
   - python setup.py sdist bdist_wheel
 script:
   - py.test
