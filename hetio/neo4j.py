@@ -24,7 +24,6 @@ def import_py2neo():
         py2neo.packages.httpstream.http.socket_timeout = 1e8
     return py2neo
 
-
 def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
     """Export hetnet to neo4j"""
     py2neo = import_py2neo()
