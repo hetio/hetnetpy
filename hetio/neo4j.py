@@ -2,24 +2,36 @@ import functools
 import itertools
 import textwrap
 import random
+import pkg_resources
 from operator import or_
 from functools import reduce
 
-import py2neo
-import py2neo.packages.httpstream
 import pandas
 from tqdm import tqdm
 
 import hetio.hetnet
 
-# Get py2neo version
-PY2NEO_VER = int(py2neo.__version__[0])
 
-# Avoid SocketError
-py2neo.packages.httpstream.http.socket_timeout = 1e8
+@functools.lru_cache()
+def import_py2neo():
+    """
+    Imports the py2neo library, checks its version, and sets the socket timeout if necessary
+    """
+    import py2neo
+    # Get py2neo version
+    PY2NEO_VER = pkg_resources.parse_version(py2neo.__version__)
+    version_tuple = PY2NEO_VER._version.release
+
+    # https://github.com/dhimmel/learn/issues/1
+    if version_tuple[0] < 4:
+        import py2neo.packages.httpstream
+        # Avoid SocketError
+        py2neo.packages.httpstream.http.socket_timeout = 1e8
+    return py2neo, version_tuple
 
 def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
     """Export hetnet to neo4j"""
+    py2neo, _ = import_py2neo()
 
     if isinstance(uri, py2neo.Graph):
         db_graph = uri
@@ -89,11 +101,13 @@ class Creator(list):
             self.create()
 
     def create(self):
+        py2neo, version_tuple = import_py2neo()
+
         if not self:
             return
 
         # http://stackoverflow.com/a/37697792/4651668
-        if PY2NEO_VER >= 3:
+        if version_tuple[0] >= 3:
             self.db_graph.create(reduce(or_, self))
         else:
             self.db_graph.create(*self)
@@ -487,6 +501,7 @@ def permute_rel_type(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, m
        Randomization Techniques for Graphs. SIAM International Conference on
        Data Mining. https://doi.org/10.1137/1.9781611972795.67
     """
+    py2neo, _ = import_py2neo()
 
     neo = py2neo.Graph(uri)
 

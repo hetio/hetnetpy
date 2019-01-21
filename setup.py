@@ -23,7 +23,7 @@ tests_require = [
     'numpy',
     'scipy',
     'neo4j',
-    'py2neo == 3',
+    'py2neo',
     'pandas',
     'tqdm'
 ]
