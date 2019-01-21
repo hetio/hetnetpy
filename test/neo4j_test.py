@@ -152,7 +152,6 @@ def test_construct_pdp_query_return_values():
 
     assert DWPC_query == q2
 
-
 def test_construct_dwpc_query():
     """
     Test dwpc query construction and computation on the metapath from
@@ -189,4 +188,3 @@ def test_construct_dwpc_query():
     dwpc = results['DWPC']
 
     assert dwpc == pytest.approx(0.03287590886921623)
-
