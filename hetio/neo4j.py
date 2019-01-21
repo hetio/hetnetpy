@@ -2,6 +2,7 @@ import functools
 import itertools
 import textwrap
 import random
+import pkg_resources
 from operator import or_
 from functools import reduce
 
@@ -18,18 +19,19 @@ def import_py2neo():
     """
     import py2neo
     # Get py2neo version
-    PY2NEO_VER = int(py2neo.__version__[0])
+    PY2NEO_VER = pkg_resources.parse_version(py2neo.__version__)
+    version_tuple = PY2NEO_VER._version.release
 
     # https://github.com/dhimmel/learn/issues/1
-    if PY2NEO_VER < 4:
+    if version_tuple[0] < 4:
         import py2neo.packages.httpstream
         # Avoid SocketError
         py2neo.packages.httpstream.http.socket_timeout = 1e8
-    return py2neo
+    return py2neo, version_tuple
 
 def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
     """Export hetnet to neo4j"""
-    py2neo = import_py2neo()
+    py2neo, _ = import_py2neo()
 
     if isinstance(uri, py2neo.Graph):
         db_graph = uri
@@ -99,15 +101,13 @@ class Creator(list):
             self.create()
 
     def create(self):
-        py2neo = import_py2neo()
-
-        PY2NEO_VER = int(py2neo.__version__[0])
+        py2neo, version_tuple = import_py2neo()
 
         if not self:
             return
 
         # http://stackoverflow.com/a/37697792/4651668
-        if PY2NEO_VER >= 3:
+        if version_tuple[0] >= 3:
             self.db_graph.create(reduce(or_, self))
         else:
             self.db_graph.create(*self)
@@ -179,6 +179,7 @@ def cypher_path(metarels):
 def construct_dwpc_query(metarels, property='name', join_hint='midpoint', index_hint=False, unique_nodes=True):
     """
     Create a cypher query for computing the *DWPC* for a type of path.
+
     Parameters
     ----------
     metarels : a metarels or MetaPath object
@@ -299,6 +300,7 @@ def construct_pdp_query(metarels, dwpc=None, property='name', join_hint='midpoin
     Create a Cypher query for computing the path degree product for a type of path.
     This function is very similar to construct_dwpc_query, with the main changes occuring in the
     query's aggregation level.
+
     Parameters
     ----------
     metarels : a metarels or MetaPath object
@@ -433,6 +435,7 @@ def construct_pdp_query(metarels, dwpc=None, property='name', join_hint='midpoin
             {degree_query}
             ] AS degrees, path
             WITH sum(reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }})) as DWPC
+
             MATCH path = {metapath_query}{using_query}
             WHERE n0.{property} = {{ source }}
             AND n{length}.{property} = {{ target }}{unique_nodes_query}
@@ -453,6 +456,7 @@ def construct_pdp_query(metarels, dwpc=None, property='name', join_hint='midpoin
             degree_query = degree_query,
             length=len(metarels),
             property=property)
+
 
     return query
 
@@ -497,7 +501,7 @@ def permute_rel_type(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, m
        Randomization Techniques for Graphs. SIAM International Conference on
        Data Mining. https://doi.org/10.1137/1.9781611972795.67
     """
-    py2neo = import_py2neo()
+    py2neo, _ = import_py2neo()
 
     neo = py2neo.Graph(uri)
 
