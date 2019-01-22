@@ -287,6 +287,29 @@ def construct_unique_nodes_clause(metarels, unique_nodes):
 
     return unique_nodes_query
 
+def create_path_return_clause(path_style='list'):
+    """
+    Create a Cypher query clause to return paths either as a list or as a string.
+    As formatting the output as a string is less efficient in terms of database
+    hits, 'list' is the default style
+
+    Parameters
+    ----------
+    path_style : str
+        the way the user wants the path returned. Currently supported options
+        are 'list' and 'string'
+    """
+    if path_style == 'string':
+        return "substring(reduce(s = '', node IN nodes(path)| s + '–' + node.name), 1) AS path,"
+    elif path_style == 'list':
+        return "extract(n in nodes(path) | n.name) AS path,"
+    else:
+        err_string = str(path_style) + (" is not a style currently implemented by "
+                                        "create_path_return_clause. Valid styles are "
+                                        "'list' and 'string'")
+
+        raise Exception(err_string)
+
 def construct_dwpc_query(metarels, property='name', join_hint='midpoint', index_hint=False, unique_nodes=True):
     """
     Create a cypher query for computing the *DWPC* for a type of path.
@@ -353,7 +376,7 @@ def construct_dwpc_query(metarels, property='name', join_hint='midpoint', index_
 
     return query
 
-def construct_pdp_query(metarels, dwpc=None, property='name', join_hint='midpoint', index_hint=False, unique_nodes=True):
+def construct_pdp_query(metarels, dwpc=None, path_style='list', property='name', join_hint='midpoint', index_hint=False, unique_nodes=True):
     """
     Create a Cypher query for computing the path degree product for a type of path.
     This function is very similar to construct_dwpc_query, with the main changes occuring in the
@@ -366,6 +389,9 @@ def construct_pdp_query(metarels, dwpc=None, property='name', join_hint='midpoin
     dwpc : int
         the degree-weighted path count for the metapath. If dwpc is not provided,
         a subquery will be added to calculate it.
+    path_style: str
+        the style in which the path information should be returned. This style is
+        used by the create_path_return_clause function
     property : str
         which property to use for soure and target node lookup
     join_hint : 'midpoint', bool, or int
@@ -402,6 +428,9 @@ def construct_pdp_query(metarels, dwpc=None, property='name', join_hint='midpoin
     # Unique node constraint (pevent paths with duplicate nodes)
     unique_nodes_query = construct_unique_nodes_clause(metarels, unique_nodes)
 
+    # decide how the path will be returned
+    path_query = create_path_return_clause(path_style=path_style)
+
     # combine cypher fragments into a single query and add PDP logic
     query = ''
     if dwpc is not None:
@@ -415,7 +444,7 @@ def construct_pdp_query(metarels, dwpc=None, property='name', join_hint='midpoin
             ] AS degrees, path
             WITH path, reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }}) AS PDP
             RETURN
-            substring(reduce(s = '', node IN nodes(path)| s + '–' + node.name), 1) AS path,
+            {path_query}
             PDP,
             100 * (PDP / {dwpc}) AS PERCENT_OF_DWPC
             ORDER BY PERCENT_OF_DWPC DESC
@@ -426,6 +455,7 @@ def construct_pdp_query(metarels, dwpc=None, property='name', join_hint='midpoin
             degree_query = degree_query,
             length=len(metarels),
             property=property,
+            path_query = path_query,
             dwpc = dwpc)
 
     # https://stackoverflow.com/questions/54245415/
