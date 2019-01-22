@@ -97,11 +97,9 @@ def test_construct_pdp_query_return_values():
             size(()-[:ASSOCIATES_DaG]-(n4))
             ] AS degrees, path
             WITH path, reduce(pdp = 1.0, d in degrees| pdp * d ^ -{ w }) AS PDP
-            WITH path, collect(PDP) AS pdps, PDP
-            WITH collect({path: path, pdps: pdps}) AS allData, sum(PDP) AS DWPC
+            WITH collect({paths: path, pdps: PDP}) AS allData, sum(PDP) AS DWPC
             UNWIND allData AS data
-            UNWIND data.pdps AS PDP
-            WITH data.path AS path, PDP, DWPC
+            WITH data.paths AS path, data.pdps AS PDP, DWPC
             RETURN
               substring(reduce(s = '', node IN nodes(path)| s + '–' + node.name), 1) AS path,
               PDP,

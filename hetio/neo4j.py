@@ -469,13 +469,11 @@ def construct_pdp_query(metarels, dwpc=None, path_style='list', property='name',
             {degree_query}
             ] AS degrees, path
             WITH path, reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }}) AS PDP
-            WITH path, collect(PDP) AS pdps, PDP
-            WITH collect({{path: path, pdps: pdps}}) AS allData, sum(PDP) AS DWPC
+            WITH collect({{paths: path, pdps: PDP}}) AS allData, sum(PDP) AS DWPC
             UNWIND allData AS data
-            UNWIND data.pdps AS PDP
-            WITH data.path AS path, PDP, DWPC
+            WITH data.paths AS path, data.pdps AS PDP, DWPC
             RETURN
-              substring(reduce(s = '', node IN nodes(path)| s + '–' + node.name), 1) AS path,
+              {path_query}
               PDP,
               100 * (PDP / DWPC) AS PERCENT_OF_DWPC
             ORDER BY PERCENT_OF_DWPC DESC
@@ -485,7 +483,8 @@ def construct_pdp_query(metarels, dwpc=None, path_style='list', property='name',
             unique_nodes_query = unique_nodes_query,
             degree_query = degree_query,
             length=len(metarels),
-            property=property)
+            property=property,
+            path_query = path_query)
 
     return query
 
