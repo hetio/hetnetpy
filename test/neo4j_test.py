@@ -19,9 +19,7 @@ def test_construct_pdp_query():
     directory = pathlib.Path(__file__).parent.absolute()
     path = directory.joinpath('data/bupropion-CbGpPWpGaD-subgraph.json.gz')
 
-    graph = hetio.readwrite.read_graph(path)
-    assert graph is not None
-    metagraph = graph.metagraph
+    metagraph = hetio.readwrite.read_metagraph(path)
 
     compound = 'DB01156'  # Bupropion
     disease = 'DOID:0050742'  # nicotine dependency
@@ -140,8 +138,7 @@ def test_construct_pdp_query_return_values():
     # Set up the graph for querying
     directory = pathlib.Path(__file__).parent.absolute()
     path = directory.joinpath('data/bupropion-CbGpPWpGaD-subgraph.json.gz')
-    graph = hetio.readwrite.read_graph(path)
-    metagraph = graph.metagraph
+    metagraph = hetio.readwrite.read_metagraph(path)
 
     metapath = metagraph.metapath_from_abbrev('CbGpPWpGaD')
     DWPCless_query = hetio.neo4j.construct_pdp_query(metapath, path_style='string', property='identifier', unique_nodes=True)
@@ -161,9 +158,7 @@ def test_construct_dwpc_query():
     directory = pathlib.Path(__file__).parent.absolute()
     path = directory.joinpath('data/bupropion-CbGpPWpGaD-subgraph.json.gz')
 
-    graph = hetio.readwrite.read_graph(path)
-    assert graph is not None
-    metagraph = graph.metagraph
+    metagraph = hetio.readwrite.read_metagraph(path)
 
     compound = 'DB01156'  # Bupropion
     disease = 'DOID:0050742'  # nicotine dependency
