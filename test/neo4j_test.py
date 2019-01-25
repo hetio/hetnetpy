@@ -17,7 +17,7 @@ def test_construct_pdp_query():
     # Set up the graph for querying
 
     directory = pathlib.Path(__file__).parent.absolute()
-    path = directory.joinpath('data/bupropion-CbGpPWpGaD-subgraph.json.gz')
+    path = directory.joinpath('data/hetionet-v1.0-metagraph.json')
 
     metagraph = hetio.readwrite.read_metagraph(path)
 
@@ -135,7 +135,7 @@ def test_construct_pdp_query_return_values():
 
     # Set up the graph for querying
     directory = pathlib.Path(__file__).parent.absolute()
-    path = directory.joinpath('data/bupropion-CbGpPWpGaD-subgraph.json.gz')
+    path = directory.joinpath('data/hetionet-v1.0-metagraph.json')
     metagraph = hetio.readwrite.read_metagraph(path)
 
     metapath = metagraph.metapath_from_abbrev('CbGpPWpGaD')
@@ -154,7 +154,7 @@ def test_construct_dwpc_query():
     """
 
     directory = pathlib.Path(__file__).parent.absolute()
-    path = directory.joinpath('data/bupropion-CbGpPWpGaD-subgraph.json.gz')
+    path = directory.joinpath('data/hetionet-v1.0-metagraph.json')
 
     metagraph = hetio.readwrite.read_metagraph(path)
 
