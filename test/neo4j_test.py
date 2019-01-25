@@ -192,7 +192,7 @@ def test_construct_path_return_clause_returns(style, identifier, expected_output
     '''
     Test the results of construct_path_return_clause with different parameters
     '''
-    assert(hetio.neo4j.create_path_return_clause(style, identifier) == expected_output)
+    assert hetio.neo4j.create_path_return_clause(style, identifier) == expected_output
 
 def test_construct_path_return_clause_error():
     '''
