@@ -475,9 +475,9 @@ def construct_pdp_query(metarels, dwpc=None, path_style='list', return_property=
             {degree_query}
             ] AS degrees, path
             WITH path, reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }}) AS PDP
-            WITH collect({{paths: path, pdps: PDP}}) AS allData, sum(PDP) AS DWPC
-            UNWIND allData AS data
-            WITH data.paths AS path, data.pdps AS PDP, DWPC
+            WITH collect({{paths: path, PDPs: PDP}}) AS data_maps, sum(PDP) AS DWPC
+            UNWIND data_maps AS data_map
+            WITH data_map.paths AS path, data_map.PDPs AS PDP, DWPC
             RETURN
               {path_query}
               PDP,
