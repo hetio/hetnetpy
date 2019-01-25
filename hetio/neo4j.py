@@ -310,7 +310,7 @@ def create_path_return_clause(path_style='list', return_property='name'):
                       "create_path_return_clause. Valid styles are "
                       "'list' and 'string'").format(style=path_style)
 
-        raise Exception(err_string)
+        raise ValueError(err_string)
 
 def construct_dwpc_query(metarels, property='name', join_hint='midpoint', index_hint=False, unique_nodes=True):
     """
