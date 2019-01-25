@@ -182,15 +182,15 @@ def test_construct_dwpc_query():
 
     assert dwpc == pytest.approx(0.03287590886921623)
 
-def test_create_path_return_clause():
-    """
-    Test whether the create_path_return_clause function behaves correctly
-    """
-    list_correct_output = "extract(n in nodes(path) | n.name) AS path,"
-    string_correct_output = "substring(reduce(s = '', node IN nodes(path)| s + '–' + node.name), 1) AS path,"
+@pytest.mark.parametrize('style, identifier, expected_output', [
+    ('list', 'name', "extract(n in nodes(path) | n.name) AS path,"),
+    ('list', 'identifier', "extract(n in nodes(path) | n.identifier) AS path,"),
+    ('string', 'name', "substring(reduce(s = '', node IN nodes(path)| s + '–' + node.name), 1) AS path,"),
+    ('string', 'identifier', "substring(reduce(s = '', node IN nodes(path)| s + '–' + node.identifier), 1) AS path,")
+    ])
+def test_construct_path_return_clause_returns(style, identifier, expected_output):
+    assert(hetio.neo4j.create_path_return_clause(style, identifier) == expected_output)
 
-    assert(hetio.neo4j.create_path_return_clause() == list_correct_output)
-    assert(hetio.neo4j.create_path_return_clause('list') == list_correct_output)
-    assert(hetio.neo4j.create_path_return_clause('string') == string_correct_output)
+def test_construct_path_return_clause_error():
     with pytest.raises(Exception):
         hetio.neo4j.create_path_return_clause('invalid_style')
