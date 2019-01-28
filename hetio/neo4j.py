@@ -452,8 +452,8 @@ def construct_pdp_query(metarels, dwpc=None, path_style='list', return_property=
             RETURN
             {path_query}
             PDP,
-            100 * (PDP / {dwpc}) AS PERCENT_OF_DWPC
-            ORDER BY PERCENT_OF_DWPC DESC
+            100 * (PDP / {dwpc}) AS percent_of_DWPC
+            ORDER BY percent_of_DWPC DESC
             ''').rstrip().format(
             metapath_query = metapath_query,
             using_query = using_query,
@@ -481,8 +481,8 @@ def construct_pdp_query(metarels, dwpc=None, path_style='list', return_property=
             RETURN
               {path_query}
               PDP,
-              100 * (PDP / DWPC) AS PERCENT_OF_DWPC
-            ORDER BY PERCENT_OF_DWPC DESC
+              100 * (PDP / DWPC) AS percent_of_DWPC
+            ORDER BY percent_of_DWPC DESC
             ''').rstrip().format(
             metapath_query = metapath_query,
             using_query = using_query,
