@@ -46,7 +46,7 @@ def test_construct_pdp_query():
     assert results[0]['path'].split('–')[0] == 'Bupropion'
     assert results[0]['path'].split('–')[-1] == 'nicotine dependence'
 
-    percent_dwpc_1 = results[0]['PERCENT_OF_DWPC']
+    percent_dwpc_1 = results[0]['percent_of_DWPC']
 
     old_pdp_query = pdp_query
 
@@ -65,11 +65,11 @@ def test_construct_pdp_query():
 
     # We'll check this because it verifies both that the DWPC and the PDP for the path
     # are the same for both queries
-    assert percent_dwpc_1 == pytest.approx(results[0]['PERCENT_OF_DWPC'])
+    assert percent_dwpc_1 == pytest.approx(results[0]['percent_of_DWPC'])
 
     sum_percent = 0
     for result in results:
-        sum_percent += result['PERCENT_OF_DWPC']
+        sum_percent += result['percent_of_DWPC']
 
     # The fractions should all add up to around 100 percent
     assert sum_percent == pytest.approx(100)
@@ -103,8 +103,8 @@ def test_construct_pdp_query_return_values():
             RETURN
               substring(reduce(s = '', node IN nodes(path)| s + '–' + node.name), 1) AS path,
               PDP,
-              100 * (PDP / DWPC) AS PERCENT_OF_DWPC
-            ORDER BY PERCENT_OF_DWPC DESC
+              100 * (PDP / DWPC) AS percent_of_DWPC
+            ORDER BY percent_of_DWPC DESC
             """).rstrip()
 
     dwpc = 0.03287590886921623
@@ -129,8 +129,8 @@ def test_construct_pdp_query_return_values():
             RETURN
             substring(reduce(s = '', node IN nodes(path)| s + '–' + node.name), 1) AS path,
             PDP,
-            100 * (PDP / 0.03287590886921623) AS PERCENT_OF_DWPC
-            ORDER BY PERCENT_OF_DWPC DESC
+            100 * (PDP / 0.03287590886921623) AS percent_of_DWPC
+            ORDER BY percent_of_DWPC DESC
             """).rstrip()
 
     # Set up the graph for querying
