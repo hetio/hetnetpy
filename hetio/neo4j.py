@@ -6,9 +6,6 @@ import pkg_resources
 from operator import or_
 from functools import reduce
 
-import pandas
-from tqdm import tqdm
-
 import hetio.hetnet
 
 
@@ -31,6 +28,7 @@ def import_py2neo():
 
 def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
     """Export hetnet to neo4j"""
+    from tqdm import tqdm
     py2neo, _ = import_py2neo()
 
     if isinstance(uri, py2neo.Graph):
@@ -70,7 +68,7 @@ def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
 
     queue = graph.get_edges(exclude_inverts=True)
     if show_progress:
-        queue = tqdm(queue, total=graph.n_edges, desc = "Importing edges")
+        queue = tqdm(queue, total=graph.n_edges, desc="Importing edges")
 
     for edge in queue:
         metaedge = edge.metaedge
@@ -135,12 +133,13 @@ def as_type(metaedge):
 
 def sanitize_data(data):
     """Create neo4j safe properties"""
+    from pandas import isnull
     sanitized = dict()
     for k, v in data.items():
         if isinstance(v, list):
             sanitized[k] = v
             continue
-        if pandas.isnull(v):
+        if isnull(v):
             continue
         if v is None:
             continue
