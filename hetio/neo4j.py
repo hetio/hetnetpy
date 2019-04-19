@@ -28,7 +28,8 @@ def import_py2neo():
 
 def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
     """Export hetnet to neo4j"""
-    from tqdm import tqdm
+    if show_progress:
+        from tqdm import tqdm
     py2neo, _ = import_py2neo()
 
     if isinstance(uri, py2neo.Graph):
