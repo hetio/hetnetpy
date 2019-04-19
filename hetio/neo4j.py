@@ -289,27 +289,34 @@ def construct_unique_nodes_clause(metarels, unique_nodes):
 
 def create_path_return_clause(path_style='list', return_property='name'):
     """
-    Create a Cypher query clause to return paths either as a list or as a string.
+    Create a Cypher query clause to return paths. If path_style is 'list' or 'string',
+    then the return_property is extracted for each node along the path. If path_style
+    is 'id_lists', then two lists (node_ids and rel_ids) are returned of neo4j databse ids.
     As formatting the output as a string is less efficient in terms of database
-    hits, 'list' is the default style
+    hits, 'list' is the default style.
 
     Parameters
     ----------
     path_style : str
         the way the user wants the path returned. Currently supported options
-        are 'list' and 'string'
+        are 'list', 'string', and 'id_lists'
     return_property : str
         which node property to use to describe the path
     """
     if path_style == 'string':
         return "substring(reduce(s = '', node IN nodes(path)| s + '–' + node.{property}), 1) AS path,".format(property=return_property)
     elif path_style == 'list':
-        return "extract(n in nodes(path) | n.{property}) AS path,".format(property=return_property)
+        return "[node in nodes(path) | node.{property}] AS path,".format(property=return_property)
+    elif path_style == 'id_lists':
+        return (
+            '[node IN nodes(path) | id(node)] AS node_ids,\n'
+            '[rel IN relationships(path) | id(rel)] AS rel_ids,'
+        )
     else:
-        err_string = ("{style} is not a style currently implemented by "
-                      "create_path_return_clause. Valid styles are "
-                      "'list' and 'string'").format(style=path_style)
-
+        err_string = (
+            "{style} is not a style currently implemented by create_path_return_clause. "
+            "Valid styles are 'list', 'string', and 'id_lists'."
+        ).format(style=path_style)
         raise ValueError(err_string)
 
 def construct_dwpc_query(metarels, property='name', join_hint='midpoint', index_hint=False, unique_nodes=True):

@@ -183,11 +183,12 @@ def test_construct_dwpc_query():
     assert dwpc == pytest.approx(0.03287590886921623)
 
 @pytest.mark.parametrize('style, identifier, expected_output', [
-    ('list', 'name', "extract(n in nodes(path) | n.name) AS path,"),
-    ('list', 'identifier', "extract(n in nodes(path) | n.identifier) AS path,"),
+    ('list', 'name', "[node in nodes(path) | node.name] AS path,"),
+    ('list', 'identifier', "[node in nodes(path) | node.identifier] AS path,"),
     ('string', 'name', "substring(reduce(s = '', node IN nodes(path)| s + '–' + node.name), 1) AS path,"),
-    ('string', 'identifier', "substring(reduce(s = '', node IN nodes(path)| s + '–' + node.identifier), 1) AS path,")
-    ])
+    ('string', 'identifier', "substring(reduce(s = '', node IN nodes(path)| s + '–' + node.identifier), 1) AS path,"),
+    ('id_lists', None, "[node IN nodes(path) | id(node)] AS node_ids,\n[rel IN relationships(path) | id(rel)] AS rel_ids,"),
+])
 def test_construct_path_return_clause_returns(style, identifier, expected_output):
     '''
     Test the results of construct_path_return_clause with different parameters
