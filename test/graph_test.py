@@ -125,6 +125,7 @@ def test_disase_gene_example():
     assert metagraph.get_metaedge(metaedge_GaD) == metaedge_GaD
     assert metaedge_id_GaD == metaedge_GaD.get_id()
     assert metagraph.get_metaedge(metaedge_id_GaD) == metaedge_GaD
+    assert metagraph.get_metaedge('ASSOCIATES_GaD') == metaedge_GaD
     assert metagraph.get_metaedge('GaD') == metaedge_GaD
     # Test metaedge.abbrev property
     assert metaedge_GaD.abbrev == 'GaD'

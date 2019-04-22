@@ -126,7 +126,9 @@ def as_label(metanode):
 
 
 def as_type(metaedge):
-    """Convert metaedge to a rel_type-formatted str"""
+    """
+    Convert metaedge to a rel_type-formatted str.
+    """
     import warnings
     warnings.warn(
         "hetio.neo4j.as_type is deprecated. Use metaedge.neo4j_rel_type instead.",
