@@ -1,10 +1,6 @@
 import functools
 import itertools
 import textwrap
-import random
-import pkg_resources
-from operator import or_
-from functools import reduce
 
 import hetio.hetnet
 
@@ -14,6 +10,7 @@ def import_py2neo():
     """
     Imports the py2neo library, checks its version, and sets the socket timeout if necessary
     """
+    import pkg_resources
     import py2neo
     # Get py2neo version
     PY2NEO_VER = pkg_resources.parse_version(py2neo.__version__)
@@ -42,7 +39,7 @@ def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
 
     # Create uniqueness constrains and indexes
     for metanode in graph.metagraph.get_nodes():
-        label = as_label(metanode)
+        label = metanode.neo4j_label
         if 'identifier' not in db_graph.schema.get_uniqueness_constraints(label):
             db_graph.schema.create_uniqueness_constraint(label, 'identifier')
         if 'name' not in db_graph.schema.get_indexes(label):
@@ -57,7 +54,7 @@ def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
         queue = tqdm(queue, total=graph.n_nodes, desc="Importing nodes")
 
     for node in queue:
-        label = as_label(node.metanode)
+        label = node.metanode.neo4j_label
         data = sanitize_data(node.data)
         neo_node = py2neo.Node(label, identifier=node.identifier, name=node.name, **data)
         creator.append(neo_node)
@@ -73,9 +70,9 @@ def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
 
     for edge in queue:
         metaedge = edge.metaedge
-        rel_type = as_type(metaedge)
-        source_label = as_label(metaedge.source)
-        target_label = as_label(metaedge.target)
+        rel_type = metaedge.neo4j_rel_type
+        source_label = metaedge.source.neo4j_label
+        target_label = metaedge.target.neo4j_label
         source = db_graph.find_one(source_label, 'identifier', edge.source.identifier)
         target = db_graph.find_one(target_label, 'identifier', edge.target.identifier)
         data = sanitize_data(edge.data)
@@ -107,30 +104,39 @@ class Creator(list):
 
         # http://stackoverflow.com/a/37697792/4651668
         if version_tuple[0] >= 3:
-            self.db_graph.create(reduce(or_, self))
+            import operator
+            self.db_graph.create(functools.reduce(operator.or_, self))
         else:
             self.db_graph.create(*self)
 
         self.n_created += len(self)
         del self[:]
 
-@functools.lru_cache()
-def as_label(metanode):
-    """Convert metanode to a label-formatted str"""
-    label = str(metanode)
-    label = label.title()
-    label = label.replace(' ', '')
-    return label
 
-@functools.lru_cache()
+def as_label(metanode):
+    """
+    Retrieve neo4j-style label for a metanode.
+    """
+    import warnings
+    warnings.warn(
+        "hetio.neo4j.as_label is deprecated. Use metanode.neo4j_label instead.",
+        DeprecationWarning,
+    )
+    return metanode.neo4j_label
+
+
 def as_type(metaedge):
-    """Convert metaedge to a rel_type-formatted str"""
+    """
+    Convert metaedge to a rel_type-formatted str.
+    """
+    import warnings
+    warnings.warn(
+        "hetio.neo4j.as_type is deprecated. Use metaedge.neo4j_rel_type instead.",
+        DeprecationWarning,
+    )
     assert isinstance(metaedge, hetio.hetnet.MetaEdge)
-    rel_type = str(metaedge.kind)
-    rel_type = rel_type.upper()
-    rel_type = rel_type.replace(' ', '_')
-    abbrev = metaedge.get_standard_abbrev()
-    return '{}_{}'.format(rel_type, abbrev)
+    return metaedge.neo4j_rel_type
+
 
 def sanitize_data(data):
     """Create neo4j safe properties"""
@@ -147,13 +153,15 @@ def sanitize_data(data):
         sanitized[k] = v
     return sanitized
 
+
 def metapath_to_metarels(metapath):
     return tuple(metaedge_to_metarel(metaedge) for metaedge in metapath)
 
+
 @functools.lru_cache()
 def metaedge_to_metarel(metaedge):
-    source, target, kind, direction = metaedge.get_id()
-    return as_label(source), as_label(target), as_type(metaedge), direction
+    return metaedge.source.neo4j_label, metaedge.target.neo4j_label, metaedge.neo4j_rel_type, metaedge.direction
+
 
 def cypher_path(metarels):
     """
@@ -542,6 +550,7 @@ def permute_rel_type(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, m
        Randomization Techniques for Graphs. SIAM International Conference on
        Data Mining. https://doi.org/10.1137/1.9781611972795.67
     """
+    import random
     py2neo, _ = import_py2neo()
 
     neo = py2neo.Graph(uri)

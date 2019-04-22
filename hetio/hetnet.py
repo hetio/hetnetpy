@@ -1,4 +1,5 @@
 import abc
+import functools
 import re
 
 import hetio.abbreviation
@@ -220,25 +221,36 @@ class MetaGraph(BaseGraph):
          - MetaNode (passthrough)
          - metanode kind (str)
          - metanode abbreviation (str)
+         - neo4j-style node label
         """
         if isinstance(metanode, MetaNode):
             return metanode
         if metanode in self.node_dict:
             return self.get_node(metanode)
-        # Assume metanode must be an abbreviation
-        return self.get_node(self.abbrev_to_kind[metanode])
+        if not isinstance(metanode, str):
+            raise ValueError('Cannot interpret object of type {}'.format(type(metanode).__name__))
+        if metanode in self.abbrev_to_kind:
+            return self.get_node(self.abbrev_to_kind[metanode])
+        if metanode in self.neo4j_to_metanode:
+            return self.neo4j_to_metanode[metanode]
+        raise ValueError('metanode not found')
 
     def get_metaedge(self, metaedge):
         """
         Return the metaedge specified by the input, which can be either a:
          - MetaEdge (passthrough)
          - metaedge_id (tuple)
+         - neo4j-style relationship type
          - metaedge abbreviation
         """
         if isinstance(metaedge, MetaEdge):
             return metaedge
         if isinstance(metaedge, tuple):
             return self.get_edge(metaedge)
+        if not isinstance(metaedge, str):
+            raise ValueError('Cannot interpret object of type {}'.format(type(metaedge).__name__))
+        if metaedge in self.neo4j_to_metaedge:
+            return self.neo4j_to_metaedge[metaedge]
         metaedge_id = hetio.abbreviation.metaedge_id_from_abbreviation(self, metaedge)
         return self.get_edge(metaedge_id)
 
@@ -255,6 +267,22 @@ class MetaGraph(BaseGraph):
             return self.get_metapath_from_edges(metapath)
         if isinstance(metapath, str):
             return self.metapath_from_abbrev(metapath)
+
+    @property
+    def neo4j_to_metanode(self):
+        if not hasattr(self, '_neo4j_to_metanode'):
+            self._neo4j_to_metanode = {
+                metanode.neo4j_label: metanode for metanode in self.get_nodes()
+            }
+        return self._neo4j_to_metanode
+
+    @property
+    def neo4j_to_metaedge(self):
+        if not hasattr(self, '_neo4j_to_metaedge'):
+            self._neo4j_to_metaedge = {
+                metaedge.neo4j_rel_type: metaedge for metaedge in self.get_edges()
+            }
+        return self._neo4j_to_metaedge
 
     @staticmethod
     def from_edge_tuples(metaedge_tuples, kind_to_abbrev=None):
@@ -429,6 +457,17 @@ class MetaNode(BaseNode):
     def get_id(self):
         return self.identifier
 
+    @property
+    @functools.lru_cache()
+    def neo4j_label(self):
+        """
+        Convert metanode to neo4j nomenclature, i.e. a label-formatted str.
+        """
+        label = str(self)
+        label = label.title()
+        label = label.replace(' ', '')
+        return label
+
     def __str__(self):
         return str(self.identifier)
 
@@ -483,6 +522,16 @@ class MetaEdge(BaseEdge):
         s = '{0}{2}{1}-{3}'.format(self.source.abbrev, self.target.abbrev,
                                    self.kind_abbrev, self.direction)
         return s.translate(None, '><')
+
+    @property
+    @functools.lru_cache()
+    def neo4j_rel_type(self):
+        """Convert metaedge to a rel_type-formatted str"""
+        rel_type = str(self.kind)
+        rel_type = rel_type.upper()
+        rel_type = rel_type.replace(' ', '_')
+        abbrev = self.get_standard_abbrev()
+        return '{}_{}'.format(rel_type, abbrev)
 
 
 class MetaPath(BasePath):
