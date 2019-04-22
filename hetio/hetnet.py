@@ -221,6 +221,7 @@ class MetaGraph(BaseGraph):
          - MetaNode (passthrough)
          - metanode kind (str)
          - metanode abbreviation (str)
+         - neo4j-style node label
         """
         if isinstance(metanode, MetaNode):
             return metanode
@@ -239,6 +240,7 @@ class MetaGraph(BaseGraph):
         Return the metaedge specified by the input, which can be either a:
          - MetaEdge (passthrough)
          - metaedge_id (tuple)
+         - neo4j-style relationship type
          - metaedge abbreviation
         """
         if isinstance(metaedge, MetaEdge):
