@@ -247,7 +247,6 @@ class MetaGraph(BaseGraph):
             return self.get_edge(metaedge)
         if not isinstance(metaedge, str):
             raise ValueError('Cannot interpret object of type {}'.format(type(metaedge).__name__))
-        print(self.neo4j_to_metaedge)
         if metaedge in self.neo4j_to_metaedge:
             return self.neo4j_to_metaedge[metaedge]
         metaedge_id = hetio.abbreviation.metaedge_id_from_abbreviation(self, metaedge)
@@ -268,14 +267,20 @@ class MetaGraph(BaseGraph):
             return self.metapath_from_abbrev(metapath)
 
     @property
-    #@functools.lru_cache()
     def neo4j_to_metanode(self):
-        return {metanode.neo4j_label: metanode for metanode in self.get_nodes()}
+        if not hasattr(self, '_neo4j_to_metanode'):
+            self._neo4j_to_metanode = {
+                metanode.neo4j_label: metanode for metanode in self.get_nodes()
+            }
+        return self._neo4j_to_metanode
 
     @property
-    #@functools.lru_cache()
     def neo4j_to_metaedge(self):
-        return {metaedge.neo4j_rel_type: metaedge for metaedge in self.get_edges()}
+        if not hasattr(self, '_neo4j_to_metaedge'):
+            self._neo4j_to_metaedge = {
+                metaedge.neo4j_rel_type: metaedge for metaedge in self.get_edges()
+            }
+        return self._neo4j_to_metaedge
 
     @staticmethod
     def from_edge_tuples(metaedge_tuples, kind_to_abbrev=None):
