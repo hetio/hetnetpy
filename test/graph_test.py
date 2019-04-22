@@ -114,21 +114,25 @@ def test_disase_gene_example():
     metagraph = hetio.hetnet.MetaGraph.from_edge_tuples(metaedge_tuples)
 
     # Test metagraph getter methods
-    # Test metagraph.get_metanode
     gene_metanode = metagraph.node_dict['Gene']
+    # Test metagraph.get_metanode
     assert metagraph.get_metanode(gene_metanode) == gene_metanode
     assert metagraph.get_metanode('Gene') == gene_metanode
     assert metagraph.get_metanode('G') == gene_metanode
+    # Test metanode properties
+    assert gene_metanode.abbrev == 'G'
+    assert gene_metanode.neo4j_label == 'Gene'
 
-    # Test metagraph.get_metaedge
     metaedge_GaD = metagraph.get_edge(metaedge_id_GaD)
+    # Test metagraph.get_metaedge
     assert metagraph.get_metaedge(metaedge_GaD) == metaedge_GaD
     assert metaedge_id_GaD == metaedge_GaD.get_id()
     assert metagraph.get_metaedge(metaedge_id_GaD) == metaedge_GaD
-    assert metagraph.get_metaedge('ASSOCIATES_GaD') == metaedge_GaD
+    assert metagraph.get_metaedge('ASSOCIATION_GaD') == metaedge_GaD
     assert metagraph.get_metaedge('GaD') == metaedge_GaD
-    # Test metaedge.abbrev property
+    # Test metaedge properties
     assert metaedge_GaD.abbrev == 'GaD'
+    assert metaedge_GaD.neo4j_rel_type == 'ASSOCIATION_GaD'
 
     # Test metagraph.get_metapath
     metapath_abbrev = 'TlDaGiG'
