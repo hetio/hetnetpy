@@ -1,4 +1,5 @@
 import abc
+import functools
 import re
 
 import hetio.abbreviation
@@ -429,6 +430,17 @@ class MetaNode(BaseNode):
     def get_id(self):
         return self.identifier
 
+    @property
+    @functools.lru_cache()
+    def neo4j_label(self):
+        """
+        Convert metanode to neo4j nomenclature, i.e. a label-formatted str.
+        """
+        label = str(self)
+        label = label.title()
+        label = label.replace(' ', '')
+        return label
+
     def __str__(self):
         return str(self.identifier)
 
@@ -483,6 +495,16 @@ class MetaEdge(BaseEdge):
         s = '{0}{2}{1}-{3}'.format(self.source.abbrev, self.target.abbrev,
                                    self.kind_abbrev, self.direction)
         return s.translate(None, '><')
+
+    @property
+    @functools.lru_cache()
+    def neo4j_rel_type(self):
+        """Convert metaedge to a rel_type-formatted str"""
+        rel_type = str(self.kind)
+        rel_type = rel_type.upper()
+        rel_type = rel_type.replace(' ', '_')
+        abbrev = self.get_standard_abbrev()
+        return '{}_{}'.format(rel_type, abbrev)
 
 
 class MetaPath(BasePath):
