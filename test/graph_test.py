@@ -214,7 +214,7 @@ def get_hetionet_metagraph():
     ('Gr>G<rG', True),
     ('Gr>GiG<rG', True),
     ('G<rGiGr>G', True),
-    ('G<rGiG<rG', True),
+    ('G<rGiG<rG', False),
 ])
 def test_metapath_symmetry(metapath, symmetry):
     """
