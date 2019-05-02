@@ -1,0 +1,31 @@
+hetio/hetio v0.2.10
+===================
+
+May 2019 release with convenience functions and other enhancements.
+
+Changes
+-------
+
+Consistent metanode/metaedge/metapath .abbrev property
+https://github.com/hetio/hetio/pull/27
+
+permute_pair_list: default to inplace=False
+https://github.com/hetio/hetio/issues/28
+
+Add construct_pdp_query to build cypher queries for PDP
+https://github.com/hetio/hetio/pull/30
+https://github.com/hetio/hetio/pull/33
+https://github.com/hetio/hetio/pull/34
+https://github.com/hetio/hetio/pull/36
+
+Improve imports to be lazy / less likely to throw errors
+https://github.com/hetio/hetio/issues/31
+https://github.com/hetio/hetio/pull/32
+https://github.com/hetio/hetio/pull/35
+
+Migrate neo4j nomenclature to hetnet module
+https://github.com/hetio/hetio/pull/37
+
+is_symmetric method for metapaths
+https://github.com/hetio/hetio/issues/38
+https://github.com/hetio/hetio/pull/39
