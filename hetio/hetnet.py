@@ -413,30 +413,28 @@ class MetaGraph(BaseGraph):
 
     def get_metapath_from_edges(self, edges):
         """Store exactly one of each metapath."""
+        assert isinstance(edges, tuple)
+        if len(edges) == 0:
+            return None
         try:
             return self.path_dict[edges]
         except KeyError:
-            assert isinstance(edges, tuple)
-            if len(edges) == 0:
-                return None
-
             metapath = MetaPath(edges)
             self.path_dict[edges] = metapath
 
             inverse_edges = metapath.inverse_edges()
-            inverse = MetaPath(inverse_edges)
-            self.path_dict[inverse_edges] = inverse
-
-            metapath.inverse = inverse
-            inverse.inverse = metapath
-
-            sub_edges = edges[1:]
-            if not sub_edges:
-                metapath.sub = None
-                inverse.sub = None
+            if metapath.is_symmetric():
+                inverse = metapath
             else:
-                metapath.sub = self.get_metapath_from_edges(sub_edges)
-                inverse.sub = self.get_metapath_from_edges(inverse_edges[1:])
+                inverse = MetaPath(inverse_edges)
+                self.path_dict[inverse_edges] = inverse
+                inverse.inverse = metapath
+            metapath.inverse = inverse
+
+            # Create metapaths for metapath segments in this metapath
+            sub_edges = edges[1:]
+            metapath.sub = self.get_metapath_from_edges(sub_edges)
+            inverse.sub = self.get_metapath_from_edges(inverse_edges[1:])
 
             return metapath
 

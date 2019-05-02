@@ -223,7 +223,7 @@ def test_metapath_symmetry(metapath, symmetry):
     metagraph = get_hetionet_metagraph()
     metapath = metagraph.get_metapath(metapath)
     assert metapath.is_symmetric() == symmetry
-    # Test only single metapath object is created
-    # https://github.com/hetio/hetio/issues/38
     if symmetry:
+        # Test only single metapath object is created
+        # https://github.com/hetio/hetio/issues/38
         assert metapath is metapath.inverse
