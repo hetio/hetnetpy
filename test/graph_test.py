@@ -1,4 +1,5 @@
 import os
+import pathlib
 
 import pytest
 
@@ -191,3 +192,38 @@ def test_disase_gene_example():
     assert graph.n_edges == 14
     assert graph.count_nodes('Disease') == 2
     assert graph.count_nodes(gene_metanode) == 7
+
+
+def get_hetionet_metagraph():
+    """
+    Return the Hetionet v1.0 metagraph
+    """
+    path = pathlib.Path(__file__).parent / 'data/hetionet-v1.0-metagraph.json'
+    return hetio.readwrite.read_metagraph(path)
+
+
+@pytest.mark.parametrize(['metapath', 'symmetry'], [
+    ('GiG', True),
+    ('GiGiG', True),
+    ('GiGiGiG', True),
+    ('GaD', False),
+    ('GaDaG', True),
+    ('GaDrD', False),
+    ('GpPWpGpPWpG', True),
+    ('Gr>Gr>G', False),
+    ('Gr>G<rG', True),
+    ('Gr>GiG<rG', True),
+    ('G<rGiGr>G', True),
+    ('G<rGiG<rG', False),
+])
+def test_metapath_symmetry(metapath, symmetry):
+    """
+    https://github.com/hetio/hetio/issues/38
+    """
+    metagraph = get_hetionet_metagraph()
+    metapath = metagraph.get_metapath(metapath)
+    assert metapath.is_symmetric() == symmetry
+    if symmetry:
+        # Test only single metapath object is created
+        # https://github.com/hetio/hetio/issues/38
+        assert metapath is metapath.inverse
