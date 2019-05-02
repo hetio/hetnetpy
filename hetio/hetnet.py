@@ -157,6 +157,10 @@ class BasePath(IterMask):
     def inverse_edges(self):
         return tuple(reversed(list(edge.inverse for edge in self)))
 
+    def is_symmetric(self):
+        """Return a bool for whether this path is symmetric."""
+        return self.edges == self.inverse_edges()
+
     def mask_elem_iter(self):
         for edge in self:
             yield edge

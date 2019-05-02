@@ -202,7 +202,7 @@ def get_hetionet_metagraph():
     return hetio.readwrite.read_metagraph(path)
 
 
-@pytest.mark.parametrize(['metapath', 'expected_symmetry'], [
+@pytest.mark.parametrize(['metapath', 'symmetry'], [
     ('GiG', True),
     ('GiGiG', True),
     ('GiGiGiG', True),
@@ -216,14 +216,14 @@ def get_hetionet_metagraph():
     ('G<rGiGr>G', True),
     ('G<rGiG<rG', True),
 ])
-def test_metapath_symmetry(metapath, expected_symmetry):
+def test_metapath_symmetry(metapath, symmetry):
     """
     https://github.com/hetio/hetio/issues/38
     """
     metagraph = get_hetionet_metagraph()
     metapath = metagraph.get_metapath(metapath)
-    symmetry = metapath == metapath.inverse
-    assert symmetry == expected_symmetry
+    assert metapath.is_symmetric() == symmetry
     # Test only single metapath object is created
     # https://github.com/hetio/hetio/issues/38
-    assert symmetry is expected_symmetry
+    if symmetry:
+        assert metapath is metapath.inverse
