@@ -1,6 +1,6 @@
 import os
 
-import hetio.readwrite
+import hetnetpy.readwrite
 
 
 directory = os.path.dirname(os.path.abspath(__file__))
@@ -25,7 +25,7 @@ def read_hetionet_v1_0_metagraph(path, extensions=None):
     if extensions is None:
         extensions = ['']
     for ext in extensions:
-        metagraph = hetio.readwrite.read_metagraph(path + ext)
+        metagraph = hetnetpy.readwrite.read_metagraph(path + ext)
         assert metagraph.n_nodes == 11
         assert metagraph.n_edges == 24
 
@@ -35,7 +35,7 @@ def test_metagraph_reading_from_urls():
     Test reading metagraphs from URLs.
     """
     url = 'https://github.com/{repo}/raw/{commit}/{path}'.format(
-        repo='hetio/hetio',
+        repo='hetio/hetnetpy',
         commit='master',
         path='test/data/hetionet-v1.0-metagraph.json',
     )

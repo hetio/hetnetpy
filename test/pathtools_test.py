@@ -2,8 +2,8 @@ import os
 
 import pytest
 
-import hetio.readwrite
-from hetio.pathtools import paths_between, DWPC
+import hetnetpy.readwrite
+from hetnetpy.pathtools import paths_between, DWPC
 
 directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -14,7 +14,7 @@ def test_disease_gene_example_dwpc():
     https://doi.org/10.1371/journal.pcbi.1004259.g002
     """
     path = os.path.join(directory, 'data', 'disease-gene-example-graph.json')
-    graph = hetio.readwrite.read_graph(path)
+    graph = hetnetpy.readwrite.read_graph(path)
     metagraph = graph.metagraph
 
     # Define source and target nodes
@@ -51,7 +51,7 @@ def test_bupropion_CbGpPWpGaD_traversal():
     # Read Hetionet v1.0 subgraph
     path = os.path.join(
         directory, 'data', 'bupropion-CbGpPWpGaD-subgraph.json.xz')
-    graph = hetio.readwrite.read_graph(path)
+    graph = hetnetpy.readwrite.read_graph(path)
     metagraph = graph.metagraph
 
     # Define traversal

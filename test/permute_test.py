@@ -1,6 +1,6 @@
 import pytest
 
-import hetio.permute
+import hetnetpy.permute
 
 
 @pytest.mark.parametrize('edges,inplace', [
@@ -9,7 +9,7 @@ import hetio.permute
 ])
 def test_permute_inplace(edges, inplace):
     old_edges = edges.copy()
-    new_edges, stats = hetio.permute.permute_pair_list(edges, inplace=inplace)
+    new_edges, stats = hetnetpy.permute.permute_pair_list(edges, inplace=inplace)
     assert old_edges != new_edges
 
     if inplace:

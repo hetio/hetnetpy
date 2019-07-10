@@ -4,11 +4,11 @@ import numpy
 import pytest
 import scipy.sparse
 
-from hetio.matrix import (
+from hetnetpy.matrix import (
     metaedge_to_adjacency_matrix,
     sparsify_or_densify,
 )
-import hetio.readwrite
+import hetnetpy.readwrite
 
 directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -59,7 +59,7 @@ def test_metaedge_to_adjacency_matrix(test_edge, dtype, dense_threshold):
     https://doi.org/10.1371/journal.pcbi.1004259.g002
     """
     path = os.path.join(directory, 'data', 'disease-gene-example-graph.json')
-    graph = hetio.readwrite.read_graph(path)
+    graph = hetnetpy.readwrite.read_graph(path)
     row_names, col_names, adj_mat = metaedge_to_adjacency_matrix(
         graph, test_edge, dtype=dtype, dense_threshold=dense_threshold)
     exp_row, exp_col, exp_adj = get_arrays(test_edge, dtype, dense_threshold)

@@ -2,7 +2,7 @@ import collections
 
 import regex
 
-import hetio.hetnet
+import hetnetpy.hetnet
 
 
 def validate_abbreviations(metagraph):
@@ -113,12 +113,12 @@ def create_abbreviations(metagraph):
 def metaedges_from_metapath(abbreviation, standardize_by=None):
     """
     Get the abbreviated metaedges for an abbreviated metapath.
-    Pass a hetio.MetaGraph object to `standardize_by` to standardize metaedge
+    Pass a hetnetpy.MetaGraph object to `standardize_by` to standardize metaedge
     abbreviations based on the non-inverted orietatation. Pass `text` to
     standardize by alphabetical/forward-direction arrangment of the
     abbreviation. Default (`None`) does not standardize.
     """
-    if isinstance(standardize_by, hetio.hetnet.MetaGraph):
+    if isinstance(standardize_by, hetnetpy.hetnet.MetaGraph):
         metapath = standardize_by.metapath_from_abbrev(abbreviation)
         return [metaedge.get_standard_abbrev() for metaedge in metapath]
     # Note that this is a valid regex module pattern but will not work in the

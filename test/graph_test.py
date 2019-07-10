@@ -3,8 +3,8 @@ import pathlib
 
 import pytest
 
-import hetio.hetnet
-import hetio.readwrite
+import hetnetpy.hetnet
+import hetnetpy.readwrite
 
 from .readwrite_test import formats, extensions
 
@@ -22,12 +22,12 @@ def test_creation(tmpdir):
         ('gene', 'gene', 'transcribes', 'forward'),
     ]
     metanode_ids = 'compound', 'disease', 'gene'
-    metagraph = hetio.hetnet.MetaGraph.from_edge_tuples(metaedge_tuples)
+    metagraph = hetnetpy.hetnet.MetaGraph.from_edge_tuples(metaedge_tuples)
 
     # check that nodes got added to metagraph_node_dict
     assert frozenset(metagraph.node_dict) == frozenset(metanode_ids)
     for metanode in metagraph.node_dict.values():
-        assert isinstance(metanode, hetio.hetnet.MetaNode)
+        assert isinstance(metanode, hetnetpy.hetnet.MetaNode)
 
     # check that metanode.get_id() and hash(metanode) are working as expected
     for metanode_id in metanode_ids:
@@ -42,7 +42,7 @@ def test_creation(tmpdir):
     assert metagraph.n_inverts == 4
 
     # Create a graph
-    graph = hetio.hetnet.Graph(metagraph)
+    graph = hetnetpy.hetnet.Graph(metagraph)
 
     # Create a node for multiple sclerosis
     ms = graph.add_node('disease', 'DOID:2377', 'multiple sclerosis')
@@ -93,12 +93,12 @@ def test_creation(tmpdir):
             ext = '.{}{}'.format(format_, extension)
             # Write metagraph
             path = os.path.join(tmpdir, 'metagraph' + ext)
-            hetio.readwrite.write_metagraph(metagraph, path)
-            hetio.readwrite.read_metagraph(path)
+            hetnetpy.readwrite.write_metagraph(metagraph, path)
+            hetnetpy.readwrite.read_metagraph(path)
             # Write graph
             path = os.path.join(tmpdir, 'graph' + ext)
-            hetio.readwrite.write_graph(graph, path)
-            hetio.readwrite.read_graph(path)
+            hetnetpy.readwrite.write_graph(graph, path)
+            hetnetpy.readwrite.read_graph(path)
 
 
 def test_disase_gene_example():
@@ -112,7 +112,7 @@ def test_disase_gene_example():
         ('Disease', 'Tissue', 'localization', 'both'),
         ('Gene', 'Gene', 'interaction', 'both'),
     ]
-    metagraph = hetio.hetnet.MetaGraph.from_edge_tuples(metaedge_tuples)
+    metagraph = hetnetpy.hetnet.MetaGraph.from_edge_tuples(metaedge_tuples)
 
     # Test metagraph getter methods
     gene_metanode = metagraph.node_dict['Gene']
@@ -145,7 +145,7 @@ def test_disase_gene_example():
     assert metapath.abbrev == metapath_abbrev
 
     # Create graph
-    graph = hetio.hetnet.Graph(metagraph)
+    graph = hetnetpy.hetnet.Graph(metagraph)
     nodes = dict()
 
     # Add gene nodes
@@ -199,7 +199,7 @@ def get_hetionet_metagraph():
     Return the Hetionet v1.0 metagraph
     """
     path = pathlib.Path(__file__).parent / 'data/hetionet-v1.0-metagraph.json'
-    return hetio.readwrite.read_metagraph(path)
+    return hetnetpy.readwrite.read_metagraph(path)
 
 
 @pytest.mark.parametrize(['metapath', 'symmetry'], [

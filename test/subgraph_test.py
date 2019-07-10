@@ -1,6 +1,6 @@
 import os
 
-import hetio.readwrite
+import hetnetpy.readwrite
 
 directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -11,7 +11,7 @@ def get_disease_gene_example_hetnet():
     https://doi.org/10.1371/journal.pcbi.1004259.g002
     """
     path = os.path.join(directory, 'data', 'disease-gene-example-graph.json')
-    graph = hetio.readwrite.read_graph(path)
+    graph = hetnetpy.readwrite.read_graph(path)
     return graph
 
 

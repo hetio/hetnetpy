@@ -1,8 +1,8 @@
 # Hetnets in Python
 
-[![Latest DOI](https://zenodo.org/badge/14475/dhimmel/hetio.svg)](https://zenodo.org/badge/latestdoi/14475/dhimmel/hetio)
-[![GitHub issues](https://img.shields.io/github/issues/hetio/hetio.svg)](https://github.com/hetio/hetio/issues)
-[![Build Status](https://travis-ci.com/hetio/hetio.svg?branch=master)](https://travis-ci.com/hetio/hetio)
+[![Latest DOI](https://zenodo.org/badge/14475/dhimmel/hetnetpy.svg)](https://zenodo.org/badge/latestdoi/14475/dhimmel/hetio)
+[![GitHub issues](https://img.shields.io/github/issues/hetio/hetnetpy.svg)](https://github.com/hetio/hetnetpy/issues)
+[![Build Status](https://travis-ci.com/hetio/hetnetpy.svg?branch=master)](https://travis-ci.com/hetio/hetnetpy)
 
 ## Package relocation
 
@@ -26,18 +26,18 @@ These users should either switch to using `hetnetpy` or downgrade to `hetio<=0.2
 
 ## Installation
 
-[![PyPI](https://img.shields.io/pypi/v/hetio.svg)](https://pypi.org/project/hetio/)
+[![PyPI](https://img.shields.io/pypi/v/hetnetpy.svg)](https://pypi.org/project/hetnetpy/)
 
 Please use Python 3.4 or higher. To install the current PyPI version (recommended), run:
 
 ```sh
-pip install hetio
+pip install hetnetpy
 ```
 
 For the latest GitHub version, run:
 
 ```sh
-pip install git+https://github.com/hetio/hetio.git#egg=hetio
+pip install git+https://github.com/hetio/hetnetpy.git#egg=hetnetpy
 ```
 
 For development, clone or download-and-extract the repository. Then run `pip install --editable .` from the repository's root directory. The `--editable` flag specifies [editable](https://pythonhosted.org/setuptools/setuptools.html#development-mode) mode, so updating the source updates your installation.
@@ -56,7 +56,7 @@ A Graph object stores a heterogeneous network and relies on the following classe
 ## Release instructions
 
 This section is only relevant for project maintainers.
-Travis CI deployments are used to upload releases to [PyPI](https://pypi.org/project/hetio) and [GitHub releases](https://github.com/hetio/hetio/releases).
+Travis CI deployments are used to upload releases to [PyPI](https://pypi.org/project/hetnetpy) and [GitHub releases](https://github.com/hetio/hetnetpy/releases).
 To create a new release, do the following:
 
 1. Bump the version in [`__init__.py`](hetio/__init__.py).
@@ -68,7 +68,7 @@ To create a new release, do the following:
     
   ```sh
   TAG=v`python setup.py --version`
-  git add hetio/__init__.py release-notes/$TAG.*
+  git add hetnetpy/__init__.py release-notes/$TAG.*
   git commit --message "Prepare $TAG release"
   git push
   git tag --annotate $TAG --file release-notes/$TAG.*

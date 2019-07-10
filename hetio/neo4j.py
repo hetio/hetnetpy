@@ -2,7 +2,7 @@ import functools
 import itertools
 import textwrap
 
-import hetio.hetnet
+import hetnetpy.hetnet
 
 
 @functools.lru_cache()
@@ -119,7 +119,7 @@ def as_label(metanode):
     """
     import warnings
     warnings.warn(
-        "hetio.neo4j.as_label is deprecated. Use metanode.neo4j_label instead.",
+        "hetnetpy.neo4j.as_label is deprecated. Use metanode.neo4j_label instead.",
         DeprecationWarning,
     )
     return metanode.neo4j_label
@@ -131,10 +131,10 @@ def as_type(metaedge):
     """
     import warnings
     warnings.warn(
-        "hetio.neo4j.as_type is deprecated. Use metaedge.neo4j_rel_type instead.",
+        "hetnetpy.neo4j.as_type is deprecated. Use metaedge.neo4j_rel_type instead.",
         DeprecationWarning,
     )
-    assert isinstance(metaedge, hetio.hetnet.MetaEdge)
+    assert isinstance(metaedge, hetnetpy.hetnet.MetaEdge)
     return metaedge.neo4j_rel_type
 
 
@@ -168,7 +168,7 @@ def cypher_path(metarels):
     Format a metapath for cypher.
     """
     # Convert metapath to metarels
-    if isinstance(metarels, hetio.hetnet.MetaPath):
+    if isinstance(metarels, hetnetpy.hetnet.MetaPath):
         metarels = metapath_to_metarels(metarels)
 
     # Create cypher query
@@ -357,7 +357,7 @@ def construct_dwpc_query(metarels, property='name', join_hint='midpoint', index_
         which is the default, uses the `labeled` method.
     """
     # Convert metapath to metarels
-    if isinstance(metarels, hetio.hetnet.MetaPath):
+    if isinstance(metarels, hetnetpy.hetnet.MetaPath):
         metarels = metapath_to_metarels(metarels)
 
     # create cypher path query
@@ -435,7 +435,7 @@ def construct_pdp_query(metarels, dwpc=None, path_style='list', return_property=
         which is the default, uses the `labeled` method.
     """
     # Convert metapath to metarels
-    if isinstance(metarels, hetio.hetnet.MetaPath):
+    if isinstance(metarels, hetnetpy.hetnet.MetaPath):
         metarels = metapath_to_metarels(metarels)
 
     # create cypher path query

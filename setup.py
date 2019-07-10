@@ -7,7 +7,7 @@ import setuptools
 directory = pathlib.Path(__file__).parent.absolute()
 
 # version
-init_path = directory.joinpath('hetio', '__init__.py')
+init_path = directory.joinpath('hetnetpy', '__init__.py')
 with init_path.open() as read_file:
     text = read_file.read()
 pattern = re.compile(r"^__version__ = ['\"]([^'\"]*)['\"]", re.MULTILINE)
@@ -30,9 +30,9 @@ tests_require = [
 
 setuptools.setup(
     # Package details
-    name='hetio',
+    name='hetnetpy',
     version=version,
-    url='https://github.com/hetio/hetio',
+    url='https://github.com/hetio/hetnetpy',
     description='Hetnets in Python',
     long_description_content_type='text/markdown',
     long_description=long_description,
@@ -43,7 +43,7 @@ setuptools.setup(
     author_email='daniel.himmelstein@gmail.com',
 
     # Package topics
-    keywords='hetnet graph heterogeneous network neo4j hetio',
+    keywords='hetnet graph heterogeneous network neo4j hetio hetnetpy',
     classifiers=[
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
@@ -56,7 +56,7 @@ setuptools.setup(
         'Programming Language :: Python :: 3.6',
     ],
 
-    packages=['hetio'],
+    packages=['hetnetpy'],
 
     # Specify python version
     python_requires='>=3.4',
