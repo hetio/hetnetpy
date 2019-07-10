@@ -1,0 +1,9 @@
+hetio/hetio v0.2.11
+===================
+
+Final release before this package is renamed to hetnetpy from hetio.
+See <https://github.com/hetio/hetio/issues/40> for more information on the renaming.
+`import hetio` will raise a DeprecationWarning.
+Users are recommended to switch to hetnetpy or downgrade to v0.2.10 to avoid the warning.
+
+There are no functional changes in this release.
