@@ -1,6 +1,4 @@
-README.rst
-
-## Python
+# Python
 __pycache__/
 .cache
 .ipynb_checkpoints/
@@ -8,8 +6,20 @@ __pycache__/
 *.egg-info/
 build/
 
+# System specific files
+
 ## Linux
 *~
+.Trash-*
 
 ## macOS
 .DS_Store
+._*
+.Trashes
+
+## Windows
+Thumbs.db
+[Dd]esktop.ini
+
+## Text Editors
+.vscode
