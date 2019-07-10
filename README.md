@@ -4,6 +4,16 @@
 [![GitHub issues](https://img.shields.io/github/issues/hetio/hetio.svg)](https://github.com/hetio/hetio/issues)
 [![Build Status](https://travis-ci.com/hetio/hetio.svg?branch=master)](https://travis-ci.com/hetio/hetio)
 
+## Package relocation
+
+**Critical**:
+This is the final release before the package name [changes](https://github.com/hetio/hetio/issues/40) to `hetnetpy` from `hetio`.
+Future development will occur in the `hetio/hetnetpy` [repository](https://github.com/hetio/hetnetpy).
+PyPI releases will be available at <https://pypi.org/project/hetnetpy/>.
+
+Users of v0.2.11 will see a warning when importing `hetio`.
+These users should either switch to using `hetnetpy` or downgrade to `hetio<=0.2.10` to avoid the warning.
+
 ## Background
 
 **Hetnets**: Hetnets, also [called](https://doi.org/10.15363/thinklab.d104) *heterogeneous information networks*, are graphs with multiple node and edge types. Hetnets are both multipartite and multirelational. They provide a scalable, intuitive, and frictionless structure for data integration.
