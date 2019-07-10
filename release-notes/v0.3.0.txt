@@ -1,0 +1,6 @@
+hetio/hetnetpy v0.3.0
+=====================
+
+This release is the first with the new package name `hetnetpy`.
+Users should now use `pip install hetnetpy` and `import hetnetpy`.
+`import hetio` will still work but will trigger a FutureWarning.

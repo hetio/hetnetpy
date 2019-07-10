@@ -1,8 +1,8 @@
-import hetio.abbreviation
+import hetnetpy.abbreviation
 
 
 def test__get_duplicates():
-    get_duplicates = hetio.abbreviation.get_duplicates
+    get_duplicates = hetnetpy.abbreviation.get_duplicates
     assert get_duplicates(range(5)) == set()
     assert get_duplicates('abcd') == set()
     assert get_duplicates('abbccd') == {'b', 'c'}
@@ -50,7 +50,7 @@ def test__find_abbrevs():
             'paIn': 'pa',
         },
     ]
-    find_abbrevs = hetio.abbreviation.find_abbrevs
+    find_abbrevs = hetnetpy.abbreviation.find_abbrevs
     for kind_to_abbrev in kind_to_abbrevs:
         assert kind_to_abbrev == find_abbrevs(kind_to_abbrev.keys())
 
@@ -67,5 +67,5 @@ def test__metaedges_from_metapath():
         }
 
     for metapath in metapath_to_metaedge:
-        result = hetio.abbreviation.metaedges_from_metapath(metapath)
+        result = hetnetpy.abbreviation.metaedges_from_metapath(metapath)
         assert result == metapath_to_metaedge[metapath]

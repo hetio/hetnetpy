@@ -16,7 +16,7 @@ try:
 except ImportError:
     fspath = str
 
-from hetio.hetnet import Graph, MetaGraph
+from hetnetpy.hetnet import Graph, MetaGraph
 
 
 def read_graph(path, formatting=None):

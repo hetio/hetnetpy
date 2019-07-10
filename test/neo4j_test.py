@@ -1,7 +1,7 @@
 import pathlib
 from neo4j.v1 import GraphDatabase
-import hetio.readwrite
-import hetio.neo4j
+import hetnetpy.readwrite
+import hetnetpy.neo4j
 import pytest
 import textwrap
 
@@ -19,7 +19,7 @@ def test_construct_pdp_query():
     directory = pathlib.Path(__file__).parent.absolute()
     path = directory.joinpath('data/hetionet-v1.0-metagraph.json')
 
-    metagraph = hetio.readwrite.read_metagraph(path)
+    metagraph = hetnetpy.readwrite.read_metagraph(path)
 
     compound = 'DB01156'  # Bupropion
     disease = 'DOID:0050742'  # nicotine dependency
@@ -28,7 +28,7 @@ def test_construct_pdp_query():
     metapath = metagraph.metapath_from_abbrev('CbGpPWpGaD')
 
     # Calculate the pdp without being provided with the dwpc
-    pdp_query = hetio.neo4j.construct_pdp_query(metapath, path_style='string', property='identifier', unique_nodes=True)
+    pdp_query = hetnetpy.neo4j.construct_pdp_query(metapath, path_style='string', property='identifier', unique_nodes=True)
 
     assert len(pdp_query) > 0
     driver = GraphDatabase.driver("bolt://neo4j.het.io")
@@ -51,7 +51,7 @@ def test_construct_pdp_query():
     old_pdp_query = pdp_query
 
     # Calculate the pdp with the provided dwpc
-    pdp_query = hetio.neo4j.construct_pdp_query(metapath, dwpc, path_style='list', property='identifier', unique_nodes=True)
+    pdp_query = hetnetpy.neo4j.construct_pdp_query(metapath, dwpc, path_style='list', property='identifier', unique_nodes=True)
 
     assert len(pdp_query) > 0
     assert old_pdp_query != pdp_query
@@ -136,14 +136,14 @@ def test_construct_pdp_query_return_values():
     # Set up the graph for querying
     directory = pathlib.Path(__file__).parent.absolute()
     path = directory.joinpath('data/hetionet-v1.0-metagraph.json')
-    metagraph = hetio.readwrite.read_metagraph(path)
+    metagraph = hetnetpy.readwrite.read_metagraph(path)
 
     metapath = metagraph.metapath_from_abbrev('CbGpPWpGaD')
-    DWPCless_query = hetio.neo4j.construct_pdp_query(metapath, path_style='string', property='identifier', unique_nodes=True)
+    DWPCless_query = hetnetpy.neo4j.construct_pdp_query(metapath, path_style='string', property='identifier', unique_nodes=True)
 
     assert DWPCless_query == q1
 
-    DWPC_query = hetio.neo4j.construct_pdp_query(metapath, dwpc, path_style='string', property='identifier', unique_nodes=True)
+    DWPC_query = hetnetpy.neo4j.construct_pdp_query(metapath, dwpc, path_style='string', property='identifier', unique_nodes=True)
 
     assert DWPC_query == q2
 
@@ -156,7 +156,7 @@ def test_construct_dwpc_query():
     directory = pathlib.Path(__file__).parent.absolute()
     path = directory.joinpath('data/hetionet-v1.0-metagraph.json')
 
-    metagraph = hetio.readwrite.read_metagraph(path)
+    metagraph = hetnetpy.readwrite.read_metagraph(path)
 
     compound = 'DB01156'  # Bupropion
     disease = 'DOID:0050742'  # nicotine dependency
@@ -164,7 +164,7 @@ def test_construct_dwpc_query():
 
     metapath = metagraph.metapath_from_abbrev('CbGpPWpGaD')
 
-    query = hetio.neo4j.construct_dwpc_query(metapath, property='identifier', unique_nodes=True)
+    query = hetnetpy.neo4j.construct_dwpc_query(metapath, property='identifier', unique_nodes=True)
     assert len(query) > 0
     driver = GraphDatabase.driver("bolt://neo4j.het.io")
 
@@ -193,11 +193,11 @@ def test_construct_path_return_clause_returns(style, identifier, expected_output
     '''
     Test the results of construct_path_return_clause with different parameters
     '''
-    assert hetio.neo4j.create_path_return_clause(style, identifier) == expected_output
+    assert hetnetpy.neo4j.create_path_return_clause(style, identifier) == expected_output
 
 def test_construct_path_return_clause_error():
     '''
     Ensure that construct_path_return_clause throwns a ValueError when given an invalid style
     '''
     with pytest.raises(ValueError):
-        hetio.neo4j.create_path_return_clause('invalid_style')
+        hetnetpy.neo4j.create_path_return_clause('invalid_style')

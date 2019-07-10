@@ -2,7 +2,7 @@ import collections
 import random
 import logging
 
-from hetio.hetnet import Graph
+from hetnetpy.hetnet import Graph
 
 
 def permute_graph(graph, multiplier=10, seed=0, metaedge_to_excluded=dict(), log=False):
@@ -19,7 +19,7 @@ def permute_graph(graph, multiplier=10, seed=0, metaedge_to_excluded=dict(), log
 
     Parameters
     ----------
-    graph : hetio.hetnet.Graph
+    graph : hetnetpy.hetnet.Graph
         Input hetnet to create a permuted derivative from
     multiplier : int or float
         This is multiplied by the number of edges for each metaedge to
@@ -36,7 +36,7 @@ def permute_graph(graph, multiplier=10, seed=0, metaedge_to_excluded=dict(), log
 
     Returns
     -------
-    permuted_graph : hetio.hetnet.Graph
+    permuted_graph : hetnetpy.hetnet.Graph
         A permuted hetnet derived from the input graph.
     stats : list of dicts
         A list where each item is a dictionary of permutation statistics at a

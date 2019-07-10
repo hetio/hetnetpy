@@ -2,7 +2,7 @@ import pathlib
 
 import pytest
 
-import hetio.readwrite
+import hetnetpy.readwrite
 
 
 def get_hetionet_metagraph():
@@ -11,7 +11,7 @@ def get_hetionet_metagraph():
     """
     directory = pathlib.Path(__file__).parent.absolute()
     path = directory.joinpath('data/hetionet-v1.0-metagraph.json')
-    return hetio.readwrite.read_metagraph(path)
+    return hetnetpy.readwrite.read_metagraph(path)
 
 
 def test_extract_metapaths():

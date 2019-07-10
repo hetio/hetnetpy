@@ -40,8 +40,8 @@ def metaedge_to_adjacency_matrix(
 
     Parameters
     ==========
-    graph : hetio.hetnet.graph
-    metaedge : hetio.hetnet.MetaEdge or an alternative metaedge specification
+    graph : hetnetpy.hetnet.graph
+    metaedge : hetnetpy.hetnet.MetaEdge or an alternative metaedge specification
     dtype : type
     dense_threshold : float (0 ≤ dense_threshold ≤ 1)
         minimum proportion of nonzero values at which to output a dense matrix.

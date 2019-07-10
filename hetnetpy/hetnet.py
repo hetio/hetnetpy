@@ -2,7 +2,7 @@ import abc
 import functools
 import re
 
-import hetio.abbreviation
+import hetnetpy.abbreviation
 
 direction_to_inverse = {
     'forward': 'backward',
@@ -255,7 +255,7 @@ class MetaGraph(BaseGraph):
             raise ValueError('Cannot interpret object of type {}'.format(type(metaedge).__name__))
         if metaedge in self.neo4j_to_metaedge:
             return self.neo4j_to_metaedge[metaedge]
-        metaedge_id = hetio.abbreviation.metaedge_id_from_abbreviation(self, metaedge)
+        metaedge_id = hetnetpy.abbreviation.metaedge_id_from_abbreviation(self, metaedge)
         return self.get_edge(metaedge_id)
 
     def get_metapath(self, metapath):
@@ -302,10 +302,10 @@ class MetaGraph(BaseGraph):
             metagraph.add_edge(edge_tuple)
 
         if kind_to_abbrev is None:
-            kind_to_abbrev = hetio.abbreviation.create_abbreviations(metagraph)
+            kind_to_abbrev = hetnetpy.abbreviation.create_abbreviations(metagraph)
         metagraph.set_abbreviations(kind_to_abbrev)
 
-        assert hetio.abbreviation.validate_abbreviations(metagraph)
+        assert hetnetpy.abbreviation.validate_abbreviations(metagraph)
 
         return metagraph
 
@@ -441,9 +441,9 @@ class MetaGraph(BaseGraph):
     def metapath_from_abbrev(self, abbrev):
         """Retrieve a metapath from its abbreviation"""
         metaedges = list()
-        metaedge_abbrevs = hetio.abbreviation.metaedges_from_metapath(abbrev)
+        metaedge_abbrevs = hetnetpy.abbreviation.metaedges_from_metapath(abbrev)
         for metaedge_abbrev in metaedge_abbrevs:
-            metaedge_id = hetio.abbreviation.metaedge_id_from_abbreviation(
+            metaedge_id = hetnetpy.abbreviation.metaedge_id_from_abbreviation(
                 self, metaedge_abbrev)
             metaedges.append(self.get_edge(metaedge_id))
         return self.get_metapath_from_edges(tuple(metaedges))
@@ -561,7 +561,7 @@ class Graph(BaseGraph):
 
         Parameters
         ----------
-        metagraph : hetio.hetnet.MetaGraph
+        metagraph : hetnetpy.hetnet.MetaGraph
             metagraph with the potential types of nodes and relationships
         """
         BaseGraph.__init__(self)
@@ -574,7 +574,7 @@ class Graph(BaseGraph):
 
         Parameters
         ----------
-        metagraph : hetio.hetnet.MetaGraph
+        metagraph : hetnetpy.hetnet.MetaGraph
             metagraph with the potential types of nodes and relationships
         kind : str
             metanode kind
@@ -601,9 +601,9 @@ class Graph(BaseGraph):
 
         Parameters
         ----------
-        source_id : hetio.hetnet.Node or tuple of (metanode, node) identifiers
+        source_id : hetnetpy.hetnet.Node or tuple of (metanode, node) identifiers
             the source node for the edge
-        target_id : hetio.hetnet.Node or tuple of (metanode, node) identifiers
+        target_id : hetnetpy.hetnet.Node or tuple of (metanode, node) identifiers
             the target node for the edge
         kind : str
             the metaedge kind

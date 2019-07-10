@@ -2,7 +2,7 @@ import itertools
 import functools
 import operator
 
-from hetio.hetnet import Node, Path
+from hetnetpy.hetnet import Node, Path
 
 
 def DWPC(paths, damping_exponent, exclude_edges=set(), exclude_masked=True):
