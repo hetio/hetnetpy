@@ -1,4 +1,4 @@
-import warnings
+import importlib
 
 import pytest
 
@@ -7,6 +7,7 @@ def test_relocation_warning():
     """
     https://github.com/hetio/hetio/issues/40
     """
-    warnings.simplefilter('always', FutureWarning)
     with pytest.warns(FutureWarning, match='PACKAGE HAS BEEN RELOCATED'):
-        import hetio.hetnet  # noqa F401
+        import hetio
+        # Reload module to ensure warning tiggers
+        importlib.reload(hetio)
