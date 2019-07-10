@@ -7,7 +7,7 @@ def test_relocation_warning():
     """
     https://github.com/hetio/hetnetpy/issues/40
     """
-    with pytest.warns(FutureWarning, match="package has been renamed to 'hetmatpy'"):
+    with pytest.warns(FutureWarning, match="package has been renamed to 'hetnetpy'"):
         import hetio
         # Reload module to ensure warning tiggers
         importlib.reload(hetio)
