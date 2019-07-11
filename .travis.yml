@@ -6,6 +6,8 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
+cache:
+  - pip
 install:
   - pip install ".[test]"
   - python setup.py sdist bdist_wheel
