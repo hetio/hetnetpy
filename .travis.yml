@@ -14,17 +14,6 @@ install:
 script:
   - pytest test
 deploy:
-  - provider: releases
-    api_key:
-      secure: wk1yDPq/hfKjvWtmBegLE8BnqjosbGjkCahFWOrtpiUG/lFW+7RRuQG9yQEUNkXjJ3ClIvRIPTXhGxywlQb1OXChhRXw5owykJxbBGDubSqnQGdGrX9nYVQa0pF70i5Lq6leabTLlSqJklxIYp8Ccv+qAlc7tP1cYI9SxKrdieU1Hq7mXC21YMsyjFWNMG+p8FH+srp3DhC1XfyNyrMJFDwFKbFyty0q1HUobD6rT8mjVmTJanlPBMNTiAkJNiZZ+Je4WEUXkrvFf85HRnUYMKg8MPPfz+sDGaV8WOHsApS0BJNX+bCPYzNITykLLdt2YzaFf6zkxDXTPvgWKuyrKanDavA+j06+vQCWRyiOzNWSSJg4ccr+UC8c64hy0T/dkKc6xaDLjXJRMCpHeBHa6h2RgJAHq8m8lH+OkHR33MXq5TTyRg88wHn2nzI6oLbNkiJhWr9IANREAKmpG5MjfUT3ogi4myxeGcVnGw1B9UJmxOOWAHTDhUtxw8nIGzgtrx4oUxQLDqds90hkH0vpFLbiAZ14rdZYaqcFFmEIp5yDw1pJu8bf3tUfQzNz0+EuoKzGwfjyH8UjlW7//PH7aAukMpa664bNlQ4p3bJZA0tYNdmwTYebf98N4vmv+zHFaEMu57rzlFtwxiltIciLP2on1Qvdfd65ukVipS3Q9Vo=
-    file_glob: true
-    file:
-      - dist/hetnetpy-*.tar.gz
-      - dist/hetnetpy-*.whl
-    on:
-      python: '3.7'
-      repo: hetio/hetnetpy
-      tags: true
   - provider: pypi
     user: dhimmel
     password:
