@@ -20,12 +20,13 @@ with readme_path.open() as read_file:
 
 # Testing dependencies
 tests_require = [
-    'numpy',
-    'scipy',
     'neo4j',
-    'py2neo',
+    'numpy',
     'pandas',
-    'tqdm'
+    'py2neo',
+    'pytest',
+    'scipy',
+    'tqdm',
 ]
 
 setuptools.setup(

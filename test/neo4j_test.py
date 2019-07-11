@@ -1,9 +1,12 @@
 import pathlib
-from neo4j.v1 import GraphDatabase
-import hetnetpy.readwrite
-import hetnetpy.neo4j
-import pytest
 import textwrap
+
+from neo4j import GraphDatabase
+import pytest
+
+import hetnetpy.neo4j
+import hetnetpy.readwrite
+
 
 def test_construct_pdp_query():
     """
