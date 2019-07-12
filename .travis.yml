@@ -13,7 +13,9 @@ install:
   - python setup.py sdist bdist_wheel
 script:
   - pytest test
-  - black --check .
+  - if black --version ; then
+      black --check .
+    fi
 deploy:
   - provider: pypi
     user: dhimmel
