@@ -2,7 +2,8 @@
 
 [![Latest DOI](https://zenodo.org/badge/14475/dhimmel/hetio.svg)](https://zenodo.org/badge/latestdoi/14475/dhimmel/hetio)
 [![GitHub issues](https://img.shields.io/github/issues/hetio/hetnetpy.svg)](https://github.com/hetio/hetnetpy/issues)
-[![Build Status](https://travis-ci.com/hetio/hetnetpy.svg?branch=master)](https://travis-ci.com/hetio/hetnetpy)
+[![Linux Build Status](https://travis-ci.com/hetio/hetnetpy.svg?branch=master)](https://travis-ci.com/hetio/hetnetpy)
+[![Windows Build status](https://ci.appveyor.com/api/projects/status/gq57kt1h4aphluj3?svg=true)](https://ci.appveyor.com/project/hetio/hetnetpy)
 
 ## Overview
 
