@@ -1,8 +1,13 @@
 import importlib
+import platform
 
 import pytest
 
 
+@pytest.mark.skipif(
+    platform.system() == "Windows",
+    reason="symlink hetio directory does not install as package on Windows",
+)
 def test_relocation_warning():
     """
     https://github.com/hetio/hetnetpy/issues/40
