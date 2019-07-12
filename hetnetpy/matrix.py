@@ -32,8 +32,7 @@ def get_node_to_position(graph, metanode):
     return node_to_position
 
 
-def metaedge_to_adjacency_matrix(
-        graph, metaedge, dtype=numpy.bool_, dense_threshold=0):
+def metaedge_to_adjacency_matrix(graph, metaedge, dtype=numpy.bool_, dense_threshold=0):
     """
     Returns an adjacency matrix where source nodes are rows and target
     nodes are columns.
@@ -64,7 +63,8 @@ def metaedge_to_adjacency_matrix(
             col.append(target_node_to_position[edge.target])
             data.append(1)
     adjacency_matrix = scipy.sparse.csc_matrix(
-        (data, (row, col)), shape=shape, dtype=dtype)
+        (data, (row, col)), shape=shape, dtype=dtype
+    )
     adjacency_matrix = sparsify_or_densify(adjacency_matrix, dense_threshold)
     row_names = [node.identifier for node in source_nodes]
     column_names = [node.identifier for node in target_node_to_position]
@@ -102,9 +102,11 @@ def sparsify_or_densify(matrix, dense_threshold=0.3):
         try:
             return matrix.toarray()
         except ValueError:
-            logging.warning("scipy.sparse does not support the conversion "
-                            "of numpy.float16 matrices to numpy.arrays. See "
-                            "https://git.io/vpXyy")
+            logging.warning(
+                "scipy.sparse does not support the conversion "
+                "of numpy.float16 matrices to numpy.arrays. See "
+                "https://git.io/vpXyy"
+            )
             return matrix.astype(numpy.float32).toarray().astype(dtype)
     if not sparse_input and not densify:
         return scipy.sparse.csc_matrix(matrix, dtype=dtype)

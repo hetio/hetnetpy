@@ -16,18 +16,18 @@ def validate_abbreviations(metagraph):
     metaedge_kinds = {metaedge.kind for metaedge in metaedges}
     duplicated_kinds = metanode_kinds & metaedge_kinds
     if duplicated_kinds:
-        msg = 'Duplicated kinds between metanodes and metaedges: {}'
+        msg = "Duplicated kinds between metanodes and metaedges: {}"
         print(msg.format(duplicated_kinds))
         valid = False
 
     # Check that metanodes do not have any duplicated abbreviations
     kind_to_abbrev = metagraph.kind_to_abbrev
     metanode_kind_to_abbrev = {
-        k: v for k, v in kind_to_abbrev.items() if k in metanode_kinds}
-    duplicated_metanode_abbrevs = get_duplicates(
-        metanode_kind_to_abbrev.values())
+        k: v for k, v in kind_to_abbrev.items() if k in metanode_kinds
+    }
+    duplicated_metanode_abbrevs = get_duplicates(metanode_kind_to_abbrev.values())
     if duplicated_metanode_abbrevs:
-        print('Duplicated metanode abbrevs:', duplicated_metanode_abbrevs)
+        print("Duplicated metanode abbrevs:", duplicated_metanode_abbrevs)
         valid = False
 
     # Check metanode abbreviation violations
@@ -35,11 +35,11 @@ def validate_abbreviations(metagraph):
         abbrev = metanode.abbrev
         # metanode abbreviations should be uppercase
         if not abbrev.isupper():
-            print('lowercase metanode abbreviation:', abbrev)
+            print("lowercase metanode abbreviation:", abbrev)
             valid = False
         # metanode abbreviation should not start with a digit
         if abbrev[0].isdigit():
-            print('digit leading metanode abbreviation:', abbrev)
+            print("digit leading metanode abbreviation:", abbrev)
             valid = False
 
     # Check metaedge abbreviation violations
@@ -47,18 +47,18 @@ def validate_abbreviations(metagraph):
         abbrev = metaedge.kind_abbrev
         # metaedge abbreviations should be lowercase
         if not abbrev.islower():
-            print('uppercase metaedge abbreviation:', abbrev)
+            print("uppercase metaedge abbreviation:", abbrev)
             valid = False
         # metaedge abbreviations should not contain digits
         if any(character.isdigit() for character in abbrev):
-            print('digit in metaedge abbreviation:', abbrev)
+            print("digit in metaedge abbreviation:", abbrev)
             valid = False
 
     # Check that metaedges are not ambigious
     metaedge_abbrevs = [metaedge.abbrev for metaedge in metaedges]
     duplicated_meataedge_abbrevs = get_duplicates(metaedge_abbrevs)
     if duplicated_meataedge_abbrevs:
-        msg = 'Duplicated metaedge abbreviations: {}'
+        msg = "Duplicated metaedge abbreviations: {}"
         print(msg.format(duplicated_meataedge_abbrevs))
         valid = False
 
@@ -90,8 +90,7 @@ def find_abbrevs(kinds):
 def create_abbreviations(metagraph):
     """Creates abbreviations for node and edge kinds."""
     kind_to_abbrev = find_abbrevs(metagraph.node_dict.keys())
-    kind_to_abbrev = {kind: abbrev.upper()
-                      for kind, abbrev in kind_to_abbrev.items()}
+    kind_to_abbrev = {kind: abbrev.upper() for kind, abbrev in kind_to_abbrev.items()}
 
     edge_set_to_keys = dict()
     for edge in list(metagraph.edge_dict.keys()):
@@ -123,24 +122,24 @@ def metaedges_from_metapath(abbreviation, standardize_by=None):
         return [metaedge.get_standard_abbrev() for metaedge in metapath]
     # Note that this is a valid regex module pattern but will not work in the
     # re module due to "look-behind requires fixed-width pattern".
-    regex_string = r'(?<=^|[a-z<>])[A-Z][A-Z0-9]*[a-z<>]+[A-Z][A-Z0-9]*'
+    regex_string = r"(?<=^|[a-z<>])[A-Z][A-Z0-9]*[a-z<>]+[A-Z][A-Z0-9]*"
     pattern = regex.compile(regex_string)
     metaedge_abbrevs = pattern.findall(abbreviation, overlapped=True)
     if standardize_by is None:
         return metaedge_abbrevs
-    elif standardize_by == 'text':
+    elif standardize_by == "text":
         metaedge_abbrevs = [arrange_metaedge(x) for x in metaedge_abbrevs]
         return metaedge_abbrevs
     else:
-        raise ValueError('Invalid value for standardize_by')
+        raise ValueError("Invalid value for standardize_by")
 
 
 def metaedge_id_from_abbreviation(metagraph, abbreviation):
     """
     Return the metaedge_id corresponding to a metaedge abbreviation.
     """
-    source_abbrev, target_abbrev = regex.split('[a-z<>]+', abbreviation)
-    edge_abbrev = regex.search('[a-z<>]+', abbreviation).group()
+    source_abbrev, target_abbrev = regex.split("[a-z<>]+", abbreviation)
+    edge_abbrev = regex.search("[a-z<>]+", abbreviation).group()
     abbrev_to_kind = {v: k for k, v in metagraph.kind_to_abbrev.items()}
     source_kind = abbrev_to_kind[source_abbrev]
     target_kind = abbrev_to_kind[target_abbrev]
@@ -152,13 +151,13 @@ def metaedge_id_from_abbreviation(metagraph, abbreviation):
             kind = edge.kind
             break
     else:
-        raise KeyError('edge abbreviation not found: {}'.format(edge_abbrev))
-    if '>' in abbreviation:
-        direction = 'forward'
-    elif '<' in abbreviation:
-        direction = 'backward'
+        raise KeyError("edge abbreviation not found: {}".format(edge_abbrev))
+    if ">" in abbreviation:
+        direction = "forward"
+    elif "<" in abbreviation:
+        direction = "backward"
     else:
-        direction = 'both'
+        direction = "both"
     return source_kind, target_kind, kind, direction
 
 
@@ -174,8 +173,8 @@ def arrange_metaedge(abbreviation):
     Deprecated::
     Use :func:`hetnet.MetaEdge.get_standard_abbrev` instead
     """
-    source, target = regex.split('[a-z<>]+', abbreviation)
-    edge = regex.search('[a-z]+', abbreviation).group()
-    if '<' in abbreviation or (source > target):
+    source, target = regex.split("[a-z<>]+", abbreviation)
+    edge = regex.search("[a-z]+", abbreviation).group()
+    if "<" in abbreviation or (source > target):
         source, target = target, source
-    return '{}{}{}'.format(source, edge, target)
+    return "{}{}{}".format(source, edge, target)

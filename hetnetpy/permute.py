@@ -45,18 +45,19 @@ def permute_graph(graph, multiplier=10, seed=0, metaedge_to_excluded=dict(), log
     """
 
     if log:
-        logging.info('Creating permuted graph template')
+        logging.info("Creating permuted graph template")
     permuted_graph = Graph(graph.metagraph)
     for (metanode_identifier, node_identifier), node in graph.node_dict.items():
         permuted_graph.add_node(
-            metanode_identifier, node_identifier, name=node.name, data=node.data)
+            metanode_identifier, node_identifier, name=node.name, data=node.data
+        )
 
     if log:
-        logging.info('Retrieving graph edges')
+        logging.info("Retrieving graph edges")
     metaedge_to_edges = graph.get_metaedge_to_edges(exclude_inverts=True)
 
     if log:
-        logging.info('Adding permuted edges')
+        logging.info("Adding permuted edges")
 
     all_stats = list()
     for metaedge, edges in metaedge_to_edges.items():
@@ -65,13 +66,18 @@ def permute_graph(graph, multiplier=10, seed=0, metaedge_to_excluded=dict(), log
 
         excluded_pair_set = metaedge_to_excluded.get(metaedge, set())
         pair_list = [(edge.source.get_id(), edge.target.get_id()) for edge in edges]
-        directed = metaedge.direction != 'both'
+        directed = metaedge.direction != "both"
         permuted_pair_list, stats = permute_pair_list(
-            pair_list, directed=directed, multiplier=multiplier,
-            excluded_pair_set=excluded_pair_set, seed=seed, log=log)
+            pair_list,
+            directed=directed,
+            multiplier=multiplier,
+            excluded_pair_set=excluded_pair_set,
+            seed=seed,
+            log=log,
+        )
         for stat in stats:
-            stat['metaedge'] = metaedge
-            stat['abbrev'] = metaedge.abbrev
+            stat["metaedge"] = metaedge
+            stat["abbrev"] = metaedge.abbrev
         all_stats.extend(stats)
 
         for pair in permuted_pair_list:
@@ -80,8 +86,15 @@ def permute_graph(graph, multiplier=10, seed=0, metaedge_to_excluded=dict(), log
     return permuted_graph, all_stats
 
 
-def permute_pair_list(pair_list, directed=False, multiplier=10, excluded_pair_set=set(),
-                      seed=0, log=False, inplace=False):
+def permute_pair_list(
+    pair_list,
+    directed=False,
+    multiplier=10,
+    excluded_pair_set=set(),
+    seed=0,
+    log=False,
+    inplace=False,
+):
     """
     Permute edges (of a single type) in a graph according to the XSwap function
     described in https://doi.org/f3mn58. This method selects two edges and
@@ -147,8 +160,11 @@ def permute_pair_list(pair_list, directed=False, multiplier=10, excluded_pair_se
     count_excluded = 0
 
     if log:
-        logging.info('{} edges, {} permutations (seed = {}, directed = {}, {} excluded_edges)'.format(
-            edge_number, n_perm, seed, directed, len(excluded_pair_set)))
+        logging.info(
+            "{} edges, {} permutations (seed = {}, directed = {}, {} excluded_edges)".format(
+                edge_number, n_perm, seed, directed, len(excluded_pair_set)
+            )
+        )
 
     orig_pair_set = pair_set.copy()
     step = max(1, n_perm // 10)
@@ -204,16 +220,20 @@ def permute_pair_list(pair_list, directed=False, multiplier=10, excluded_pair_se
 
         if i in print_at:
             stat = collections.OrderedDict()
-            stat['cumulative_attempts'] = i
+            stat["cumulative_attempts"] = i
             index = print_at.index(i)
-            stat['attempts'] = print_at[index] + 1 if index == 0 else print_at[index] - print_at[index - 1]
-            stat['complete'] = (i + 1) / n_perm
-            stat['unchanged'] = len(orig_pair_set & pair_set) / len(pair_set)
-            stat['same_edge'] = count_same_edge / stat['attempts']
-            stat['self_loop'] = count_self_loop / stat['attempts']
-            stat['duplicate'] = count_duplicate / stat['attempts']
-            stat['undirected_duplicate'] = count_undir_dup / stat['attempts']
-            stat['excluded'] = count_excluded / stat['attempts']
+            stat["attempts"] = (
+                print_at[index] + 1
+                if index == 0
+                else print_at[index] - print_at[index - 1]
+            )
+            stat["complete"] = (i + 1) / n_perm
+            stat["unchanged"] = len(orig_pair_set & pair_set) / len(pair_set)
+            stat["same_edge"] = count_same_edge / stat["attempts"]
+            stat["self_loop"] = count_self_loop / stat["attempts"]
+            stat["duplicate"] = count_duplicate / stat["attempts"]
+            stat["undirected_duplicate"] = count_undir_dup / stat["attempts"]
+            stat["excluded"] = count_excluded / stat["attempts"]
             stats.append(stat)
 
             count_same_edge = 0
