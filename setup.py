@@ -57,7 +57,8 @@ setuptools.setup(
         'Programming Language :: Python :: 3.6',
     ],
 
-    packages=['hetnetpy', 'hetio'],
+    # should find hetnetpy (and hetio if symlink supported)
+    packages=setuptools.find_packages(exclude=['test']),
 
     # Specify python version
     python_requires='>=3.4',
