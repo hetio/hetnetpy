@@ -1,10 +1,10 @@
 # Hetnets in Python
 
-[![Linux Build Status](https://travis-ci.com/hetio/hetnetpy.svg?branch=master)](https://travis-ci.com/hetio/hetnetpy)
+[![Linux Build Status](https://img.shields.io/travis/com/hetio/hetnetpy/master.svg?logo=travis)](https://travis-ci.com/hetio/hetnetpy)
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/gq57kt1h4aphluj3?svg=true)](https://ci.appveyor.com/project/hetio/hetnetpy)
-[![PyPI](https://img.shields.io/pypi/v/hetnetpy.svg)](https://pypi.org/project/hetnetpy/)
+[![PyPI](https://img.shields.io/pypi/v/hetnetpy.svg?logo=pypi&logoColor=white)](https://pypi.org/project/hetnetpy/)
 [![Latest DOI](https://zenodo.org/badge/14475/dhimmel/hetio.svg)](https://zenodo.org/badge/latestdoi/14475/dhimmel/hetio)
-[![GitHub issues](https://img.shields.io/github/issues/hetio/hetnetpy.svg)](https://github.com/hetio/hetnetpy/issues)
+[![GitHub issues](https://img.shields.io/github/issues/hetio/hetnetpy.svg?logo=github)](https://github.com/hetio/hetnetpy/issues)
 
 ## Overview
 
@@ -35,7 +35,7 @@ In July 2019, the package was [renamed](https://github.com/hetio/hetnetpy/issues
 
 ## Installation
 
-[![PyPI](https://img.shields.io/pypi/v/hetnetpy.svg)](https://pypi.org/project/hetnetpy/)
+[![PyPI](https://img.shields.io/pypi/v/hetnetpy.svg?logo=pypi&logoColor=white)](https://pypi.org/project/hetnetpy/)
 
 Please use Python 3.4 or higher. To install the current PyPI version (recommended), run:
 
