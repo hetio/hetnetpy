@@ -12,6 +12,7 @@ def import_py2neo():
     """
     import pkg_resources
     import py2neo
+
     # Get py2neo version
     PY2NEO_VER = pkg_resources.parse_version(py2neo.__version__)
     version_tuple = PY2NEO_VER._version.release
@@ -19,9 +20,11 @@ def import_py2neo():
     # https://github.com/dhimmel/learn/issues/1
     if version_tuple[0] < 4:
         import py2neo.packages.httpstream
+
         # Avoid SocketError
         py2neo.packages.httpstream.http.socket_timeout = 1e8
     return py2neo, version_tuple
+
 
 def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
     """Export hetnet to neo4j"""
@@ -40,11 +43,10 @@ def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
     # Create uniqueness constrains and indexes
     for metanode in graph.metagraph.get_nodes():
         label = metanode.neo4j_label
-        if 'identifier' not in db_graph.schema.get_uniqueness_constraints(label):
-            db_graph.schema.create_uniqueness_constraint(label, 'identifier')
-        if 'name' not in db_graph.schema.get_indexes(label):
-            db_graph.schema.create_index(label, 'name')
-
+        if "identifier" not in db_graph.schema.get_uniqueness_constraints(label):
+            db_graph.schema.create_uniqueness_constraint(label, "identifier")
+        if "name" not in db_graph.schema.get_indexes(label):
+            db_graph.schema.create_index(label, "name")
 
     # Create nodes
     creator = Creator(db_graph, node_queue)
@@ -56,10 +58,11 @@ def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
     for node in queue:
         label = node.metanode.neo4j_label
         data = sanitize_data(node.data)
-        neo_node = py2neo.Node(label, identifier=node.identifier, name=node.name, **data)
+        neo_node = py2neo.Node(
+            label, identifier=node.identifier, name=node.name, **data
+        )
         creator.append(neo_node)
     creator.create()
-
 
     # Create edges
     creator = Creator(db_graph, edge_queue)
@@ -73,14 +76,15 @@ def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
         rel_type = metaedge.neo4j_rel_type
         source_label = metaedge.source.neo4j_label
         target_label = metaedge.target.neo4j_label
-        source = db_graph.find_one(source_label, 'identifier', edge.source.identifier)
-        target = db_graph.find_one(target_label, 'identifier', edge.target.identifier)
+        source = db_graph.find_one(source_label, "identifier", edge.source.identifier)
+        target = db_graph.find_one(target_label, "identifier", edge.target.identifier)
         data = sanitize_data(edge.data)
         neo_rel = py2neo.Relationship(source, rel_type, target, **data)
         creator.append(neo_rel)
     creator.create()
 
     return db_graph
+
 
 class Creator(list):
     """Batch creation of py2neo objects"""
@@ -105,6 +109,7 @@ class Creator(list):
         # http://stackoverflow.com/a/37697792/4651668
         if version_tuple[0] >= 3:
             import operator
+
             self.db_graph.create(functools.reduce(operator.or_, self))
         else:
             self.db_graph.create(*self)
@@ -118,6 +123,7 @@ def as_label(metanode):
     Retrieve neo4j-style label for a metanode.
     """
     import warnings
+
     warnings.warn(
         "hetnetpy.neo4j.as_label is deprecated. Use metanode.neo4j_label instead.",
         DeprecationWarning,
@@ -130,6 +136,7 @@ def as_type(metaedge):
     Convert metaedge to a rel_type-formatted str.
     """
     import warnings
+
     warnings.warn(
         "hetnetpy.neo4j.as_type is deprecated. Use metaedge.neo4j_rel_type instead.",
         DeprecationWarning,
@@ -141,6 +148,7 @@ def as_type(metaedge):
 def sanitize_data(data):
     """Create neo4j safe properties"""
     from pandas import isnull
+
     sanitized = dict()
     for k, v in data.items():
         if isinstance(v, list):
@@ -160,7 +168,12 @@ def metapath_to_metarels(metapath):
 
 @functools.lru_cache()
 def metaedge_to_metarel(metaedge):
-    return metaedge.source.neo4j_label, metaedge.target.neo4j_label, metaedge.neo4j_rel_type, metaedge.direction
+    return (
+        metaedge.source.neo4j_label,
+        metaedge.target.neo4j_label,
+        metaedge.neo4j_rel_type,
+        metaedge.direction,
+    )
 
 
 def cypher_path(metarels):
@@ -172,17 +185,20 @@ def cypher_path(metarels):
         metarels = metapath_to_metarels(metarels)
 
     # Create cypher query
-    q = '(n0:{})'.format(metarels[0][0])
+    q = "(n0:{})".format(metarels[0][0])
     for i, (source_label, target_label, rel_type, direction) in enumerate(metarels):
         kwargs = {
-            'i': i + 1,
-            'rel_type': rel_type,
-            'target_label': ':{}'.format(target_label) if i + 1 == len(metarels) else '',
-            'dir0': '<-' if direction == 'backward' else '-',
-            'dir1': '->' if direction == 'forward' else '-',
+            "i": i + 1,
+            "rel_type": rel_type,
+            "target_label": ":{}".format(target_label)
+            if i + 1 == len(metarels)
+            else "",
+            "dir0": "<-" if direction == "backward" else "-",
+            "dir1": "->" if direction == "forward" else "-",
         }
-        q += '{dir0}[:{rel_type}]{dir1}(n{i}{target_label})'.format(**kwargs)
+        q += "{dir0}[:{rel_type}]{dir1}(n{i}{target_label})".format(**kwargs)
     return q
+
 
 def construct_degree_clause(metarels):
     """
@@ -197,22 +213,25 @@ def construct_degree_clause(metarels):
     degree_strs = list()
     for i, (source_label, target_label, rel_type, direction) in enumerate(metarels):
         kwargs = {
-            'i0': i,
-            'i1': i + 1,
-            'source_label': source_label,
-            'target_label': target_label,
-            'rel_type': rel_type,
-            'dir0': '<-' if direction == 'backward' else '-',
-            'dir1': '->' if direction == 'forward' else '-',
+            "i0": i,
+            "i1": i + 1,
+            "source_label": source_label,
+            "target_label": target_label,
+            "rel_type": rel_type,
+            "dir0": "<-" if direction == "backward" else "-",
+            "dir1": "->" if direction == "forward" else "-",
         }
-        degree_strs.append(textwrap.dedent(
-            '''\
+        degree_strs.append(
+            textwrap.dedent(
+                """\
             size((n{i0}){dir0}[:{rel_type}]{dir1}()),
-            size((){dir0}[:{rel_type}]{dir1}(n{i1}))'''
-            ).format(**kwargs))
-    degree_query = ',\n'.join(degree_strs)
+            size((){dir0}[:{rel_type}]{dir1}(n{i1}))"""
+            ).format(**kwargs)
+        )
+    degree_query = ",\n".join(degree_strs)
 
     return degree_query
+
 
 def construct_using_clause(metarels, join_hint, index_hint):
     """
@@ -233,22 +252,29 @@ def construct_using_clause(metarels, join_hint, index_hint):
         and target nodes to use for lookup. Enabling both `index_hint` and
         `join_hint` can cause the query to fail.
     """
-    using_query = ''
+    using_query = ""
     # Specify index hint for node lookup
     if index_hint:
-        using_query = '\n' + textwrap.dedent('''\
+        using_query = (
+            "\n"
+            + textwrap.dedent(
+                """\
         USING INDEX n0:{source_label}({property})
         USING INDEX n{length}:{target_label}({property})
-        ''').rstrip().format(
-            property = property,
-            source_label = metarels[0][0],
-            target_label = metarels[-1][1],
-            length = len(metarels)
+        """
+            )
+            .rstrip()
+            .format(
+                property=property,
+                source_label=metarels[0][0],
+                target_label=metarels[-1][1],
+                length=len(metarels),
+            )
         )
 
     # Specify join hint with node to join on
     if join_hint is not False:
-        if join_hint is True or join_hint == 'midpoint':
+        if join_hint is True or join_hint == "midpoint":
             join_hint = len(metarels) // 2
         join_hint = int(join_hint)
         assert join_hint >= 0
@@ -256,6 +282,7 @@ def construct_using_clause(metarels, join_hint, index_hint):
         using_query += "\nUSING JOIN ON n{}".format(join_hint)
 
     return using_query
+
 
 def construct_unique_nodes_clause(metarels, unique_nodes):
     """
@@ -274,12 +301,12 @@ def construct_unique_nodes_clause(metarels, unique_nodes):
         nodes with the same label are checked for duplicity. Specifying `True`,
         which is the default, uses the `labeled` method.
     """
-    if unique_nodes == 'nested':
-        unique_nodes_query = '\nAND ALL (x IN nodes(path) WHERE size(filter(z IN nodes(path) WHERE z = x)) = 1)'
-    elif unique_nodes == 'expanded':
+    if unique_nodes == "nested":
+        unique_nodes_query = "\nAND ALL (x IN nodes(path) WHERE size(filter(z IN nodes(path) WHERE z = x)) = 1)"
+    elif unique_nodes == "expanded":
         pairs = itertools.combinations(range(len(metarels) + 1), 2)
         unique_nodes_query = format_expanded_clause(pairs)
-    elif unique_nodes == 'labeled' or unique_nodes is True:
+    elif unique_nodes == "labeled" or unique_nodes is True:
         labels = [metarel[0] for metarel in metarels]
         labels.append(metarels[-1][1])
         label_to_nodes = dict()
@@ -291,11 +318,12 @@ def construct_unique_nodes_clause(metarels, unique_nodes):
         unique_nodes_query = format_expanded_clause(pairs)
     else:
         assert unique_nodes is False
-        unique_nodes_query = ''
+        unique_nodes_query = ""
 
     return unique_nodes_query
 
-def create_path_return_clause(path_style='list', return_property='name'):
+
+def create_path_return_clause(path_style="list", return_property="name"):
     """
     Create a Cypher query clause to return paths. If path_style is 'list' or 'string',
     then the return_property is extracted for each node along the path. If path_style
@@ -311,14 +339,18 @@ def create_path_return_clause(path_style='list', return_property='name'):
     return_property : str
         which node property to use to describe the path
     """
-    if path_style == 'string':
-        return "substring(reduce(s = '', node IN nodes(path)| s + '–' + node.{property}), 1) AS path,".format(property=return_property)
-    elif path_style == 'list':
-        return "[node in nodes(path) | node.{property}] AS path,".format(property=return_property)
-    elif path_style == 'id_lists':
+    if path_style == "string":
+        return "substring(reduce(s = '', node IN nodes(path)| s + '–' + node.{property}), 1) AS path,".format(
+            property=return_property
+        )
+    elif path_style == "list":
+        return "[node in nodes(path) | node.{property}] AS path,".format(
+            property=return_property
+        )
+    elif path_style == "id_lists":
         return (
-            '[node IN nodes(path) | id(node)] AS node_ids,\n'
-            '[rel IN relationships(path) | id(rel)] AS rel_ids,'
+            "[node IN nodes(path) | id(node)] AS node_ids,\n"
+            "[rel IN relationships(path) | id(rel)] AS rel_ids,"
         )
     else:
         err_string = (
@@ -327,7 +359,10 @@ def create_path_return_clause(path_style='list', return_property='name'):
         ).format(style=path_style)
         raise ValueError(err_string)
 
-def construct_dwpc_query(metarels, property='name', join_hint='midpoint', index_hint=False, unique_nodes=True):
+
+def construct_dwpc_query(
+    metarels, property="name", join_hint="midpoint", index_hint=False, unique_nodes=True
+):
     """
     Create a cypher query for computing the *DWPC* for a type of path.
 
@@ -372,7 +407,9 @@ def construct_dwpc_query(metarels, property='name', join_hint='midpoint', index_
     unique_nodes_query = construct_unique_nodes_clause(metarels, unique_nodes)
 
     # combine cypher fragments into a single query and add DWPC logic
-    query = textwrap.dedent('''\
+    query = (
+        textwrap.dedent(
+            """\
         MATCH path = {metapath_query}{using_query}
         WHERE n0.{property} = {{ source }}
         AND n{length}.{property} = {{ target }}{unique_nodes_query}
@@ -383,19 +420,32 @@ def construct_dwpc_query(metarels, property='name', join_hint='midpoint', index_
         RETURN
         count(path) AS PC,
         sum(reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }})) AS DWPC
-        ''').rstrip().format(
-        metapath_query = metapath_query,
-        using_query = using_query,
-        unique_nodes_query = unique_nodes_query,
-        degree_query = degree_query,
-        length=len(metarels),
-        property=property)
+        """
+        )
+        .rstrip()
+        .format(
+            metapath_query=metapath_query,
+            using_query=using_query,
+            unique_nodes_query=unique_nodes_query,
+            degree_query=degree_query,
+            length=len(metarels),
+            property=property,
+        )
+    )
 
     return query
 
-def construct_pdp_query(metarels, dwpc=None, path_style='list', return_property='name',
-                        property='name', join_hint='midpoint', index_hint=False, 
-                        unique_nodes=True):
+
+def construct_pdp_query(
+    metarels,
+    dwpc=None,
+    path_style="list",
+    return_property="name",
+    property="name",
+    join_hint="midpoint",
+    index_hint=False,
+    unique_nodes=True,
+):
     """
     Create a Cypher query for computing the path degree product for a type of path.
     This function is very similar to construct_dwpc_query, with the main changes occuring in the
@@ -450,12 +500,16 @@ def construct_pdp_query(metarels, dwpc=None, path_style='list', return_property=
     unique_nodes_query = construct_unique_nodes_clause(metarels, unique_nodes)
 
     # decide how the path will be returned
-    path_query = create_path_return_clause(path_style=path_style, return_property=return_property)
+    path_query = create_path_return_clause(
+        path_style=path_style, return_property=return_property
+    )
 
     # combine cypher fragments into a single query and add PDP logic
-    query = ''
+    query = ""
     if dwpc is not None:
-        query = textwrap.dedent('''\
+        query = (
+            textwrap.dedent(
+                """\
             MATCH path = {metapath_query}{using_query}
             WHERE n0.{property} = {{ source }}
             AND n{length}.{property} = {{ target }}{unique_nodes_query}
@@ -469,19 +523,26 @@ def construct_pdp_query(metarels, dwpc=None, path_style='list', return_property=
             PDP,
             100 * (PDP / {dwpc}) AS percent_of_DWPC
             ORDER BY percent_of_DWPC DESC
-            ''').rstrip().format(
-            metapath_query = metapath_query,
-            using_query = using_query,
-            unique_nodes_query = unique_nodes_query,
-            degree_query = degree_query,
-            length=len(metarels),
-            property=property,
-            path_query = path_query,
-            dwpc = dwpc)
+            """
+            )
+            .rstrip()
+            .format(
+                metapath_query=metapath_query,
+                using_query=using_query,
+                unique_nodes_query=unique_nodes_query,
+                degree_query=degree_query,
+                length=len(metarels),
+                property=property,
+                path_query=path_query,
+                dwpc=dwpc,
+            )
+        )
 
     # https://stackoverflow.com/questions/54245415/
     else:
-        query = textwrap.dedent('''\
+        query = (
+            textwrap.dedent(
+                """\
             MATCH path = {metapath_query}{using_query}
             WHERE n0.{property} = {{ source }}
             AND n{length}.{property} = {{ target }}{unique_nodes_query}
@@ -498,16 +559,22 @@ def construct_pdp_query(metarels, dwpc=None, path_style='list', return_property=
               PDP,
               100 * (PDP / DWPC) AS percent_of_DWPC
             ORDER BY percent_of_DWPC DESC
-            ''').rstrip().format(
-            metapath_query = metapath_query,
-            using_query = using_query,
-            unique_nodes_query = unique_nodes_query,
-            degree_query = degree_query,
-            length=len(metarels),
-            property=property,
-            path_query = path_query)
+            """
+            )
+            .rstrip()
+            .format(
+                metapath_query=metapath_query,
+                using_query=using_query,
+                unique_nodes_query=unique_nodes_query,
+                degree_query=degree_query,
+                length=len(metarels),
+                property=property,
+                path_query=path_query,
+            )
+        )
 
     return query
+
 
 def format_expanded_clause(pairs):
     """
@@ -515,10 +582,19 @@ def format_expanded_clause(pairs):
     for excluding paths where a pair of nodes are equal.
     """
     if not pairs:
-        return ''
-    return '\nAND ' + ' AND '.join('n{} <> n{}'.format(a, b) for a, b in pairs)
+        return ""
+    return "\nAND " + " AND ".join("n{} <> n{}".format(a, b) for a, b in pairs)
 
-def permute_rel_type(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, max_tries_mult=20, seed=None):
+
+def permute_rel_type(
+    uri,
+    rel_type,
+    nswap=None,
+    max_tries=None,
+    nswap_mult=10,
+    max_tries_mult=20,
+    seed=None,
+):
     """
     Permute the specified relationship type in a neo4j graph using the XSwap
     algorithm [1]_.
@@ -551,15 +627,20 @@ def permute_rel_type(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, m
        Data Mining. https://doi.org/10.1137/1.9781611972795.67
     """
     import random
+
     py2neo, _ = import_py2neo()
 
     neo = py2neo.Graph(uri)
 
     # retrieve relationship IDs
-    query = textwrap.dedent('''\
+    query = textwrap.dedent(
+        """\
     MATCH ()-[r:{rel_type}]->()
     RETURN id(r) AS id\
-    '''.format(rel_type=rel_type))
+    """.format(
+            rel_type=rel_type
+        )
+    )
     ids = [row.id for row in neo.cypher.execute(query)]
     nrel = len(ids)
     if nswap is None:
@@ -567,7 +648,8 @@ def permute_rel_type(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, m
     if max_tries is None:
         max_tries = round(nrel * max_tries_mult)
 
-    query = textwrap.dedent('''\
+    query = textwrap.dedent(
+        """\
     MATCH (u)-[r0:{rel_type}]->(v)
     MATCH (x)-[r1:{rel_type}]->(y)
     WHERE id(r0) = {{ id_0 }}
@@ -580,7 +662,10 @@ def permute_rel_type(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, m
     CREATE (x)-[nr1:{rel_type}]->(v)
     DELETE r0, r1
     RETURN id(nr0) AS id_nr0, id(nr1) AS id_nr1\
-    '''.format(rel_type=rel_type))
+    """.format(
+            rel_type=rel_type
+        )
+    )
 
     swaps = 0
     tries = 0
@@ -597,8 +682,5 @@ def permute_rel_type(uri, rel_type, nswap=None, max_tries=None, nswap_mult=10, m
             swaps += 1
         tries += 1
 
-    stats = {
-        'swaps': swaps,
-        'tries': tries,
-    }
+    stats = {"swaps": swaps, "tries": tries}
     return stats

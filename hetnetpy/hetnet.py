@@ -4,27 +4,14 @@ import re
 
 import hetnetpy.abbreviation
 
-direction_to_inverse = {
-    'forward': 'backward',
-    'backward': 'forward',
-    'both': 'both',
-}
+direction_to_inverse = {"forward": "backward", "backward": "forward", "both": "both"}
 
-direction_to_abbrev = {
-    'forward': '>',
-    'backward': '<',
-    'both': '-',
-}
+direction_to_abbrev = {"forward": ">", "backward": "<", "both": "-"}
 
-direction_to_unicode_abbrev = {
-    'forward': '→',
-    'backward': '←',
-    'both': '–',
-}
+direction_to_unicode_abbrev = {"forward": "→", "backward": "←", "both": "–"}
 
 
 class ElemMask(object):
-
     def __init__(self):
         self.masked = False
 
@@ -39,13 +26,11 @@ class ElemMask(object):
 
 
 class IterMask(object):
-
     def is_masked(self):
         return any(elem.is_masked() for elem in self.mask_elem_iter())
 
 
 class BaseGraph(object):
-
     def __init__(self):
         self.node_dict = dict()
         self.edge_dict = dict()
@@ -76,13 +61,14 @@ class BaseGraph(object):
         return item in self.node_dict
 
     def __eq__(self, other):
-        return (type(other) is type(self) and
-                self.node_dict == other.node_dict and
-                self.edge_dict == other.edge_dict)
+        return (
+            type(other) is type(self)
+            and self.node_dict == other.node_dict
+            and self.edge_dict == other.edge_dict
+        )
 
 
 class BaseNode(ElemMask):
-
     def __init__(self, identifier):
         ElemMask.__init__(self)
         self.identifier = identifier
@@ -105,7 +91,6 @@ class BaseNode(ElemMask):
 
 
 class BaseEdge(ElemMask):
-
     def __init__(self, source, target):
         ElemMask.__init__(self)
         self.source = source
@@ -126,7 +111,7 @@ class BaseEdge(ElemMask):
     def __str__(self):
         source, target, kind, direction = self.get_id()
         dir_abbrev = direction_to_abbrev[direction]
-        return '{0} {3} {2} {3} {1}'.format(source, target, kind, dir_abbrev)
+        return "{0} {3} {2} {3} {1}".format(source, target, kind, dir_abbrev)
 
     def get_unicode_str(self):
         """
@@ -134,11 +119,10 @@ class BaseEdge(ElemMask):
         """
         source, target, kind, direction = self.get_id()
         dir_abbrev = direction_to_unicode_abbrev[direction]
-        return '{0}{3}{2}{3}{1}'.format(source, target, kind, dir_abbrev)
+        return "{0}{3}{2}{3}{1}".format(source, target, kind, dir_abbrev)
 
 
 class BasePath(IterMask):
-
     def __init__(self, edges):
         assert isinstance(edges, tuple)
         self.edges = edges
@@ -151,7 +135,7 @@ class BasePath(IterMask):
 
     def get_nodes(self):
         nodes = tuple(edge.source for edge in self)
-        nodes = nodes + (self.target(), )
+        nodes = nodes + (self.target(),)
         return nodes
 
     def inverse_edges(self):
@@ -181,15 +165,15 @@ class BasePath(IterMask):
         Returns a pretty, unicode, human-readable, and verbose str for a path
         or metapath.
         """
-        s = ''
+        s = ""
         for edge in self:
             *temp, kind, direction = edge.get_id()
-            source = (edge.source.name if hasattr(edge, 'name')
-                      else edge.source.identifier)
+            source = (
+                edge.source.name if hasattr(edge, "name") else edge.source.identifier
+            )
             dir_abbrev = direction_to_unicode_abbrev[direction]
-            s += '{0}{2}{1}{2}'.format(source, kind, dir_abbrev)
-        target = (edge.target.name if hasattr(edge, 'name') else
-                  edge.target.identifier)
+            s += "{0}{2}{1}{2}".format(source, kind, dir_abbrev)
+        target = edge.target.name if hasattr(edge, "name") else edge.target.identifier
         s += target
         return s
 
@@ -215,7 +199,6 @@ class BasePath(IterMask):
 
 
 class MetaGraph(BaseGraph):
-
     def __init__(self):
         BaseGraph.__init__(self)
 
@@ -232,12 +215,14 @@ class MetaGraph(BaseGraph):
         if metanode in self.node_dict:
             return self.get_node(metanode)
         if not isinstance(metanode, str):
-            raise ValueError('Cannot interpret object of type {}'.format(type(metanode).__name__))
+            raise ValueError(
+                "Cannot interpret object of type {}".format(type(metanode).__name__)
+            )
         if metanode in self.abbrev_to_kind:
             return self.get_node(self.abbrev_to_kind[metanode])
         if metanode in self.neo4j_to_metanode:
             return self.neo4j_to_metanode[metanode]
-        raise ValueError('metanode not found')
+        raise ValueError("metanode not found")
 
     def get_metaedge(self, metaedge):
         """
@@ -252,10 +237,14 @@ class MetaGraph(BaseGraph):
         if isinstance(metaedge, tuple):
             return self.get_edge(metaedge)
         if not isinstance(metaedge, str):
-            raise ValueError('Cannot interpret object of type {}'.format(type(metaedge).__name__))
+            raise ValueError(
+                "Cannot interpret object of type {}".format(type(metaedge).__name__)
+            )
         if metaedge in self.neo4j_to_metaedge:
             return self.neo4j_to_metaedge[metaedge]
-        metaedge_id = hetnetpy.abbreviation.metaedge_id_from_abbreviation(self, metaedge)
+        metaedge_id = hetnetpy.abbreviation.metaedge_id_from_abbreviation(
+            self, metaedge
+        )
         return self.get_edge(metaedge_id)
 
     def get_metapath(self, metapath):
@@ -274,7 +263,7 @@ class MetaGraph(BaseGraph):
 
     @property
     def neo4j_to_metanode(self):
-        if not hasattr(self, '_neo4j_to_metanode'):
+        if not hasattr(self, "_neo4j_to_metanode"):
             self._neo4j_to_metanode = {
                 metanode.neo4j_label: metanode for metanode in self.get_nodes()
             }
@@ -282,7 +271,7 @@ class MetaGraph(BaseGraph):
 
     @property
     def neo4j_to_metaedge(self):
-        if not hasattr(self, '_neo4j_to_metaedge'):
+        if not hasattr(self, "_neo4j_to_metaedge"):
             self._neo4j_to_metaedge = {
                 metaedge.neo4j_rel_type: metaedge for metaedge in self.get_edges()
             }
@@ -317,10 +306,10 @@ class MetaGraph(BaseGraph):
             metanode.abbrev = kind_to_abbrev[kind]
         for metaedge in self.edge_dict.values():
             abbrev = kind_to_abbrev[metaedge.kind]
-            if metaedge.direction == 'forward':
-                abbrev = '{}>'.format(abbrev)
-            if metaedge.direction == 'backward':
-                abbrev = '<{}'.format(abbrev)
+            if metaedge.direction == "forward":
+                abbrev = "{}>".format(abbrev)
+            if metaedge.direction == "backward":
+                abbrev = "<{}".format(abbrev)
             metaedge.kind_abbrev = abbrev
 
     def add_node(self, kind):
@@ -341,7 +330,7 @@ class MetaGraph(BaseGraph):
         metaedge.inverted = False
         self.n_edges += 1
 
-        if source == target and direction == 'both':
+        if source == target and direction == "both":
             metaedge.inverse = metaedge
         else:
             inverse_direction = direction_to_inverse[direction]
@@ -371,21 +360,23 @@ class MetaGraph(BaseGraph):
         if max_length == 0:
             return []
 
-        metapaths = [self.get_metapath_from_edges((edge, )) for edge in source.edges]
+        metapaths = [self.get_metapath_from_edges((edge,)) for edge in source.edges]
         previous_metapaths = list(metapaths)
         for depth in range(1, max_length):
             current_metapaths = list()
             for metapath in previous_metapaths:
                 for add_edge in metapath.target().edges:
                     new_metapath = self.get_metapath_from_edges(
-                        metapath.edges + (add_edge, ))
+                        metapath.edges + (add_edge,)
+                    )
                     current_metapaths.append(new_metapath)
             metapaths.extend(current_metapaths)
             previous_metapaths = current_metapaths
 
         if target:
-            metapaths = [metapath for metapath in metapaths
-                         if metapath.target() == target]
+            metapaths = [
+                metapath for metapath in metapaths if metapath.target() == target
+            ]
         return sorted(metapaths)
 
     def extract_all_metapaths(self, max_length, exclude_inverts=False):
@@ -444,13 +435,13 @@ class MetaGraph(BaseGraph):
         metaedge_abbrevs = hetnetpy.abbreviation.metaedges_from_metapath(abbrev)
         for metaedge_abbrev in metaedge_abbrevs:
             metaedge_id = hetnetpy.abbreviation.metaedge_id_from_abbreviation(
-                self, metaedge_abbrev)
+                self, metaedge_abbrev
+            )
             metaedges.append(self.get_edge(metaedge_id))
         return self.get_metapath_from_edges(tuple(metaedges))
 
 
 class MetaNode(BaseNode):
-
     def __init__(self, identifier):
         BaseNode.__init__(self, identifier)
         self.edges = set()
@@ -467,7 +458,7 @@ class MetaNode(BaseNode):
         """
         label = str(self)
         label = label.title()
-        label = label.replace(' ', '')
+        label = label.replace(" ", "")
         return label
 
     def __str__(self):
@@ -475,7 +466,6 @@ class MetaNode(BaseNode):
 
 
 class MetaEdge(BaseEdge):
-
     def __init__(self, source, target, kind, direction):
         """source and target are MetaNodes."""
         BaseEdge.__init__(self, source, target)
@@ -518,12 +508,13 @@ class MetaEdge(BaseEdge):
         here.
         """
         metaedge = self.inverse if self.inverted else self
-        return re.sub('[<>]', '', metaedge.abbrev)
+        return re.sub("[<>]", "", metaedge.abbrev)
 
     def filesystem_str(self):
-        s = '{0}{2}{1}-{3}'.format(self.source.abbrev, self.target.abbrev,
-                                   self.kind_abbrev, self.direction)
-        return s.translate(None, '><')
+        s = "{0}{2}{1}-{3}".format(
+            self.source.abbrev, self.target.abbrev, self.kind_abbrev, self.direction
+        )
+        return s.translate(None, "><")
 
     @property
     @functools.lru_cache()
@@ -531,13 +522,12 @@ class MetaEdge(BaseEdge):
         """Convert metaedge to a rel_type-formatted str"""
         rel_type = str(self.kind)
         rel_type = rel_type.upper()
-        rel_type = rel_type.replace(' ', '_')
+        rel_type = rel_type.replace(" ", "_")
         abbrev = self.get_standard_abbrev()
-        return '{}_{}'.format(rel_type, abbrev)
+        return "{}_{}".format(rel_type, abbrev)
 
 
 class MetaPath(BasePath):
-
     def __init__(self, edges):
         """metaedges is a tuple of edges"""
         assert all(isinstance(edge, MetaEdge) for edge in edges)
@@ -548,13 +538,12 @@ class MetaPath(BasePath):
 
     @property
     def abbrev(self):
-        s = ''.join(edge.source.abbrev + edge.kind_abbrev for edge in self)
+        s = "".join(edge.source.abbrev + edge.kind_abbrev for edge in self)
         s += self.target().abbrev
         return s
 
 
 class Graph(BaseGraph):
-
     def __init__(self, metagraph, data=dict()):
         """
         Create a graph.
@@ -590,7 +579,7 @@ class Graph(BaseGraph):
         metanode = self.metagraph.node_dict[kind]
         node = Node(metanode, identifier, name, data)
         node_id = node.get_id()
-        assert node_id not in self, 'node already exists'
+        assert node_id not in self, "node already exists"
         self.node_dict[node_id] = node
         self.n_nodes += 1
         return node
@@ -638,8 +627,8 @@ class Graph(BaseGraph):
         # Check that edges do not already exist
         edge_id = source_id, target_id, kind, metaedge.direction
         inverse_id = target_id, source_id, kind, metaedge.inverse.direction
-        assert edge_id not in self.edge_dict, 'edge already exists'
-        assert inverse_id not in self.edge_dict, 'inverse edge already exists'
+        assert edge_id not in self.edge_dict, "edge already exists"
+        assert inverse_id not in self.edge_dict, "inverse edge already exists"
 
         # Create edge
         edge = Edge(source, target, metaedge, data)
@@ -728,8 +717,8 @@ class Graph(BaseGraph):
         metagraph = MetaGraph.from_edge_tuples(metaedge_tuples)
         kinds = set(metagraph.kind_to_abbrev)
         kind_to_abbrev = {
-            k: v for k, v in self.metagraph.kind_to_abbrev.items()
-            if k in kinds}
+            k: v for k, v in self.metagraph.kind_to_abbrev.items() if k in kinds
+        }
         metagraph.set_abbreviations(kind_to_abbrev)
         graph = Graph(metagraph, data=self.data)
 
@@ -767,7 +756,6 @@ class Graph(BaseGraph):
 
 
 class Node(BaseNode):
-
     def __init__(self, metanode, identifier, name, data):
         """ """
         BaseNode.__init__(self, identifier)
@@ -795,18 +783,17 @@ class Node(BaseNode):
 
     def __repr__(self):
         node_as_dict = self.__dict__.copy()
-        del node_as_dict['edges']
-        return '{!s}({!r})'.format(self.__class__, node_as_dict)
+        del node_as_dict["edges"]
+        return "{!s}({!r})".format(self.__class__, node_as_dict)
 
     def _repr_pretty_(self, p, cycle):
         p.text(str(self))
 
     def __str__(self):
-        return '{}::{}'.format(*self.get_id())
+        return "{}::{}".format(*self.get_id())
 
 
 class Edge(BaseEdge):
-
     def __init__(self, source, target, metaedge, data):
         """source and target are Node objects. metaedge is the MetaEdge object
         representing the edge
@@ -827,15 +814,13 @@ class Edge(BaseEdge):
 
 
 class Path(BasePath):
-
     def __init__(self, edges):
         BasePath.__init__(self, edges)
 
     def __repr__(self):
-        s = ''
+        s = ""
         for edge in self:
             dir_abbrev = direction_to_abbrev[edge.metaedge.direction]
-            s += '{0} {1} {2} {1} '.format(
-                edge.source, dir_abbrev, edge.metaedge.kind)
-        s = '{}{}'.format(s, self.target())
+            s += "{0} {1} {2} {1} ".format(edge.source, dir_abbrev, edge.metaedge.kind)
+        s = "{}{}".format(s, self.target())
         return s

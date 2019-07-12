@@ -5,6 +5,7 @@
 [![PyPI](https://img.shields.io/pypi/v/hetnetpy.svg?logo=pypi&logoColor=white)](https://pypi.org/project/hetnetpy/)
 [![Latest DOI](https://zenodo.org/badge/14475/dhimmel/hetio.svg)](https://zenodo.org/badge/latestdoi/14475/dhimmel/hetio)
 [![GitHub issues](https://img.shields.io/github/issues/hetio/hetnetpy.svg?logo=github)](https://github.com/hetio/hetnetpy/issues)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?logo=python)](https://github.com/python/black)
 
 ## Overview
 

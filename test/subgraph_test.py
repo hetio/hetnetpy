@@ -10,7 +10,7 @@ def get_disease_gene_example_hetnet():
     Return the example disease gene example hetnet in
     https://doi.org/10.1371/journal.pcbi.1004259.g002
     """
-    path = os.path.join(directory, 'data', 'disease-gene-example-graph.json')
+    path = os.path.join(directory, "data", "disease-gene-example-graph.json")
     graph = hetnetpy.readwrite.read_graph(path)
     return graph
 
@@ -33,11 +33,11 @@ def test_subgraph_node_subset():
     """
     graph = get_disease_gene_example_hetnet()
     nodes = [
-        ('Gene', 'STAT3'),
-        ('Gene', 'CXCR4'),
-        ('Gene', 'ITCH'),
-        ('Disease', 'Multiple Sclerosis'),
-        ('Tissue', 'Lung'),
+        ("Gene", "STAT3"),
+        ("Gene", "CXCR4"),
+        ("Gene", "ITCH"),
+        ("Disease", "Multiple Sclerosis"),
+        ("Tissue", "Lung"),
     ]
     nodes = [graph.get_node(node) for node in nodes]
     subgraph = graph.get_subgraph(nodes=nodes)
@@ -52,18 +52,15 @@ def test_subgraph_metanode_subset():
     Test get_subgraph with a specified subset of metanodes.
     """
     graph = get_disease_gene_example_hetnet()
-    metanodes = [
-        'Disease',
-        'Tissue',
-    ]
+    metanodes = ["Disease", "Tissue"]
     metanodes = [graph.metagraph.get_node(mn) for mn in metanodes]
     subgraph = graph.get_subgraph(metanodes=metanodes)
     assert subgraph.metagraph.n_nodes == 2
     assert subgraph.metagraph.n_edges == 1
     assert subgraph.metagraph.kind_to_abbrev == {
-        'Disease': 'D',
-        'Tissue': 'T',
-        'localization': 'l',
+        "Disease": "D",
+        "Tissue": "T",
+        "localization": "l",
     }
     assert subgraph.n_nodes == 4
     assert subgraph.n_edges == 1
@@ -74,26 +71,23 @@ def test_subgraph_node_metanode_subset():
     Test get_subgraph with a specified subset of nodes.
     """
     graph = get_disease_gene_example_hetnet()
-    metanodes = [
-        'Gene',
-        'Disease',
-    ]
+    metanodes = ["Gene", "Disease"]
     metanodes = [graph.metagraph.get_node(mn) for mn in metanodes]
     nodes = [
-        ('Gene', 'STAT3'),
-        ('Gene', 'CXCR4'),
-        ('Gene', 'ITCH'),
-        ('Disease', 'Multiple Sclerosis'),
+        ("Gene", "STAT3"),
+        ("Gene", "CXCR4"),
+        ("Gene", "ITCH"),
+        ("Disease", "Multiple Sclerosis"),
     ]
     nodes = [graph.get_node(node) for node in nodes]
     subgraph = graph.get_subgraph(nodes=nodes, metanodes=metanodes)
     assert subgraph.metagraph.n_nodes == 2
     assert subgraph.metagraph.n_edges == 2
     assert subgraph.metagraph.kind_to_abbrev == {
-        'Disease': 'D',
-        'Gene': 'G',
-        'association': 'a',
-        'interaction': 'i',
+        "Disease": "D",
+        "Gene": "G",
+        "association": "a",
+        "interaction": "i",
     }
     assert subgraph.n_nodes == 4
     assert subgraph.n_edges == 3
@@ -104,15 +98,10 @@ def test_subgraph_metaedges_subset():
     Test get_subgraph with a specified subset of metaedges.
     """
     graph = get_disease_gene_example_hetnet()
-    metaedges = [
-        ('Gene', 'Gene', 'interaction', 'both'),
-    ]
+    metaedges = [("Gene", "Gene", "interaction", "both")]
     metaedges = [graph.metagraph.get_edge(me) for me in metaedges]
     subgraph = graph.get_subgraph(metaedges=metaedges)
-    assert subgraph.metagraph.kind_to_abbrev == {
-        'Gene': 'G',
-        'interaction': 'i',
-    }
+    assert subgraph.metagraph.kind_to_abbrev == {"Gene": "G", "interaction": "i"}
     assert subgraph.metagraph.n_nodes == 1
     assert subgraph.metagraph.n_edges == 1
     assert subgraph.n_nodes == 7
