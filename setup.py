@@ -20,6 +20,7 @@ with readme_path.open() as read_file:
 
 # Testing dependencies
 tests_require = [
+    'black',
     'neo4j',
     'numpy',
     'pandas',

@@ -13,6 +13,7 @@ install:
   - python setup.py sdist bdist_wheel
 script:
   - pytest test
+  - black --check .
 deploy:
   - provider: pypi
     user: dhimmel
