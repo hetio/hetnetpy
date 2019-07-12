@@ -19,7 +19,7 @@ with readme_path.open() as read_file:
 
 # Testing dependencies
 tests_require = [
-    "black",
+    "black ; python_version>='3.6'",
     "neo4j",
     "numpy",
     "pandas",
