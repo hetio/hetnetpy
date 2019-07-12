@@ -15,6 +15,9 @@ environment:
 
 build: off
 
+cache:
+  - '%LOCALAPPDATA%\pip\Cache -> .appveyor.yml, setup.py'
+
 install:
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - "python -m pip install --upgrade pip"
