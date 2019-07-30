@@ -524,7 +524,7 @@ def construct_pdp_query(
             RETURN
             {path_query}
             PDP,
-            100 * (PDP / {dwpc}) AS percent_of_DWPC{return_extras}
+            100 * (PDP / {dwpc}) AS percent_of_DWPC
             ORDER BY percent_of_DWPC DESC
             """
             )
@@ -538,7 +538,6 @@ def construct_pdp_query(
                 property=property,
                 path_query=path_query,
                 dwpc=dwpc,
-                return_extras=",\nDWPC" if aggregate_columns else "",
             )
         )
 
