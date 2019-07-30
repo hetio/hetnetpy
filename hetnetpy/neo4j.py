@@ -445,6 +445,7 @@ def construct_pdp_query(
     join_hint="midpoint",
     index_hint=False,
     unique_nodes=True,
+    aggregate_columns=False,
 ):
     """
     Create a Cypher query for computing the path degree product for a type of path.
@@ -483,6 +484,8 @@ def construct_pdp_query(
         `labeled` to perform an intelligent version of `expanded` where only
         nodes with the same label are checked for duplicity. Specifying `True`,
         which is the default, uses the `labeled` method.
+    aggregate_columns : bool
+        whether to return two extra columns (PC and DWPC) that are the same for every path.
     """
     # Convert metapath to metarels
     if isinstance(metarels, hetnetpy.hetnet.MetaPath):
@@ -551,13 +554,13 @@ def construct_pdp_query(
             {degree_query}
             ] AS degrees, path
             WITH path, reduce(pdp = 1.0, d in degrees| pdp * d ^ -{{ w }}) AS PDP
-            WITH collect({{paths: path, PDPs: PDP}}) AS data_maps, sum(PDP) AS DWPC
+            WITH collect({{paths: path, PDPs: PDP}}) AS data_maps, count(path) AS PC, sum(PDP) AS DWPC
             UNWIND data_maps AS data_map
-            WITH data_map.paths AS path, data_map.PDPs AS PDP, DWPC
+            WITH data_map.paths AS path, data_map.PDPs AS PDP, PC, DWPC
             RETURN
               {path_query}
               PDP,
-              100 * (PDP / DWPC) AS percent_of_DWPC
+              100 * (PDP / DWPC) AS percent_of_DWPC{return_extras}
             ORDER BY percent_of_DWPC DESC
             """
             )
@@ -570,6 +573,7 @@ def construct_pdp_query(
                 length=len(metarels),
                 property=property,
                 path_query=path_query,
+                return_extras=",\n  PC, DWPC" if aggregate_columns else "",
             )
         )
 
