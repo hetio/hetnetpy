@@ -16,9 +16,8 @@ script:
   - if black --version ; then black --check . ; fi
 deploy:
   - provider: pypi
-    user: dhimmel
-    password:
-      secure: i6dHe2W+ynK81i/yjdCNqhXZ39rGJcdA+Nmp1W4Qg4NjizN3lozKmS9vHObdXRrobyn+AbCXPJ6GqyXPlT5+MbOtiTYWfvWm2Yd5zJff9GYyKkh4RBvmYrFgpkUJrb6mxmn+Gdo2yRA2aU2P+IBdY8aqx7/wvCBB6Z1e1xelOaZgOamCI8yfwsjXjuim8lP1IM6ayHjhTtejj8zHw14QhUoqBM6aKV2igJtv7CgwSZr6iAeOhruuyI3QgnlY3uM1f6I2YpsA/V0MnZDtVtvJ2ddk6sU6pIR1uUj5TCrJVBcFYI/z5jgJdo5kh2CLKRaD+k/luE+m0KV8K+GkRcC6+fYhLc+tF9gDw2F8TT2nnAmfHt8UYIn29sAyZsR8MifG6zhGTLZC4KpVRQP7eREr57GeQKEzEJiA/C4Fz2Fr47BMusO029EmB/OWsm8HqXz0IwsyWBp58shpgrP9xZUZBnDHe92pQNNfOfNzWuC1ATOs7LkbqB8Ml5vUT2vOePxkh7Bt3MR0ZEqNct7ZqwgOWrh2yFjoQ8BGDwPx1DNAQhQSGKBiea4kgWUGQIVTZw/IwwM7reWNY6Yvh8TA/5jlonVuCFBAXs0v1hwXn/suHGRk64yG2cS49h2lvltG379qp9gx6FI5WViszFvbwBZSONtIOr7lhGFw1IFRLRmeVkI=
+    user: __token__
+    password: $pypi_password
     on:
       python: '3.7'
       repo: hetio/hetnetpy
