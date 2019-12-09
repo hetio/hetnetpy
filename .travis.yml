@@ -1,11 +1,11 @@
-dist: xenial
+dist: bionic
 sudo: false
 language: python
 python:
-  - "3.4"
   - "3.5"
   - "3.6"
   - "3.7"
+  - "3.8"
 cache:
   - pip
 install:
@@ -19,7 +19,7 @@ deploy:
     user: __token__
     password: $pypi_password
     on:
-      python: '3.7'
+      python: '3.8'
       repo: hetio/hetnetpy
       tags: true
     distributions: sdist bdist_wheel
