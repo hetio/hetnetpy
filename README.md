@@ -86,3 +86,10 @@ To create a new release, do the following:
   ```
 
 4. Recommended: Edit the GitHub release to improve formatting and add a Zenodo badge.
+
+## License
+
+This repository is dual licensed, available under either or both of the following licenses:
+
+1. BSD-2-Clause Plus Patent License at [`LICENSE-BSD.md`](LICENSE-BSD.md)
+2. CC0 1.0 Universal Public Domain Dedication at [`LICENSE-CC0.md`](LICENSE-CC0.md)
