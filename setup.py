@@ -50,15 +50,15 @@ setuptools.setup(
         "License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     # should find hetnetpy (and hetio if symlink supported)
     packages=setuptools.find_packages(exclude=["test"]),
     # Specify python version
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     # Run-time dependencies
     install_requires=["regex"],
     # Testing dependencies
