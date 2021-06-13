@@ -62,9 +62,16 @@ A Graph object stores a heterogeneous network and relies on the following classe
 3. Edge
 4. MetaEdge
 
-## Release instructions
+## Development
 
-This section is only relevant for project maintainers.
+This repo uses pre-commit:
+
+```sh
+# run once per local repo before committing
+pre-commit install
+```
+
+This following is only relevant for maintainers.
 Create a new release at <https://github.com/hetio/hetnetpy/releases/new>.
 GitHub Actions will build the distribution and upload it to PyPI.
 The version information inferred from the Git tag using [setuptools_scm](https://github.com/pypa/setuptools_scm/).
