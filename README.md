@@ -1,6 +1,6 @@
 # Hetnets in Python
 
-[![Linux Build Status](https://img.shields.io/travis/com/hetio/hetnetpy/master.svg?logo=travis)](https://travis-ci.com/hetio/hetnetpy)
+[![Linux Build Status](https://img.shields.io/travis/com/hetio/hetnetpy/main.svg?logo=travis)](https://travis-ci.com/hetio/hetnetpy)
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/gq57kt1h4aphluj3?svg=true)](https://ci.appveyor.com/project/hetio/hetnetpy)
 [![PyPI](https://img.shields.io/pypi/v/hetnetpy.svg?logo=pypi&logoColor=white)](https://pypi.org/project/hetnetpy/)
 [![Latest DOI](https://zenodo.org/badge/14475/dhimmel/hetio.svg)](https://zenodo.org/badge/latestdoi/14475/dhimmel/hetio)
@@ -22,7 +22,7 @@ Note that this package was previousely named `hetio`, available at the following
 - <https://github.com/hetio/hetio> (former)
 - <https://github.com/dhimmel/hetio> (former)
 
-In July 2019, the package was [renamed](https://github.com/hetio/hetnetpy/issues/40) to `hetnetpy` to more clearly represent its functionality and disambiguiate it from other products.
+In July 2019, the package was [renamed](https://github.com/hetio/hetnetpy/issues/40) to `hetnetpy` to more clearly represent its functionality and disambiguate it from other products.
 
 ## Background
 

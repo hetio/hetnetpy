@@ -28,7 +28,7 @@ def test_metagraph_reading_from_urls():
     """
     url = "https://github.com/{repo}/raw/{commit}/{path}".format(
         repo="hetio/hetnetpy",
-        commit="master",
+        commit="main",
         path="test/data/hetionet-v1.0-metagraph.json",
     )
     read_hetionet_v1_0_metagraph(url, extensions)
