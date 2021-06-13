@@ -65,26 +65,9 @@ A Graph object stores a heterogeneous network and relies on the following classe
 ## Release instructions
 
 This section is only relevant for project maintainers.
-Travis CI deployments are used to upload releases to [PyPI](https://pypi.org/project/hetnetpy) and [GitHub releases](https://github.com/hetio/hetnetpy/releases).
-To create a new release, do the following:
-
-1. Bump the version in [`__init__.py`](hetnetpy/__init__.py).
-
-2. Add a release notes file in [`release-notes`](release-notes).
-  Format as a commit message that will be used as the GitHub release description.
-
-3. Run the following commands:
-    
-  ```sh
-  TAG=v`python setup.py --version`
-  git add hetnetpy/__init__.py release-notes/$TAG.*
-  git commit --message "Prepare $TAG release"
-  git push
-  git tag --annotate $TAG --file release-notes/$TAG.*
-  git push upstream $TAG
-  ```
-
-4. Recommended: Edit the GitHub release to improve formatting and add a Zenodo badge.
+Create a new release at <https://github.com/hetio/hetnetpy/releases/new>.
+GitHub Actions will build the distribution and upload it to PyPI.
+The version information inferred from the Git tag using [setuptools_scm](https://github.com/pypa/setuptools_scm/).
 
 ## License
 

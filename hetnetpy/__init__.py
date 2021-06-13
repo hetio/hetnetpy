@@ -1,5 +1,3 @@
-__version__ = "0.3.0"
-
 if __name__ == "hetio":
     # https://github.com/hetio/hetnetpy/issues/40
     import warnings

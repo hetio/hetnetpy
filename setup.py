@@ -5,13 +5,6 @@ import setuptools
 
 directory = pathlib.Path(__file__).parent.absolute()
 
-# version
-init_path = directory.joinpath("hetnetpy", "__init__.py")
-with init_path.open() as read_file:
-    text = read_file.read()
-pattern = re.compile(r"^__version__ = ['\"]([^'\"]*)['\"]", re.MULTILINE)
-version = pattern.search(text).group(1)
-
 # long_description
 readme_path = directory.joinpath("README.md")
 with readme_path.open() as read_file:
@@ -32,7 +25,6 @@ tests_require = [
 setuptools.setup(
     # Package details
     name="hetnetpy",
-    version=version,
     url="https://github.com/hetio/hetnetpy",
     description="Hetnets in Python",
     long_description_content_type="text/markdown",
