@@ -29,7 +29,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install ".[test]"
-      - name: Formatting
-        run: black --check .
+      - name: Run pre-commit
+        uses: pre-commit/action@v2.0.0
       - name: Tests
         run: pytest --color=yes test
