@@ -6,7 +6,7 @@ import pytest
 import hetnetpy.hetnet
 import hetnetpy.readwrite
 
-from .readwrite_test import formats, extensions
+from .readwrite_test import extensions, formats
 
 
 def test_creation(tmpdir):

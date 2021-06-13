@@ -1,7 +1,7 @@
 import collections
 import csv
-import io
 import importlib
+import io
 import json
 import mimetypes
 import operator

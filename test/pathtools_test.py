@@ -3,7 +3,7 @@ import os
 import pytest
 
 import hetnetpy.readwrite
-from hetnetpy.pathtools import paths_between, DWPC
+from hetnetpy.pathtools import DWPC, paths_between
 
 directory = os.path.dirname(os.path.abspath(__file__))
 

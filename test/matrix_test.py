@@ -4,8 +4,8 @@ import numpy
 import pytest
 import scipy.sparse
 
-from hetnetpy.matrix import metaedge_to_adjacency_matrix, sparsify_or_densify
 import hetnetpy.readwrite
+from hetnetpy.matrix import metaedge_to_adjacency_matrix, sparsify_or_densify
 
 directory = os.path.dirname(os.path.abspath(__file__))
 

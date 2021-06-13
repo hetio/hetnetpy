@@ -2,7 +2,6 @@ import os
 
 import hetnetpy.readwrite
 
-
 directory = os.path.dirname(os.path.abspath(__file__))
 
 formats = ["json", "pkl"]

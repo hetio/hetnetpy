@@ -1,6 +1,6 @@
 import collections
-import random
 import logging
+import random
 
 from hetnetpy.hetnet import Graph
 

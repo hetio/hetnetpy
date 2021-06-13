@@ -1,8 +1,8 @@
 import pathlib
 import textwrap
 
-from neo4j import GraphDatabase
 import pytest
+from neo4j import GraphDatabase
 
 import hetnetpy.neo4j
 import hetnetpy.readwrite

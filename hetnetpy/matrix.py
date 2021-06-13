@@ -1,6 +1,6 @@
+import logging
 from collections import OrderedDict
 
-import logging
 import numpy
 import scipy.sparse
 

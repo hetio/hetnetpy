@@ -1,5 +1,5 @@
-import itertools
 import functools
+import itertools
 import operator
 
 from hetnetpy.hetnet import Node, Path

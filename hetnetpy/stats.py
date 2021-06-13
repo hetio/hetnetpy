@@ -1,6 +1,6 @@
-import pandas
 import matplotlib
 import matplotlib.backends.backend_pdf
+import pandas
 import seaborn
 
 
