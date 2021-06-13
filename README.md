@@ -1,7 +1,6 @@
 # Hetnets in Python
 
-[![Linux Build Status](https://img.shields.io/travis/com/hetio/hetnetpy/main.svg?logo=travis)](https://travis-ci.com/hetio/hetnetpy)
-[![Windows Build status](https://ci.appveyor.com/api/projects/status/gq57kt1h4aphluj3?svg=true)](https://ci.appveyor.com/project/hetio/hetnetpy)
+[![CI Status](https://img.shields.io/github/workflow/status/hetio/hetnetpy/Build/main?label=actions&logo=github)](https://github.com/manubot/catalog/actions)
 [![PyPI](https://img.shields.io/pypi/v/hetnetpy.svg?logo=pypi&logoColor=white)](https://pypi.org/project/hetnetpy/)
 [![Latest DOI](https://zenodo.org/badge/14475/dhimmel/hetio.svg)](https://zenodo.org/badge/latestdoi/14475/dhimmel/hetio)
 [![GitHub issues](https://img.shields.io/github/issues/hetio/hetnetpy.svg?logo=github)](https://github.com/hetio/hetnetpy/issues)
@@ -16,7 +15,7 @@ See https://het.io/software for additional software packages designed specifical
 
 ## Package relocation
 
-Note that this package was previousely named `hetio`, available at the following repositories:
+Note that this package was previously named `hetio`, available at the following repositories:
 
 - <https://github.com/hetio/hetnetpy> (current)
 - <https://github.com/hetio/hetio> (former)
