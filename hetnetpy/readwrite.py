@@ -99,7 +99,7 @@ def load(read_file, formatting):
         return pickle.load(read_file)
 
     # Unsupported format
-    raise ValueError("Unsupported format: {}".format(formatting))
+    raise ValueError(f"Unsupported format: {formatting}")
 
 
 def extract_writable(path, formatting=None):
@@ -132,7 +132,7 @@ def dump(writable, path, formatting=None):
 
     # Unsupported format
     else:
-        raise ValueError("Unsupported format: {}".format(formatting))
+        raise ValueError(f"Unsupported format: {formatting}")
 
 
 def detect_formatting(path):
@@ -142,7 +142,7 @@ def detect_formatting(path):
         return "json"
     if ".pkl" in path:
         return "pkl"
-    raise ValueError("Cannot detect the format of {}".format(path))
+    raise ValueError(f"Cannot detect the format of {path}")
 
 
 encoding_to_module = {"gzip": "gzip", "bzip2": "bz2", "xz": "lzma"}

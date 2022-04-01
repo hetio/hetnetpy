@@ -152,9 +152,9 @@ def paths_between(
         graph, target, metapath_tail, duplicates, masked, exclude_nodes, exclude_edges
     )
 
-    node_intersect = set(path.target() for path in paths_head) & set(
+    node_intersect = {path.target() for path in paths_head} & {
         path.target() for path in paths_tail
-    )
+    }
 
     head_dict = dict()
     for path in paths_head:

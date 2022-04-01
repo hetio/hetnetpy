@@ -100,7 +100,7 @@ def get_metanode_df(graph):
         metaedges = set()
         for metaedge in metanode.edges:
             metaedges |= {metaedge, metaedge.inverse}
-        series["metaedges"] = sum([not metaedge.inverted for metaedge in metaedges])
+        series["metaedges"] = sum(not metaedge.inverted for metaedge in metaedges)
         series["nodes"] = len(nodes)
         series["unconnected_nodes"] = sum(
             not any(node.edges.values()) for node in nodes
@@ -118,8 +118,8 @@ def get_metaedge_df(graph):
         series["metaedge"] = str(metaedge)
         series["abbreviation"] = metaedge.abbrev
         series["edges"] = len(edges)
-        series["source_nodes"] = len(set(edge.source for edge in edges))
-        series["target_nodes"] = len(set(edge.target for edge in edges))
+        series["source_nodes"] = len({edge.source for edge in edges})
+        series["target_nodes"] = len({edge.target for edge in edges})
         rows.append(series)
     metaedge_df = pandas.DataFrame(rows).sort_values("metaedge")
     return metaedge_df

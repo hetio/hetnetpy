@@ -151,7 +151,7 @@ def metaedge_id_from_abbreviation(metagraph, abbreviation):
             kind = edge.kind
             break
     else:
-        raise KeyError("edge abbreviation not found: {}".format(edge_abbrev))
+        raise KeyError(f"edge abbreviation not found: {edge_abbrev}")
     if ">" in abbreviation:
         direction = "forward"
     elif "<" in abbreviation:
@@ -177,4 +177,4 @@ def arrange_metaedge(abbreviation):
     edge = regex.search("[a-z]+", abbreviation).group()
     if "<" in abbreviation or (source > target):
         source, target = target, source
-    return "{}{}{}".format(source, edge, target)
+    return f"{source}{edge}{target}"

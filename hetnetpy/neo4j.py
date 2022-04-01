@@ -185,14 +185,12 @@ def cypher_path(metarels):
         metarels = metapath_to_metarels(metarels)
 
     # Create cypher query
-    q = "(n0:{})".format(metarels[0][0])
+    q = f"(n0:{metarels[0][0]})"
     for i, (source_label, target_label, rel_type, direction) in enumerate(metarels):
         kwargs = {
             "i": i + 1,
             "rel_type": rel_type,
-            "target_label": ":{}".format(target_label)
-            if i + 1 == len(metarels)
-            else "",
+            "target_label": f":{target_label}" if i + 1 == len(metarels) else "",
             "dir0": "<-" if direction == "backward" else "-",
             "dir1": "->" if direction == "forward" else "-",
         }
@@ -279,7 +277,7 @@ def construct_using_clause(metarels, join_hint, index_hint):
         join_hint = int(join_hint)
         assert join_hint >= 0
         assert join_hint <= len(metarels)
-        using_query += "\nUSING JOIN ON n{}".format(join_hint)
+        using_query += f"\nUSING JOIN ON n{join_hint}"
 
     return using_query
 
@@ -587,7 +585,7 @@ def format_expanded_clause(pairs):
     """
     if not pairs:
         return ""
-    return "\nAND " + " AND ".join("n{} <> n{}".format(a, b) for a, b in pairs)
+    return "\nAND " + " AND ".join(f"n{a} <> n{b}" for a, b in pairs)
 
 
 def permute_rel_type(

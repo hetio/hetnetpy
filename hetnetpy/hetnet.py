@@ -11,7 +11,7 @@ direction_to_abbrev = {"forward": ">", "backward": "<", "both": "-"}
 direction_to_unicode_abbrev = {"forward": "→", "backward": "←", "both": "–"}
 
 
-class ElemMask(object):
+class ElemMask:
     def __init__(self):
         self.masked = False
 
@@ -25,12 +25,12 @@ class ElemMask(object):
         self.masked = False
 
 
-class IterMask(object):
+class IterMask:
     def is_masked(self):
         return any(elem.is_masked() for elem in self.mask_elem_iter())
 
 
-class BaseGraph(object):
+class BaseGraph:
     def __init__(self):
         self.node_dict = dict()
         self.edge_dict = dict()
@@ -216,7 +216,7 @@ class MetaGraph(BaseGraph):
             return self.get_node(metanode)
         if not isinstance(metanode, str):
             raise ValueError(
-                "Cannot interpret object of type {}".format(type(metanode).__name__)
+                f"Cannot interpret object of type {type(metanode).__name__}"
             )
         if metanode in self.abbrev_to_kind:
             return self.get_node(self.abbrev_to_kind[metanode])
@@ -238,7 +238,7 @@ class MetaGraph(BaseGraph):
             return self.get_edge(metaedge)
         if not isinstance(metaedge, str):
             raise ValueError(
-                "Cannot interpret object of type {}".format(type(metaedge).__name__)
+                f"Cannot interpret object of type {type(metaedge).__name__}"
             )
         if metaedge in self.neo4j_to_metaedge:
             return self.neo4j_to_metaedge[metaedge]
@@ -307,9 +307,9 @@ class MetaGraph(BaseGraph):
         for metaedge in self.edge_dict.values():
             abbrev = kind_to_abbrev[metaedge.kind]
             if metaedge.direction == "forward":
-                abbrev = "{}>".format(abbrev)
+                abbrev = f"{abbrev}>"
             if metaedge.direction == "backward":
-                abbrev = "<{}".format(abbrev)
+                abbrev = f"<{abbrev}"
             metaedge.kind_abbrev = abbrev
 
     def add_node(self, kind):
@@ -524,7 +524,7 @@ class MetaEdge(BaseEdge):
         rel_type = rel_type.upper()
         rel_type = rel_type.replace(" ", "_")
         abbrev = self.get_standard_abbrev()
-        return "{}_{}".format(rel_type, abbrev)
+        return f"{rel_type}_{abbrev}"
 
 
 class MetaPath(BasePath):
@@ -784,7 +784,7 @@ class Node(BaseNode):
     def __repr__(self):
         node_as_dict = self.__dict__.copy()
         del node_as_dict["edges"]
-        return "{!s}({!r})".format(self.__class__, node_as_dict)
+        return f"{self.__class__!s}({node_as_dict!r})"
 
     def _repr_pretty_(self, p, cycle):
         p.text(str(self))
@@ -822,5 +822,5 @@ class Path(BasePath):
         for edge in self:
             dir_abbrev = direction_to_abbrev[edge.metaedge.direction]
             s += "{0} {1} {2} {1} ".format(edge.source, dir_abbrev, edge.metaedge.kind)
-        s = "{}{}".format(s, self.target())
+        s = f"{s}{self.target()}"
         return s

@@ -92,7 +92,7 @@ def test_creation(tmpdir):
     # Test writing then reading graph
     for extension in extensions:
         for format_ in formats:
-            ext = ".{}{}".format(format_, extension)
+            ext = f".{format_}{extension}"
             # Write metagraph
             path = os.path.join(tmpdir, "metagraph" + ext)
             hetnetpy.readwrite.write_metagraph(metagraph, path)
