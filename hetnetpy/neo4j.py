@@ -255,16 +255,21 @@ def construct_using_clause(metarels, join_hint, index_hint):
     using_query = ""
     # Specify index hint for node lookup
     if index_hint:
-        using_query = "\n" + textwrap.dedent(
-            """\
+        using_query = (
+            "\n"
+            + textwrap.dedent(
+                """\
         USING INDEX n0:{source_label}({property})
         USING INDEX n{length}:{target_label}({property})
         """
-        ).rstrip().format(
-            property=property,
-            source_label=metarels[0][0],
-            target_label=metarels[-1][1],
-            length=len(metarels),
+            )
+            .rstrip()
+            .format(
+                property=property,
+                source_label=metarels[0][0],
+                target_label=metarels[-1][1],
+                length=len(metarels),
+            )
         )
 
     # Specify join hint with node to join on

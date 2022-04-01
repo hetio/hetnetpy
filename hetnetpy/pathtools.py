@@ -40,7 +40,7 @@ def path_degree_product(
         degrees.append(source_degree)
         degrees.append(target_degree)
 
-    damped_degrees = [degree ** damping_exponent for degree in degrees]
+    damped_degrees = [degree**damping_exponent for degree in degrees]
     degree_product = functools.reduce(operator.mul, damped_degrees)
     return degree_product
 

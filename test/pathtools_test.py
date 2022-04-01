@@ -31,7 +31,7 @@ def test_disease_gene_example_dwpc():
     assert len(paths) == 1
     # Test degree-weighted path count
     dwpc = DWPC(paths, damping_exponent=0.5)
-    assert dwpc == pytest.approx(2 ** -0.5)
+    assert dwpc == pytest.approx(2**-0.5)
 
     # Define GiGaD traversal
     metapath = metagraph.metapath_from_abbrev("GiGaD")
@@ -40,7 +40,7 @@ def test_disease_gene_example_dwpc():
     assert len(paths) == 3
     # Test degree-weighted path count
     dwpc = DWPC(paths, damping_exponent=0.5)
-    assert dwpc == pytest.approx(0.25 + 0.25 + 32 ** -0.5)
+    assert dwpc == pytest.approx(0.25 + 0.25 + 32**-0.5)
 
 
 def test_bupropion_CbGpPWpGaD_traversal():
