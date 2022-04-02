@@ -37,7 +37,7 @@ In July 2019, the package was [renamed](https://github.com/hetio/hetnetpy/issues
 
 [![PyPI](https://img.shields.io/pypi/v/hetnetpy.svg?logo=pypi&logoColor=white)](https://pypi.org/project/hetnetpy/)
 
-Please use Python 3.4 or higher. To install the current PyPI version (recommended), run:
+To install the current PyPI version (recommended), run:
 
 ```sh
 pip install hetnetpy
