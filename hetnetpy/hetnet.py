@@ -451,7 +451,7 @@ class MetaNode(BaseNode):
         return self.identifier
 
     @property
-    @functools.lru_cache()
+    @functools.lru_cache
     def neo4j_label(self):
         """
         Convert metanode to neo4j nomenclature, i.e. a label-formatted str.
@@ -517,7 +517,7 @@ class MetaEdge(BaseEdge):
         return s.translate(None, "><")
 
     @property
-    @functools.lru_cache()
+    @functools.lru_cache
     def neo4j_rel_type(self):
         """Convert metaedge to a rel_type-formatted str"""
         rel_type = str(self.kind)

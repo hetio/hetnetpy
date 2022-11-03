@@ -5,7 +5,7 @@ import textwrap
 import hetnetpy.hetnet
 
 
-@functools.lru_cache()
+@functools.lru_cache
 def import_py2neo():
     """
     Imports the py2neo library, checks its version, and sets the socket timeout if necessary
@@ -166,7 +166,7 @@ def metapath_to_metarels(metapath):
     return tuple(metaedge_to_metarel(metaedge) for metaedge in metapath)
 
 
-@functools.lru_cache()
+@functools.lru_cache
 def metaedge_to_metarel(metaedge):
     return (
         metaedge.source.neo4j_label,
