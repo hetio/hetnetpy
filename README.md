@@ -1,6 +1,6 @@
 # Hetnets in Python
 
-[![CI Status](https://img.shields.io/github/workflow/status/hetio/hetnetpy/Build/main?label=actions&logo=github)](https://github.com/manubot/catalog/actions)
+[![CI Status](https://img.shields.io/github/actions/workflow/status/hetio/hetnetpy/build.yaml?branch=main&label=actions&logo=github)](https://github.com/hetio/hetnetpy/actions)
 [![PyPI](https://img.shields.io/pypi/v/hetnetpy.svg?logo=pypi&logoColor=white)](https://pypi.org/project/hetnetpy/)
 [![Latest DOI](https://zenodo.org/badge/14475/dhimmel/hetio.svg)](https://zenodo.org/badge/latestdoi/14475/dhimmel/hetio)
 [![GitHub issues](https://img.shields.io/github/issues/hetio/hetnetpy.svg?logo=github)](https://github.com/hetio/hetnetpy/issues)
