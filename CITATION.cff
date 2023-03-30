@@ -1,0 +1,64 @@
+cff-version: 1.2.0
+title: >-
+  hetio/hetnetpy repository:
+  Hetnets in Python
+message: >-
+  This citation is for the source code of the hetnetpy Python library.
+  The methods implemented by this software have been developed over the course of several studies:
+  <https://doi.org/10.1371/journal.pcbi.1004259>
+  <https://doi.org/10.7554/eLife.26726>
+  <https://greenelab.github.io/connectivity-search-manuscript/>
+type: software
+authors:
+  - given-names: Daniel
+    family-names: Himmelstein
+    orcid: 'https://orcid.org/0000-0002-3012-7446'
+  - given-names: Benjamin
+    family-names: Heil
+    orcid: 'https://orcid.org/0000-0002-2811-1031'
+  - given-names: Michael
+    family-names: Zietz
+    orcid: 'https://orcid.org/0000-0003-0539-630X'
+  - given-names: Tong Shu
+    family-names: Li
+  - given-names: Kyle
+    family-names: Kloster
+    orcid: 'https://orcid.org/0000-0001-5678-7197'
+  - given-names: Gregory
+    family-names: Way
+    orcid: 'https://orcid.org/0000-0002-0503-9348'
+  - given-names: Casey
+    family-names: Greene
+    orcid: 'https://orcid.org/0000-0001-8713-9213'
+  - given-names: Sergio
+    family-names: Baranzini
+    orcid: 'https://orcid.org/0000-0003-0067-194X'
+identifiers:
+  - type: swh
+    value: 'swh:1:dir:2dc7b6e544b6502ace7be92a96536b41c80d6be0'
+    description: Software Heritage Directory
+  - type: swh
+    value: 'swh:1:rev:8bf8ccb620292757d96838c3139bbb14cbce60de'
+    description: Software Heritage Revision
+  - type: url
+    value: 'https://zenodo.org/record/3315264'
+    description: 'Zenodo Deposit'
+repository-code: 'https://github.com/hetio/hetnetpy'
+repository-artifact: 'https://pypi.org/project/hetnetpy/'
+abstract: >-
+  Hetnets in Python (relocated from dhimmel/hetio)
+keywords:
+  - python
+  - graph
+  - rephetio
+  - hetnet
+  - networks
+  - heterogeneous-network
+  - baranzini-lab
+  - greenelab
+  - hetio
+  - hetnets
+license: BSD-2-Clause-Patent
+commit: 42fd6d7d4c2dbfea5d21686b33626329048f8b1d
+version: v0.3.1
+date-released: '2021-06-13'
