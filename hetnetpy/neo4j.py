@@ -76,8 +76,8 @@ def export_neo4j(graph, uri, node_queue=200, edge_queue=5, show_progress=False):
         rel_type = metaedge.neo4j_rel_type
         source_label = metaedge.source.neo4j_label
         target_label = metaedge.target.neo4j_label
-        source = db_graph.find_one(source_label, "identifier", edge.source.identifier)
-        target = db_graph.find_one(target_label, "identifier", edge.target.identifier)
+        source = db_graph.nodes.match(source_label, identifier=edge.source.identifier).first()
+        target = db_graph.nodes.match(target_label, identifier=edge.target.identifier).first()
         data = sanitize_data(edge.data)
         neo_rel = py2neo.Relationship(source, rel_type, target, **data)
         creator.append(neo_rel)
